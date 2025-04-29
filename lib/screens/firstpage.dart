@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:sizer/sizer.dart';
+import 'package:zomo/design/const.dart';
+import 'package:zomo/screens/auth/signin.dart';
 
 class FirstPage extends StatelessWidget {
   const FirstPage({super.key});
@@ -12,10 +15,20 @@ class FirstPage extends StatelessWidget {
         children: [
           Align(
             alignment: Alignment.center,
-            child: Image.asset(
-              'assets/background.png',
-              width: 100.w,
-              height: 100.h,
+            child: Stack(
+              children: [
+                Image.asset(
+                  'assets/background.jpeg',
+                  width: 100.w,
+                  height: 100.h,
+                  fit: BoxFit.cover,
+                ),
+                Container(
+                  width: 100.w,
+                  height: 100.h,
+                  color: Colors.black.withOpacity(0.2),
+                ),
+              ],
             ),
           ),
           // Background image at top left
@@ -24,15 +37,16 @@ class FirstPage extends StatelessWidget {
             left: 1.w,
             child: Image.asset(
               'assets/background1.png',
-              width: 30.w,
-              height: 30.h,
+              width: 70.w,
+              height: 60.h,
             ),
           ),
 
           // Center content (logo and text)
           Center(
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 // Logo in center
                 Image.asset(
@@ -42,12 +56,36 @@ class FirstPage extends StatelessWidget {
                 ),
                 SizedBox(height: 2.h),
                 // Text under logo
-                Text(
-                  'Zomo, l’application qui réunit tous vos trajets et services.',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.bold,
+                SizedBox(
+                  width: 80.w,
+                  child: Text(
+                    'Zomo, l’application qui réunit tous vos trajets et services.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.only(top: 12.h),
+                  child: Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Center(
+                      child: IconButton(
+                        icon: Icon(
+                          Icons.keyboard_arrow_up_sharp,
+                          color: kPrimaryColor,
+                          size: 30.sp,
+                        ),
+                        onPressed: () {
+                          Get.to(() => const SignInScreen(),
+                              transition: Transition.downToUp,
+                              duration: const Duration(milliseconds: 500));
+                        },
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -55,22 +93,6 @@ class FirstPage extends StatelessWidget {
           ),
 
           // Bottom icon button
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: Center(
-              child: IconButton(
-                icon: Icon(
-                  Icons.keyboard_arrow_up_sharp,
-                  color: Colors.white,
-                  size: 30.sp,
-                ),
-                onPressed: () {
-                  // Navigate to next screen
-                  // You can add navigation code here
-                },
-              ),
-            ),
-          ),
         ],
       ),
     );

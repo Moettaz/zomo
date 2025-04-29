@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:sizer/sizer.dart';
 import 'screens/firstpage.dart';
 
@@ -11,12 +12,12 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Sizer(builder: (context, orientation, deviceType) {
-      return MaterialApp(
+      return GetMaterialApp(
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(
             surface: Colors.white,
-            seedColor: Color.fromRGBO(253, 186, 27, 0),
+            seedColor: Color.fromRGBO(253, 186, 27, 1),
           ),
         ),
         home: const FirstPage(),
