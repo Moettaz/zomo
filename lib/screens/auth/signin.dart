@@ -5,6 +5,7 @@ import 'package:sizer/sizer.dart';
 import 'package:zomo/design/const.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:zomo/screens/navigation_screen.dart';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
@@ -57,7 +58,9 @@ class _SignInScreenState extends State<SignInScreen> {
             stickyAuth: true,
             sensitiveTransaction: false,
           ),
-          localizedReason: 'Veuillez vous authentifier pour connectez',
+          localizedReason: language == 'fr'
+              ? 'Veuillez vous authentifier pour connectez'
+              : 'Please authenticate to connect',
         );
         if (didAuthenticate) {
           setState(() {
@@ -71,12 +74,10 @@ class _SignInScreenState extends State<SignInScreen> {
         setState(() {
           bioLoading = false;
         });
-        Get.showSnackbar(
-          const GetSnackBar(
-            title: "Erreur",
-            message: "Votre appareil ne support pas les biometriques",
-          ),
-        );
+        Get.showSnackbar(kErrorSnackBar(
+            language == 'fr'
+                ? "Votre appareil ne support pas les biometriques"
+                : "Your device does not support biometrics"));
       }
     } on PlatformException catch (e) {
       setState(() {
@@ -84,12 +85,8 @@ class _SignInScreenState extends State<SignInScreen> {
       });
       // ignore: avoid_print
       print(e);
-      Get.showSnackbar(
-        const GetSnackBar(
-          title: "Erreur",
-          message: "Une erreur est survenue",
-        ),
-      );
+      Get.showSnackbar(kErrorSnackBar(
+          language == 'fr' ? "Une erreur est survenue" : "An error occurred"));
     }
     setState(() {
       bioLoading = false;
@@ -235,7 +232,9 @@ class _SignInScreenState extends State<SignInScreen> {
                                         ),
                                       ),
                                       child: Text(
-                                        'Se connecter',
+                                        language == 'fr'
+                                            ? 'Se connecter'
+                                            : 'Login',
                                         style: TextStyle(
                                             color: selectedIndex == 0
                                                 ? Colors.black
@@ -264,7 +263,9 @@ class _SignInScreenState extends State<SignInScreen> {
                                         ),
                                       ),
                                       child: Text(
-                                        'Créer un compte',
+                                        language == 'fr'
+                                            ? 'Créer un compte'
+                                            : 'Create an account',
                                         style: TextStyle(
                                           color: selectedIndex == 1
                                               ? Colors.black
@@ -294,12 +295,16 @@ class _SignInScreenState extends State<SignInScreen> {
                                           cursorColor: kPrimaryColor,
                                           validator: (value) {
                                             if (value!.isEmpty) {
-                                              return 'Email est obligatoire';
+                                              return language == 'fr'
+                                                  ? 'Email est obligatoire'
+                                                  : 'Email is required';
                                             }
                                             if (!RegExp(
                                                     r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
                                                 .hasMatch(value)) {
-                                              return 'Email invalide';
+                                              return language == 'fr'
+                                                  ? 'Email invalide'
+                                                  : 'Invalid email';
                                             }
                                             return null;
                                           },
@@ -307,7 +312,9 @@ class _SignInScreenState extends State<SignInScreen> {
                                               TextInputType.emailAddress,
                                           textInputAction: TextInputAction.next,
                                           decoration: InputDecoration(
-                                            hintText: 'Email',
+                                            hintText: language == 'fr'
+                                                ? 'Email'
+                                                : 'Email',
                                             hintStyle: TextStyle(
                                               color: kSecondaryColor,
                                               fontSize: 15.sp,
@@ -352,15 +359,21 @@ class _SignInScreenState extends State<SignInScreen> {
                                           obscureText: _isLoginPasswordVisible,
                                           validator: (value) {
                                             if (value!.isEmpty) {
-                                              return 'Mot de passe est obligatoire';
+                                              return language == 'fr'
+                                                  ? 'Mot de passe est obligatoire'
+                                                  : 'Password is required';
                                             }
                                             if (value.length < 8) {
-                                              return 'Mot de passe doit contenir au moins 8 caractères';
+                                              return language == 'fr'
+                                                  ? 'Mot de passe doit contenir au moins 8 caractères'
+                                                  : 'Password must contain at least 8 characters';
                                             }
                                             return null;
                                           },
                                           decoration: InputDecoration(
-                                            hintText: 'Mot de passe',
+                                            hintText: language == 'fr'
+                                                ? 'Mot de passe'
+                                                : 'Password',
                                             hintStyle: TextStyle(
                                               color: kSecondaryColor,
                                               fontSize: 15.sp,
@@ -432,7 +445,9 @@ class _SignInScreenState extends State<SignInScreen> {
                                                     });
                                                   },
                                                 ),
-                                                const Text('Souviens-moi'),
+                                                Text(language == 'fr'
+                                                    ? 'Souviens-moi'
+                                                    : 'Remember me'),
                                               ],
                                             ),
                                             TextButton(
@@ -443,7 +458,9 @@ class _SignInScreenState extends State<SignInScreen> {
                                                 });
                                               },
                                               child: Text(
-                                                'Mot de passe oublié ?',
+                                                language == 'fr'
+                                                    ? 'Mot de passe oublié ?'
+                                                    : 'Forgot password?',
                                                 style: TextStyle(
                                                   color: kPrimaryColor,
                                                   fontSize: 15.sp,
@@ -462,8 +479,8 @@ class _SignInScreenState extends State<SignInScreen> {
                                           onPressed: () {
                                             if (_loginFormKey.currentState!
                                                 .validate()) {
-                                              _loginFormKey.currentState!
-                                                  .save();
+                                              Get.to(() =>
+                                                  NavigationScreen(index: 0));
                                             }
                                           },
                                           style: ElevatedButton.styleFrom(
@@ -475,7 +492,9 @@ class _SignInScreenState extends State<SignInScreen> {
                                             ),
                                           ),
                                           child: Text(
-                                            'Se connecter',
+                                            language == 'fr'
+                                                ? 'Se connecter'
+                                                : 'Login',
                                             style: TextStyle(
                                               color: Colors.white,
                                               fontSize: 16.sp,
@@ -494,7 +513,9 @@ class _SignInScreenState extends State<SignInScreen> {
                                             padding: EdgeInsets.symmetric(
                                                 horizontal: 16),
                                             child: Text(
-                                              'Se connecter avec',
+                                              language == 'fr'
+                                                  ? 'Se connecter avec'
+                                                  : 'Login with',
                                               style: TextStyle(
                                                 fontSize: 15.sp,
                                               ),
@@ -529,17 +550,23 @@ class _SignInScreenState extends State<SignInScreen> {
                                                 TextInputAction.next,
                                             validator: (value) {
                                               if (value!.isEmpty) {
-                                                return 'Email est obligatoire';
+                                                return language == 'fr'
+                                                    ? 'Email est obligatoire'
+                                                    : 'Email is required';
                                               }
                                               if (!RegExp(
                                                       r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
                                                   .hasMatch(value)) {
-                                                return 'Email invalide';
+                                                return language == 'fr'
+                                                    ? 'Email invalide'
+                                                    : 'Invalid email';
                                               }
                                               return null;
                                             },
                                             decoration: InputDecoration(
-                                              hintText: 'Email',
+                                              hintText: language == 'fr'
+                                                  ? 'Email'
+                                                  : 'Email',
                                               hintStyle: TextStyle(
                                                 color: kSecondaryColor,
                                                 fontSize: 15.sp,
@@ -583,16 +610,22 @@ class _SignInScreenState extends State<SignInScreen> {
                                                 TextInputAction.next,
                                             validator: (value) {
                                               if (value!.isEmpty) {
-                                                return 'Nom d\'utilisateur est obligatoire';
+                                                return language == 'fr'
+                                                    ? 'Nom d\'utilisateur est obligatoire'
+                                                    : 'Username is required';
                                               }
                                               if (!value
                                                   .contains(RegExp(r'[0-9]'))) {
-                                                return 'Le nom d\'utilisateur doit contenir au moins un chiffre';
+                                                return language == 'fr'
+                                                    ? 'Le nom d\'utilisateur doit contenir au moins un chiffre'
+                                                    : 'The username must contain at least one number';
                                               }
                                               return null;
                                             },
                                             decoration: InputDecoration(
-                                              hintText: "Nom d'utilisateur",
+                                              hintText: language == 'fr'
+                                                  ? "Nom d'utilisateur"
+                                                  : 'Username',
                                               hintStyle: TextStyle(
                                                 color: kSecondaryColor,
                                                 fontSize: 15.sp,
@@ -639,15 +672,21 @@ class _SignInScreenState extends State<SignInScreen> {
                                                 _isRegisterPasswordVisible,
                                             validator: (value) {
                                               if (value!.isEmpty) {
-                                                return 'Mot de passe est obligatoire';
+                                                return language == 'fr'
+                                                    ? 'Mot de passe est obligatoire'
+                                                    : 'Password is required';
                                               }
                                               if (value.length < 8) {
-                                                return 'Mot de passe doit contenir au moins 8 caractères';
+                                                return language == 'fr'
+                                                    ? 'Mot de passe doit contenir au moins 8 caractères'
+                                                    : 'Password must contain at least 8 characters';
                                               }
                                               return null;
                                             },
                                             decoration: InputDecoration(
-                                              hintText: 'Mot de passe',
+                                              hintText: language == 'fr'
+                                                  ? 'Mot de passe'
+                                                  : 'Password',
                                               hintStyle: TextStyle(
                                                 color: kSecondaryColor,
                                                 fontSize: 15.sp,
@@ -709,15 +748,21 @@ class _SignInScreenState extends State<SignInScreen> {
                                             ],
                                             validator: (value) {
                                               if (value!.isEmpty) {
-                                                return 'Numéro de téléphone est obligatoire';
+                                                return language == 'fr'
+                                                    ? 'Numéro de téléphone est obligatoire'
+                                                    : 'Phone number is required';
                                               }
                                               if (value.length != 8) {
-                                                return 'Numéro de téléphone doit contenir 10 chiffres';
+                                                return language == 'fr'
+                                                    ? 'Numéro de téléphone doit contenir 10 chiffres'
+                                                    : 'Phone number must contain 10 digits';
                                               }
                                               return null;
                                             },
                                             decoration: InputDecoration(
-                                              hintText: 'Numéro de téléphone',
+                                              hintText: language == 'fr'
+                                                  ? 'Numéro de téléphone'
+                                                  : 'Phone number',
                                               hintStyle: TextStyle(
                                                 color: kSecondaryColor,
                                                 fontSize: 15.sp,
@@ -766,10 +811,13 @@ class _SignInScreenState extends State<SignInScreen> {
                                             child:
                                                 DropdownButtonFormField<String>(
                                               hint: Text(
-                                                'Rôle',
+                                                language == 'fr'
+                                                    ? 'Rôle'
+                                                    : 'Role',
                                                 style: TextStyle(
                                                   color: kSecondaryColor,
                                                   fontSize: 15.sp,
+                                                  fontWeight: FontWeight.bold,
                                                 ),
                                               ),
                                               value: selectedRole,
@@ -783,9 +831,15 @@ class _SignInScreenState extends State<SignInScreen> {
                                                 fontSize: 15.sp,
                                               ),
                                               items: <String>[
-                                                'Client',
-                                                'Chauffeur',
-                                                'Déménageur ou Transporteur'
+                                                language == 'fr'
+                                                    ? 'Client'
+                                                    : 'Client',
+                                                language == 'fr'
+                                                    ? 'Chauffeur'
+                                                    : 'Driver',
+                                                language == 'fr'
+                                                    ? 'Déménageur ou Transporteur'
+                                                    : 'Demovator or Transporter'
                                               ].map<DropdownMenuItem<String>>(
                                                   (String value) {
                                                 return DropdownMenuItem<String>(
@@ -803,7 +857,9 @@ class _SignInScreenState extends State<SignInScreen> {
                                               }).toList(),
                                               validator: (value) {
                                                 if (value == 'Rôle') {
-                                                  return 'Veuillez sélectionner un rôle';
+                                                  return language == 'fr'
+                                                      ? 'Veuillez sélectionner un rôle'
+                                                      : 'Please select a role';
                                                 }
                                                 return null;
                                               },
@@ -841,7 +897,9 @@ class _SignInScreenState extends State<SignInScreen> {
                                                 },
                                               ),
                                               Text(
-                                                "J'accepte les termes et conditions",
+                                                language == 'fr'
+                                                    ? "J'accepte les termes et conditions"
+                                                    : "I accept the terms and conditions",
                                                 style: TextStyle(
                                                   fontSize: 16.sp,
                                                   color: Colors.blue[900],
@@ -870,10 +928,10 @@ class _SignInScreenState extends State<SignInScreen> {
                                                 }
                                               } else {
                                                 Get.showSnackbar(
-                                                  const GetSnackBar(
-                                                    title: "Erreur",
-                                                    message:
-                                                        "Vous devez accepter les termes et conditions",
+                                                  kErrorSnackBar(
+                                                    language == 'fr'
+                                                        ? "Vous devez accepter les termes et conditions"
+                                                        : "You must accept the terms and conditions",
                                                   ),
                                                 );
                                               }
@@ -887,7 +945,9 @@ class _SignInScreenState extends State<SignInScreen> {
                                               ),
                                             ),
                                             child: Text(
-                                              'Créer un compte',
+                                              language == 'fr'
+                                                  ? 'Créer un compte'
+                                                  : 'Create an account',
                                               style: TextStyle(
                                                 color: Colors.white,
                                                 fontSize: 16.sp,
@@ -906,7 +966,9 @@ class _SignInScreenState extends State<SignInScreen> {
                                               padding: EdgeInsets.symmetric(
                                                   horizontal: 16),
                                               child: Text(
-                                                'Créer un compte avec',
+                                                language == 'fr'
+                                                    ? 'Créer un compte avec'
+                                                    : 'Create an account with',
                                                 style: TextStyle(
                                                   fontSize: 15.sp,
                                                 ),
@@ -1095,17 +1157,23 @@ class _SignInScreenState extends State<SignInScreen> {
                                     textInputAction: TextInputAction.next,
                                     validator: (value) {
                                       if (value!.isEmpty) {
-                                        return 'Email est obligatoire';
+                                        return language == 'fr'
+                                            ? 'Email est obligatoire'
+                                            : 'Email is required';
                                       }
                                       if (!RegExp(
                                               r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
                                           .hasMatch(value)) {
-                                        return 'Email invalide';
+                                        return language == 'fr'
+                                            ? 'Email invalide'
+                                            : 'Invalid email';
                                       }
                                       return null;
                                     },
                                     decoration: InputDecoration(
-                                      hintText: 'Email',
+                                          hintText: language == 'fr'
+                                          ? 'Email'
+                                          : 'Email',
                                       hintStyle: TextStyle(
                                         color: kSecondaryColor,
                                         fontSize: 15.sp,
@@ -1157,7 +1225,9 @@ class _SignInScreenState extends State<SignInScreen> {
                                     ),
                                   ),
                                   child: Text(
-                                    'Envoyer',
+                                    language == 'fr'
+                                        ? 'Envoyer'
+                                        : 'Send',
                                     style: TextStyle(
                                       color: Colors.white,
                                       fontSize: 16.sp,
@@ -1170,7 +1240,9 @@ class _SignInScreenState extends State<SignInScreen> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Text(
-                                    "Se souvenir du mot de passe ?",
+                                    language == "fr"
+                                        ? "Se souvenir du mot de passe ?"
+                                        : "Remember your password?",
                                     style: TextStyle(
                                       fontSize: 15.sp,
                                     ),
@@ -1183,7 +1255,9 @@ class _SignInScreenState extends State<SignInScreen> {
                                       });
                                     },
                                     child: Text(
-                                      'Se connecter',
+                                      language == 'fr'
+                                          ? 'Se connecter'
+                                          : 'Login',
                                       style: TextStyle(
                                         color: kPrimaryColor,
                                         fontSize: 15.sp,
@@ -1207,7 +1281,9 @@ class _SignInScreenState extends State<SignInScreen> {
                                   SizedBox(
                                     width: 65.w,
                                     child: Text(
-                                      'Veuillez vérifier votre email',
+                                      language == 'fr'
+                                          ? 'Veuillez vérifier votre email'
+                                          : 'Please check your email',
                                       style: TextStyle(
                                         fontSize: 20.sp,
                                         fontWeight: FontWeight.bold,
@@ -1219,7 +1295,9 @@ class _SignInScreenState extends State<SignInScreen> {
                                   SizedBox(
                                     width: 65.w,
                                     child: Text(
-                                      'Nous avons envoyé un code à\n${_emailController.text}',
+                                      language == 'fr'
+                                          ? 'Nous avons envoyé un code à\n${_emailController.text}'
+                                          : 'We have sent a code to\n${_emailController.text}',
                                       style: TextStyle(
                                         fontSize: 15.sp,
                                       ),
@@ -1328,7 +1406,9 @@ class _SignInScreenState extends State<SignInScreen> {
                                         ),
                                       ),
                                       child: Text(
-                                        'Vérifier',
+                                        language == 'fr'
+                                            ? 'Vérifier'
+                                            : 'Verify',
                                         style: TextStyle(
                                           color: Colors.white,
                                           fontSize: 16.sp,
@@ -1341,13 +1421,17 @@ class _SignInScreenState extends State<SignInScreen> {
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       Text(
-                                        "Envoyer à nouveau le code ",
+                                        language == 'fr'
+                                            ? "Envoyer à nouveau le code "
+                                            : "Send the code again ",
                                         style: TextStyle(
                                           fontSize: 15.sp,
                                         ),
                                       ),
                                       Text(
-                                        '00:20',
+                                        language == 'fr'
+                                            ? '00:20'
+                                            : '00:20',
                                         style: TextStyle(
                                           color: kPrimaryColor,
                                           fontSize: 15.sp,
@@ -1376,7 +1460,9 @@ class _SignInScreenState extends State<SignInScreen> {
                                             child: SizedBox(
                                               width: 65.w,
                                               child: Text(
-                                                'Réinitialiser le mot de passe',
+                                                language == 'fr'
+                                                    ? 'Réinitialiser le mot de passe'
+                                                    : 'Reset password',
                                                 style: TextStyle(
                                                   fontSize: 20.sp,
                                                   fontWeight: FontWeight.bold,
@@ -1394,7 +1480,9 @@ class _SignInScreenState extends State<SignInScreen> {
                                             padding: EdgeInsets.symmetric(
                                                 horizontal: 25.sp),
                                             child: Text(
-                                              'Nouveau mot de passe',
+                                              language == 'fr'
+                                                  ? 'Nouveau mot de passe'
+                                                  : 'New password',
                                               style: TextStyle(
                                                 fontSize: 15.sp,
                                               ),
@@ -1416,16 +1504,21 @@ class _SignInScreenState extends State<SignInScreen> {
                                                 _isResetPasswordEmailVisible,
                                             validator: (value) {
                                               if (value!.isEmpty) {
-                                                return 'Mot de passe est obligatoire';
+                                                return language == 'fr'
+                                                    ? 'Mot de passe est obligatoire'
+                                                    : 'Password is required';
                                               }
                                               if (value.length < 8) {
-                                                return 'Mot de passe doit contenir au moins 8 caractères';
+                                                return language == 'fr'
+                                                    ? 'Mot de passe doit contenir au moins 8 caractères'
+                                                    : 'Password must contain at least 8 characters';
                                               }
                                               return null;
                                             },
                                             decoration: InputDecoration(
-                                              hintText:
-                                                  'Doit contenir 8 caractères',
+                                              hintText: language == 'fr'
+                                                  ? 'Doit contenir 8 caractères'
+                                                  : 'Must contain 8 characters',
                                               hintStyle: TextStyle(
                                                 color: kSecondaryColor,
                                                 fontSize: 15.sp,
@@ -1478,7 +1571,9 @@ class _SignInScreenState extends State<SignInScreen> {
                                             padding: EdgeInsets.symmetric(
                                                 horizontal: 25.sp),
                                             child: Text(
-                                              'Confirmer le mot de passe',
+                                              language == 'fr'
+                                                  ? 'Confirmer le mot de passe'
+                                                  : 'Confirm password',
                                               style: TextStyle(
                                                 fontSize: 15.sp,
                                               ),
@@ -1501,17 +1596,22 @@ class _SignInScreenState extends State<SignInScreen> {
                                                 _isResetPasswordPasswordVisible,
                                             validator: (value) {
                                               if (value!.isEmpty) {
-                                                return 'Mot de passe est obligatoire';
+                                                return language == 'fr'
+                                                    ? 'Mot de passe est obligatoire'
+                                                    : 'Password is required';
                                               }
                                               if (value !=
                                                   _newPasswordController.text) {
-                                                return 'Mot de passe ne correspond pas';
+                                                return language == 'fr'
+                                                    ? 'Mot de passe ne correspond pas'
+                                                    : 'Password does not match';
                                               }
                                               return null;
                                             },
                                             decoration: InputDecoration(
-                                              hintText:
-                                                  'Répéter votre mot de passe',
+                                              hintText: language == 'fr'
+                                                  ? 'Répéter votre mot de passe'
+                                                  : 'Repeat your password',
                                               hintStyle: TextStyle(
                                                 color: kSecondaryColor,
                                                 fontSize: 15.sp,
@@ -1582,7 +1682,9 @@ class _SignInScreenState extends State<SignInScreen> {
                                               ),
                                             ),
                                             child: Text(
-                                              'Réinitialiser',
+                                              language == 'fr'
+                                                  ? 'Réinitialiser'
+                                                  : 'Reset',
                                               style: TextStyle(
                                                 color: Colors.white,
                                                 fontSize: 16.sp,
@@ -1596,7 +1698,9 @@ class _SignInScreenState extends State<SignInScreen> {
                                               MainAxisAlignment.center,
                                           children: [
                                             Text(
-                                              "Se souvenir du mot de passe ?",
+                                              language == 'fr'
+                                                  ? "Se souvenir du mot de passe ?"
+                                                  : "Remember your password?",
                                               style: TextStyle(
                                                 fontSize: 15.sp,
                                               ),
@@ -1609,7 +1713,9 @@ class _SignInScreenState extends State<SignInScreen> {
                                                 });
                                               },
                                               child: Text(
-                                                'Se connecter',
+                                                language == 'fr'
+                                                    ? 'Se connecter'
+                                                    : 'Login',
                                                 style: TextStyle(
                                                   color: kPrimaryColor,
                                                   fontSize: 15.sp,
@@ -1639,7 +1745,9 @@ class _SignInScreenState extends State<SignInScreen> {
                                           SizedBox(
                                             width: 65.w,
                                             child: Text(
-                                              'Mot de passe modifié',
+                                              language == 'fr'
+                                                  ? 'Mot de passe modifié'
+                                                  : 'Password modified',
                                               style: TextStyle(
                                                 fontSize: 20.sp,
                                                 fontWeight: FontWeight.bold,
@@ -1651,7 +1759,9 @@ class _SignInScreenState extends State<SignInScreen> {
                                           SizedBox(
                                             width: 65.w,
                                             child: Text(
-                                              'Votre mot de passe a été modifié avec succès',
+                                              language == 'fr'
+                                                  ? 'Votre mot de passe a été modifié avec succès'
+                                                  : 'Your password has been modified successfully',
                                               style: TextStyle(
                                                 fontSize: 15.sp,
                                               ),
@@ -1681,7 +1791,9 @@ class _SignInScreenState extends State<SignInScreen> {
                                                 ),
                                               ),
                                               child: Text(
-                                                'Se connecter',
+                                                language == 'fr'
+                                                    ?   'Se connecter'
+                                                    : 'Login',
                                                 style: TextStyle(
                                                   color: Colors.white,
                                                   fontSize: 16.sp,

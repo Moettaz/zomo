@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:sizer/sizer.dart';
-import 'screens/firstpage.dart';
+import 'screens/first_page.dart';
 
 void main() {
   runApp(const MyApp());

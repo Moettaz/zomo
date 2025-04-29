@@ -4,9 +4,14 @@ import 'package:sizer/sizer.dart';
 import 'package:zomo/design/const.dart';
 import 'package:zomo/screens/auth/signin.dart';
 
-class FirstPage extends StatelessWidget {
+class FirstPage extends StatefulWidget {
   const FirstPage({super.key});
 
+  @override
+  State<FirstPage> createState() => _FirstPageState();
+}
+
+class _FirstPageState extends State<FirstPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -41,7 +46,35 @@ class FirstPage extends StatelessWidget {
               height: 60.h,
             ),
           ),
-
+          Align(
+            alignment: Alignment.topRight,
+            child: Padding(
+              padding: EdgeInsets.only(top: 5.h, right: 1.w),
+              child: IconButton(
+                onPressed: () {
+                  setState(() {
+                    language == 'fr' ? language = 'en' : language = 'fr';
+                  });
+                },
+                icon: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Text(language == 'fr' ? 'FR' : 'EN',
+                        style: TextStyle(
+                          color: kPrimaryColor,
+                          fontSize: 18.sp,
+                          fontWeight: FontWeight.bold,
+                        )),
+                    Icon(
+                      Icons.language_outlined,
+                      color: kPrimaryColor,
+                      size: 25.sp,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
           // Center content (logo and text)
           Center(
             child: Column(
@@ -59,7 +92,9 @@ class FirstPage extends StatelessWidget {
                 SizedBox(
                   width: 80.w,
                   child: Text(
-                    'Zomo, l’application qui réunit tous vos trajets et services.',
+                    language == 'fr'
+                        ? 'Zomo, l’application qui réunit tous vos trajets et services.'
+                        : 'Zomo, the application that brings together all your trips and services.',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Colors.white,
