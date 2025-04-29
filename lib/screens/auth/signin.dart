@@ -5,6 +5,7 @@ import 'package:sizer/sizer.dart';
 import 'package:zomo/design/const.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:zomo/screens/navigation_screen.dart';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
@@ -462,8 +463,8 @@ class _SignInScreenState extends State<SignInScreen> {
                                           onPressed: () {
                                             if (_loginFormKey.currentState!
                                                 .validate()) {
-                                              _loginFormKey.currentState!
-                                                  .save();
+                                              Get.to(() =>
+                                                  NavigationScreen(index: 0));
                                             }
                                           },
                                           style: ElevatedButton.styleFrom(
