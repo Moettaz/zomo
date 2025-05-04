@@ -3,6 +3,9 @@ import 'package:get/get.dart';
 import 'package:zomo/design/const.dart';
 import 'package:sizer/sizer.dart';
 import 'package:zomo/screens/auth/signin.dart';
+import 'package:zomo/screens/profile/my_points.dart';
+import 'package:zomo/screens/profile/politique.dart';
+import 'package:zomo/screens/profile/signal_problem.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -103,12 +106,13 @@ class _ProfilePageState extends State<ProfilePage> {
                   Icons.info_outline,
                   language == 'fr'
                       ? 'Signaler un problème'
-                      : 'Report a problem',
-                  () {}),
-              _buildProfileOption(
-                  Icons.star_rounded,
-                  language == 'fr' ? 'Système de points' : 'Points system',
-                  () {}),
+                      : 'Report a problem', () {
+                Get.to(SignalProblem());
+              }),
+              _buildProfileOption(Icons.star_rounded,
+                  language == 'fr' ? 'Système de points' : 'Points system', () {
+                Get.to(MyPointsPage());
+              }),
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 5.w),
                 child: Divider(
@@ -119,8 +123,9 @@ class _ProfilePageState extends State<ProfilePage> {
                   Icons.privacy_tip_outlined,
                   language == 'fr'
                       ? 'Politique de confidentialité'
-                      : 'Privacy policy',
-                  () {}),
+                      : 'Privacy policy', () {
+                Get.to(Politique());
+              }),
               _buildProfileOption(
                   Icons.logout, language == 'fr' ? 'Déconnexion' : 'Logout',
                   () {
