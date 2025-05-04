@@ -50,7 +50,7 @@ class MyPointsPage extends StatelessWidget {
             ),
           ),
           title: Text(
-            'Système de points',
+            language == 'fr' ? 'Système de points' : 'Points system',
             style: TextStyle(
               fontSize: 18.sp,
               fontWeight: FontWeight.bold,
@@ -64,7 +64,7 @@ class MyPointsPage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Mes points',
+              Text(language == 'fr' ? 'Mes points' : 'My points',
                   style: TextStyle(
                       fontSize: 20.sp,
                       fontWeight: FontWeight.bold,
@@ -83,7 +83,10 @@ class MyPointsPage extends StatelessWidget {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Vous avez: $points points',
+                      Text(
+                          language == 'fr'
+                              ? 'Vous avez: $points points'
+                              : 'You have: $points points',
                           style: TextStyle(
                               fontSize: 15.sp,
                               fontWeight: FontWeight.w500,
@@ -115,7 +118,8 @@ class MyPointsPage extends StatelessWidget {
                 ],
               ),
               SizedBox(height: 1.h),
-              Text('$points/$maxPoints points',
+              Text(
+                  '${language == 'fr' ? '$points/$maxPoints points' : '$points/$maxPoints points'}',
                   style: TextStyle(fontSize: 15.sp, color: kSecondaryColor)),
               SizedBox(height: 3.h),
               Row(
@@ -131,7 +135,10 @@ class MyPointsPage extends StatelessWidget {
                         ),
                         padding: EdgeInsets.symmetric(vertical: 12.sp),
                       ),
-                      child: Text('Transformer mes points',
+                      child: Text(
+                          language == 'fr'
+                              ? 'Transformer mes points'
+                              : 'Transform my points',
                           style: TextStyle(
                             fontSize: 15.sp,
                           )),
@@ -148,7 +155,10 @@ class MyPointsPage extends StatelessWidget {
                         ),
                         padding: EdgeInsets.symmetric(vertical: 12.sp),
                       ),
-                      child: Text('Utiliser mes points',
+                      child: Text(
+                          language == 'fr'
+                              ? 'Utiliser mes points'
+                              : 'Use my points',
                           style:
                               TextStyle(fontSize: 15.sp, color: Colors.white)),
                     ),
@@ -157,7 +167,10 @@ class MyPointsPage extends StatelessWidget {
               ),
               SizedBox(height: 3.h),
               Divider(),
-              Text('Historique des gains',
+              Text(
+                  language == 'fr'
+                      ? 'Historique des gains'
+                      : 'History of gains',
                   style: TextStyle(
                       fontSize: 17.sp,
                       fontWeight: FontWeight.bold,

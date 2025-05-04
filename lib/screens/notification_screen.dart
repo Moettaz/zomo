@@ -95,9 +95,7 @@ class _NotificationscreenState extends State<Notificationscreen> {
                     child: Padding(
                       padding: EdgeInsets.symmetric(horizontal: 5.w),
                       child: Text(
-                        language == 'fr'
-                            ? 'Notifications'
-                            : 'Notifications',
+                        language == 'fr' ? 'Notifications' : 'Notifications',
                         style: TextStyle(
                           fontSize: 18.sp,
                           fontWeight: FontWeight.bold,
@@ -155,9 +153,7 @@ class _NotificationscreenState extends State<Notificationscreen> {
         ),
         const SizedBox(height: 28),
         Text(
-          language == 'fr'
-              ? "Aucune notification !"
-              : "No notification !",
+          language == 'fr' ? "Aucune notification !" : "No notification !",
           style: TextStyle(
             fontFamily: 'Sofia Pro',
             fontSize: 20.sp,

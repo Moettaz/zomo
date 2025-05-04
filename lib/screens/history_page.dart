@@ -101,9 +101,7 @@ class _HistorypageState extends State<Historypage> {
                     child: Padding(
                       padding: EdgeInsets.symmetric(horizontal: 5.w),
                       child: Text(
-                         language == 'fr'
-                            ? 'Historique'
-                            : 'History',
+                        language == 'fr' ? 'Historique' : 'History',
                         style: TextStyle(
                           fontSize: 18.sp,
                           fontWeight: FontWeight.bold,
@@ -161,9 +159,7 @@ class _HistorypageState extends State<Historypage> {
         ),
         const SizedBox(height: 28),
         Text(
-          language == 'fr'
-              ? "Aucun historique !"
-              : "No history !",
+          language == 'fr' ? "Aucun historique !" : "No history !",
           style: TextStyle(
             fontFamily: 'Sofia Pro',
             fontSize: 20.sp,
@@ -237,7 +233,7 @@ class _HistorypageState extends State<Historypage> {
                       Text(
                         language == 'fr'
                             ? '${history.isTransporteur ? 'Transporteur' : 'Chauffeur'} : '
-                        : '${history.isTransporteur ? 'Driver' : 'Transporteur'} : ',
+                            : '${history.isTransporteur ? 'Driver' : 'Transporteur'} : ',
                         style: TextStyle(
                           fontSize: 14.sp,
                           fontWeight: FontWeight.bold,
@@ -266,28 +262,26 @@ class _HistorypageState extends State<Historypage> {
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child: Expanded(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(history.status,
-                        style: TextStyle(
-                          fontSize: 14.sp,
-                          color: kPrimaryColor,
-                          fontWeight: FontWeight.bold,
-                        )),
-                    SizedBox(height: 12.h),
-                    Text(
-                        language == 'fr'
-                            ? "+ ${history.point} Pts"
-                            : "+ ${history.point} Points",
-                        style: TextStyle(
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.bold,
-                        )),
-                  ],
-                ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(history.status,
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        color: kPrimaryColor,
+                        fontWeight: FontWeight.bold,
+                      )),
+                  SizedBox(height: 12.h),
+                  Text(
+                      language == 'fr'
+                          ? "+ ${history.point} Pts"
+                          : "+ ${history.point} Points",
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.bold,
+                      )),
+                ],
               ),
             ),
           ],

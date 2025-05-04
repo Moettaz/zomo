@@ -74,10 +74,9 @@ class _SignInScreenState extends State<SignInScreen> {
         setState(() {
           bioLoading = false;
         });
-        Get.showSnackbar(kErrorSnackBar(
-            language == 'fr'
-                ? "Votre appareil ne support pas les biometriques"
-                : "Your device does not support biometrics"));
+        Get.showSnackbar(kErrorSnackBar(language == 'fr'
+            ? "Votre appareil ne support pas les biometriques"
+            : "Your device does not support biometrics"));
       }
     } on PlatformException catch (e) {
       setState(() {
@@ -614,11 +613,11 @@ class _SignInScreenState extends State<SignInScreen> {
                                                     ? 'Nom d\'utilisateur est obligatoire'
                                                     : 'Username is required';
                                               }
-                                              if (!value
+                                              if (value
                                                   .contains(RegExp(r'[0-9]'))) {
                                                 return language == 'fr'
-                                                    ? 'Le nom d\'utilisateur doit contenir au moins un chiffre'
-                                                    : 'The username must contain at least one number';
+                                                    ? 'Le nom d\'utilisateur ne doit pas contenir de chiffre'
+                                                    : 'The username must not contain a number';
                                               }
                                               return null;
                                             },
@@ -754,8 +753,8 @@ class _SignInScreenState extends State<SignInScreen> {
                                               }
                                               if (value.length != 8) {
                                                 return language == 'fr'
-                                                    ? 'Numéro de téléphone doit contenir 10 chiffres'
-                                                    : 'Phone number must contain 10 digits';
+                                                    ? 'Numéro de téléphone doit contenir 8 chiffres'
+                                                    : 'Phone number must contain 8 digits';
                                               }
                                               return null;
                                             },
@@ -1171,9 +1170,8 @@ class _SignInScreenState extends State<SignInScreen> {
                                       return null;
                                     },
                                     decoration: InputDecoration(
-                                          hintText: language == 'fr'
-                                          ? 'Email'
-                                          : 'Email',
+                                      hintText:
+                                          language == 'fr' ? 'Email' : 'Email',
                                       hintStyle: TextStyle(
                                         color: kSecondaryColor,
                                         fontSize: 15.sp,
@@ -1225,9 +1223,7 @@ class _SignInScreenState extends State<SignInScreen> {
                                     ),
                                   ),
                                   child: Text(
-                                    language == 'fr'
-                                        ? 'Envoyer'
-                                        : 'Send',
+                                    language == 'fr' ? 'Envoyer' : 'Send',
                                     style: TextStyle(
                                       color: Colors.white,
                                       fontSize: 16.sp,
@@ -1429,9 +1425,7 @@ class _SignInScreenState extends State<SignInScreen> {
                                         ),
                                       ),
                                       Text(
-                                        language == 'fr'
-                                            ? '00:20'
-                                            : '00:20',
+                                        language == 'fr' ? '00:20' : '00:20',
                                         style: TextStyle(
                                           color: kPrimaryColor,
                                           fontSize: 15.sp,
@@ -1792,7 +1786,7 @@ class _SignInScreenState extends State<SignInScreen> {
                                               ),
                                               child: Text(
                                                 language == 'fr'
-                                                    ?   'Se connecter'
+                                                    ? 'Se connecter'
                                                     : 'Login',
                                                 style: TextStyle(
                                                   color: Colors.white,

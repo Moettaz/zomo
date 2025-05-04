@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:sizer/sizer.dart';
 import 'package:zomo/design/const.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:zomo/models/notification_model.dart';
 
 class SignalProblem extends StatefulWidget {
   const SignalProblem({super.key});
@@ -220,62 +219,6 @@ class _SignalProblemState extends State<SignalProblem> {
           ),
         ),
       ],
-    );
-  }
-
-  notificationItem(NotificationModel notification) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 1.h),
-      child: Material(
-        elevation: 4,
-        color: Colors.white,
-        borderRadius: BorderRadius.only(
-          topRight: Radius.circular(20.sp),
-          bottomRight: Radius.circular(20.sp),
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            Container(
-              width: 20.w,
-              height: 20.h,
-              decoration: BoxDecoration(
-                color: kSecondaryColor,
-                shape: BoxShape.rectangle,
-                borderRadius: BorderRadius.circular(0.sp),
-              ),
-              child: Image.asset(
-                'assets/miniLogo.png',
-                width: 10.w,
-                height: 10.w,
-              ),
-            ),
-            SizedBox(width: 2.w),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(notification.title,
-                    style: TextStyle(
-                      fontSize: 18.sp,
-                      fontWeight: FontWeight.bold,
-                    )),
-                SizedBox(height: 1.h),
-                SizedBox(
-                    width: 70.w,
-                    child: Text(notification.description,
-                        style: TextStyle(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w400,
-                        ),
-                        maxLines: 4,
-                        overflow: TextOverflow.ellipsis)),
-                SizedBox(height: 1.h),
-              ],
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

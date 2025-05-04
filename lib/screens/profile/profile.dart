@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 import 'package:zomo/design/const.dart';
 import 'package:sizer/sizer.dart';
 import 'package:zomo/screens/auth/signin.dart';
+import 'package:zomo/screens/profile/change_profile.dart';
+import 'package:zomo/screens/profile/language_page.dart';
 import 'package:zomo/screens/profile/my_points.dart';
 import 'package:zomo/screens/profile/politique.dart';
 import 'package:zomo/screens/profile/signal_problem.dart';
@@ -53,15 +55,15 @@ class _ProfilePageState extends State<ProfilePage> {
                       SizedBox(height: 1.h),
                       // Name and email
                       Text(
-                        'Feriel Othmani',
+                        'Nom Prénom',
                         style: TextStyle(
                             fontSize: 20.sp, fontWeight: FontWeight.bold),
                       ),
                       SizedBox(height: 1.h),
                       Text(
-                        'Feriel123@gmailcom',
+                        'email@example.com',
                         style:
-                            TextStyle(fontSize: 14.sp, color: Colors.grey[600]),
+                            TextStyle(fontSize: 15.sp, color: Colors.grey[600]),
                       ),
                       SizedBox(height: 1.h),
                       // Edit profile button
@@ -91,8 +93,9 @@ class _ProfilePageState extends State<ProfilePage> {
                   Icons.person_outline_rounded,
                   language == 'fr'
                       ? 'Informations personnelles'
-                      : 'Personal information',
-                  () {}),
+                      : 'Personal information', () {
+                Get.to(() => ChangeProfile());
+              }),
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 5.w),
                 child: Divider(
@@ -101,17 +104,19 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
 
               _buildProfileOption(Icons.language_outlined,
-                  language == 'fr' ? 'Langues' : 'Languages', () {}),
+                  language == 'fr' ? 'Langues' : 'Languages', () {
+                Get.to(() => LanguagePage());
+              }),
               _buildProfileOption(
                   Icons.info_outline,
                   language == 'fr'
                       ? 'Signaler un problème'
                       : 'Report a problem', () {
-                Get.to(SignalProblem());
+                Get.to(() => SignalProblem());
               }),
               _buildProfileOption(Icons.star_rounded,
                   language == 'fr' ? 'Système de points' : 'Points system', () {
-                Get.to(MyPointsPage());
+                Get.to(() => MyPointsPage());
               }),
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 5.w),
@@ -124,12 +129,12 @@ class _ProfilePageState extends State<ProfilePage> {
                   language == 'fr'
                       ? 'Politique de confidentialité'
                       : 'Privacy policy', () {
-                Get.to(Politique());
+                Get.to(() => Politique());
               }),
               _buildProfileOption(
                   Icons.logout, language == 'fr' ? 'Déconnexion' : 'Logout',
                   () {
-                Get.offAll(SignInScreen());
+                Get.offAll(() => SignInScreen());
               }),
             ],
           ),

@@ -43,7 +43,9 @@ class _PolitiqueState extends State<Politique> {
             ),
           ),
           title: Text(
-            'Politique de confidentialité',
+            language == 'fr'
+                ? 'Politique de confidentialité'
+                : 'Privacy policy',
             style: TextStyle(
               fontSize: 18.sp,
               fontWeight: FontWeight.bold,
