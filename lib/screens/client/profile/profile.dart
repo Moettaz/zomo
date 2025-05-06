@@ -3,11 +3,11 @@ import 'package:get/get.dart';
 import 'package:zomo/design/const.dart';
 import 'package:sizer/sizer.dart';
 import 'package:zomo/screens/auth/signin.dart';
-import 'package:zomo/screens/profile/change_profile.dart';
-import 'package:zomo/screens/profile/language_page.dart';
-import 'package:zomo/screens/profile/my_points.dart';
-import 'package:zomo/screens/profile/politique.dart';
-import 'package:zomo/screens/profile/signal_problem.dart';
+import 'package:zomo/screens/client/profile/change_profile.dart';
+import 'package:zomo/screens/client/profile/language_page.dart';
+import 'package:zomo/screens/client/profile/my_points.dart';
+import 'package:zomo/screens/client/profile/politique.dart';
+import 'package:zomo/screens/client/profile/signal_problem.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -22,6 +22,7 @@ class _ProfilePageState extends State<ProfilePage> {
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
+          automaticallyImplyLeading: false,
           backgroundColor: Colors.white,
           title: Text(language == 'fr' ? 'Mon profil' : 'My profile',
               style: TextStyle(

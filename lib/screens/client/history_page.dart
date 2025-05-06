@@ -2,35 +2,41 @@ import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 import 'package:zomo/design/const.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:zomo/models/notification_model.dart';
+import 'package:zomo/models/history_model.dart';
 
-class Notificationscreen extends StatefulWidget {
-  const Notificationscreen({super.key});
+class Historypage extends StatefulWidget {
+  const Historypage({super.key});
 
   @override
-  State<Notificationscreen> createState() => _NotificationscreenState();
+  State<Historypage> createState() => _HistorypageState();
 }
 
-class _NotificationscreenState extends State<Notificationscreen> {
+class _HistorypageState extends State<Historypage> {
   bool empty = false;
-  List<NotificationModel> notifications = [
-    NotificationModel(
-      title: 'We’re blasting off 🚀',
-      description:
-          'OneSignal announces 500% growth, delivering 2 trillion messages annually & delivery rates of 1.75 million per second.',
-      image: 'assets/miniLogo.png',
+  List<HistoryModel> history = [
+    HistoryModel(
+      isTransporteur: true,
+      title: 'Livraison 8kg',
+      demandeId: 'Demande #002',
+      date: '20 avril 2025',
+      time: '15:20',
+      transporteur: 'Aziz',
+      emplacement: 'Tunis, Bab Saadoun - Alger, El Harrach',
+      point: '10',
+      status: 'En cours',
+      amount: 90,
     ),
-    NotificationModel(
-      title: 'We’re blasting off 🚀',
-      description:
-          'OneSignal announces 500% growth, delivering 2 trillion messages annually & delivery rates of 1.75 million per second.',
-      image: 'assets/miniLogo.png',
-    ),
-    NotificationModel(
-      title: 'We’re blasting off 🚀',
-      description:
-          'OneSignal announces 500% growth, delivering 2 trillion messages annually & delivery rates of 1.75 million per second.',
-      image: 'assets/miniLogo.png',
+    HistoryModel(
+      isTransporteur: false,
+      title: 'Trajet VTC',
+      demandeId: 'Demande #001',
+      date: '18 avril 2025',
+      time: '11:00',
+      transporteur: 'Chiheb',
+      emplacement: 'Tunis, Bab Saadoun - Alger, El Harrach',
+      point: '10',
+      status: 'En cours',
+      amount: 90,
     ),
   ];
   @override
@@ -74,7 +80,7 @@ class _NotificationscreenState extends State<Notificationscreen> {
           alignment: Alignment.bottomCenter,
           child: Container(
             width: 100.w,
-            height: 78.h,
+            height: 85.h,
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.only(
@@ -95,7 +101,7 @@ class _NotificationscreenState extends State<Notificationscreen> {
                     child: Padding(
                       padding: EdgeInsets.symmetric(horizontal: 5.w),
                       child: Text(
-                        language == 'fr' ? 'Notifications' : 'Notifications',
+                        language == 'fr' ? 'Historique' : 'History',
                         style: TextStyle(
                           fontSize: 18.sp,
                           fontWeight: FontWeight.bold,
@@ -109,9 +115,9 @@ class _NotificationscreenState extends State<Notificationscreen> {
                       : SizedBox(
                           height: 70.h,
                           child: ListView.builder(
-                            itemCount: notifications.length,
+                            itemCount: history.length,
                             itemBuilder: (context, index) {
-                              return notificationItem(notifications[index]);
+                              return historyItem(history[index]);
                             },
                           ),
                         )
@@ -146,14 +152,14 @@ class _NotificationscreenState extends State<Notificationscreen> {
             ],
           ),
           child: Icon(
-            Icons.notifications,
+            Icons.access_time_rounded,
             size: 45.sp,
             color: kPrimaryColor,
           ),
         ),
         const SizedBox(height: 28),
         Text(
-          language == 'fr' ? "Aucune notification !" : "No notification !",
+          language == 'fr' ? "Aucun historique !" : "No history !",
           style: TextStyle(
             fontFamily: 'Sofia Pro',
             fontSize: 20.sp,
@@ -165,8 +171,8 @@ class _NotificationscreenState extends State<Notificationscreen> {
         const SizedBox(height: 12),
         Text(
           language == 'fr'
-              ? "Aucune notification à vous pour le moment."
-              : "No notification for you at the moment.",
+              ? "Faire des trajets pour les voir ici."
+              : "Make trips to see them here.",
           textAlign: TextAlign.center,
           style: TextStyle(
             fontFamily: 'Sofia Pro',
@@ -179,7 +185,7 @@ class _NotificationscreenState extends State<Notificationscreen> {
     );
   }
 
-  notificationItem(NotificationModel notification) {
+  historyItem(HistoryModel history) {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 1.h),
       child: Material(
@@ -201,33 +207,82 @@ class _NotificationscreenState extends State<Notificationscreen> {
                 shape: BoxShape.rectangle,
                 borderRadius: BorderRadius.circular(0.sp),
               ),
-              child: Image.asset(
-                'assets/miniLogo.png',
-                width: 10.w,
-                height: 10.w,
+              child: Icon(
+                Icons.access_time_rounded,
+                size: 30.sp,
+                color: kPrimaryColor,
               ),
             ),
             SizedBox(width: 2.w),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(notification.title,
-                    style: TextStyle(
-                      fontSize: 18.sp,
-                      fontWeight: FontWeight.bold,
-                    )),
-                SizedBox(height: 1.h),
-                SizedBox(
-                    width: 70.w,
-                    child: Text(notification.description,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(history.title,
+                      style: TextStyle(
+                        fontSize: 18.sp,
+                        fontWeight: FontWeight.bold,
+                      )),
+                  SizedBox(height: 1.h),
+                  Text(history.demandeId),
+                  SizedBox(height: 1.h),
+                  Text('${history.date} ${history.time}'),
+                  SizedBox(height: 1.h),
+                  Row(
+                    children: [
+                      Text(
+                        language == 'fr'
+                            ? '${history.isTransporteur ? 'Transporteur' : 'Chauffeur'} : '
+                            : '${history.isTransporteur ? 'Driver' : 'Transporteur'} : ',
                         style: TextStyle(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w400,
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.bold,
                         ),
-                        maxLines: 4,
-                        overflow: TextOverflow.ellipsis)),
-                SizedBox(height: 1.h),
-              ],
+                      ),
+                      Text(
+                        history.transporteur,
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 1.h),
+                  Text(
+                      language == 'fr'
+                          ? "${history.amount.toString()} TND"
+                          : "${history.amount.toString()} DT",
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.bold,
+                      )),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(history.status,
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        color: kPrimaryColor,
+                        fontWeight: FontWeight.bold,
+                      )),
+                  SizedBox(height: 12.h),
+                  Text(
+                      language == 'fr'
+                          ? "+ ${history.point} Pts"
+                          : "+ ${history.point} Points",
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.bold,
+                      )),
+                ],
+              ),
             ),
           ],
         ),

@@ -1,9 +1,11 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:dots_indicator/dots_indicator.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:sizer/sizer.dart';
 import 'package:zomo/design/const.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:zomo/screens/client/car/select_car.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -97,7 +99,7 @@ class _HomePageState extends State<HomePage> {
           alignment: Alignment.bottomCenter,
           child: Container(
             width: 100.w,
-            height: 78.h,
+            height: 85.h,
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.only(
@@ -134,9 +136,7 @@ class _HomePageState extends State<HomePage> {
                               ),
                             ),
                             child: Text(
-                              language == 'fr'
-                                  ? 'Course'
-                                  : 'Course',
+                              language == 'fr' ? 'Course' : 'Course',
                               style: TextStyle(
                                   color: selectedIndex == 0
                                       ? kPrimaryColor
@@ -166,9 +166,7 @@ class _HomePageState extends State<HomePage> {
                               ),
                             ),
                             child: Text(
-                              language == 'fr'
-                                  ? 'Déménagement'
-                                  : 'Demovation',
+                              language == 'fr' ? 'Déménagement' : 'Demovation',
                               maxLines: 1,
                               style: TextStyle(
                                   color: selectedIndex == 1
@@ -199,9 +197,7 @@ class _HomePageState extends State<HomePage> {
                               ),
                             ),
                             child: Text(
-                              language == 'fr'
-                                  ? 'Colis'
-                                  : 'Colis',
+                              language == 'fr' ? 'Colis' : 'Colis',
                               style: TextStyle(
                                 color: selectedIndex == 2
                                     ? kPrimaryColor
@@ -228,9 +224,7 @@ class _HomePageState extends State<HomePage> {
                                 children: [
                                   SizedBox(height: 2.h),
                                   Text(
-                                    language == 'fr'
-                                        ? 'Course'
-                                        : 'Course',
+                                    language == 'fr' ? 'Course' : 'Course',
                                     style: TextStyle(
                                       fontSize: 18.sp,
                                       fontWeight: FontWeight.bold,
@@ -248,7 +242,11 @@ class _HomePageState extends State<HomePage> {
                             Padding(
                               padding: EdgeInsets.symmetric(horizontal: 15.sp),
                               child: ElevatedButton(
-                                onPressed: () {},
+                                onPressed: () {
+                                  Get.to(() => SelectCar(),
+                                      transition: Transition.downToUp,
+                                      duration: Duration(milliseconds: 500));
+                                },
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: kPrimaryColor,
                                   fixedSize: Size(70.w, 6.h),
@@ -257,9 +255,7 @@ class _HomePageState extends State<HomePage> {
                                   ),
                                 ),
                                 child: Text(
-                                  language == 'fr'
-                                      ? 'Réserver'
-                                      : 'Book',
+                                  language == 'fr' ? 'Réserver' : 'Book',
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 16.sp,
@@ -267,7 +263,7 @@ class _HomePageState extends State<HomePage> {
                                 ),
                               ),
                             ),
-                            SizedBox(height: 5.h),
+                            SizedBox(height: 3.h),
                             CarouselSlider(
                               options: CarouselOptions(
                                 height: 5.h,
@@ -282,21 +278,18 @@ class _HomePageState extends State<HomePage> {
                                 },
                               ),
                               items: [
-                                Text(
-                                    language == 'fr'
-                                        ? "Réservez un taxi en un clic avec Zomo."
-                                        : "Book a taxi in one click with Zomo."),
-                                Text(
-                                    language == 'fr'
-                                        ? "Chauffeurs vérifiés et tarifs transparents."
-                                        : "Drivers verified and transparent prices."),
-                                Text(
-                                    language == 'fr'
-                                        ? "Voyagez partout, à tout moment."
-                                        : "Travel everywhere, anytime."),
+                                Text(language == 'fr'
+                                    ? "Réservez un taxi en un clic avec Zomo."
+                                    : "Book a taxi in one click with Zomo."),
+                                Text(language == 'fr'
+                                    ? "Chauffeurs vérifiés et tarifs transparents."
+                                    : "Drivers verified and transparent prices."),
+                                Text(language == 'fr'
+                                    ? "Voyagez partout, à tout moment."
+                                    : "Travel everywhere, anytime."),
                               ],
                             ),
-                            SizedBox(height: 5.h),
+                            SizedBox(height: 2.h),
                             DotsIndicator(
                               dotsCount: 3,
                               position: carouselIndex.toDouble(),
@@ -354,9 +347,7 @@ class _HomePageState extends State<HomePage> {
                                       ),
                                     ),
                                     child: Text(
-                                      language == 'fr'
-                                          ? 'Réserver'
-                                          : 'Book',
+                                      language == 'fr' ? 'Réserver' : 'Book',
                                       style: TextStyle(
                                         color: Colors.white,
                                         fontSize: 16.sp,
@@ -379,18 +370,15 @@ class _HomePageState extends State<HomePage> {
                                     },
                                   ),
                                   items: [
-                                    Text(
-                                        language == 'fr'
-                                            ? "Déménagez sans stress avec notre application."
-                                            : "Move without stress with our application."),
-                                    Text(
-                                        language == 'fr'
-                                            ? "Réservation rapide et équipes pro."
-                                            : "Quick booking and professional teams."),
-                                    Text(
-                                        language == 'fr'
-                                            ? "Suivi en temps réel, 7j/7."
-                                            : "Real-time tracking, 7/7."),
+                                    Text(language == 'fr'
+                                        ? "Déménagez sans stress avec notre application."
+                                        : "Move without stress with our application."),
+                                    Text(language == 'fr'
+                                        ? "Réservation rapide et équipes pro."
+                                        : "Quick booking and professional teams."),
+                                    Text(language == 'fr'
+                                        ? "Suivi en temps réel, 7j/7."
+                                        : "Real-time tracking, 7/7."),
                                   ],
                                 ),
                                 SizedBox(height: 5.h),
@@ -454,9 +442,7 @@ class _HomePageState extends State<HomePage> {
                                       ),
                                     ),
                                     child: Text(
-                                      language == 'fr'
-                                          ? 'Réserver'
-                                          : 'Book',
+                                      language == 'fr' ? 'Réserver' : 'Book',
                                       style: TextStyle(
                                         color: Colors.white,
                                         fontSize: 16.sp,
@@ -479,18 +465,15 @@ class _HomePageState extends State<HomePage> {
                                     },
                                   ),
                                   items: [
-                                    Text(
-                                        language == 'fr'
-                                            ? "Expédiez vos colis facilement et en toute sécurité."
-                                            : "Ship your packages easily and securely."),
-                                    Text(
-                                        language == 'fr'
-                                            ? "Suivi en temps réel et tarifs transparents."
-                                            : "Real-time tracking and transparent prices."),
-                                    Text(
-                                        language == 'fr'
-                                            ?   "Disponible 7j/7, pour tous vos envois, près ou loin."
-                                            : "Available 7/7, for all your shipments, near or far."),
+                                    Text(language == 'fr'
+                                        ? "Expédiez vos colis facilement et en toute sécurité."
+                                        : "Ship your packages easily and securely."),
+                                    Text(language == 'fr'
+                                        ? "Suivi en temps réel et tarifs transparents."
+                                        : "Real-time tracking and transparent prices."),
+                                    Text(language == 'fr'
+                                        ? "Disponible 7j/7, pour tous vos envois, près ou loin."
+                                        : "Available 7/7, for all your shipments, near or far."),
                                   ],
                                 ),
                                 SizedBox(height: 5.h),

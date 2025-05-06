@@ -5,7 +5,7 @@ import 'package:sizer/sizer.dart';
 import 'package:zomo/design/const.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:zomo/screens/navigation_screen.dart';
+import 'package:zomo/screens/client/navigation_screen.dart';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});

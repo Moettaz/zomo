@@ -119,7 +119,7 @@ class MyPointsPage extends StatelessWidget {
               ),
               SizedBox(height: 1.h),
               Text(
-                  '${language == 'fr' ? '$points/$maxPoints points' : '$points/$maxPoints points'}',
+                  language == 'fr' ? '$points/$maxPoints points' : '$points/$maxPoints points',
                   style: TextStyle(fontSize: 15.sp, color: kSecondaryColor)),
               SizedBox(height: 3.h),
               Row(
