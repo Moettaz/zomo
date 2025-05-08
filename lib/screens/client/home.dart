@@ -1,6 +1,7 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:dots_indicator/dots_indicator.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:get/get.dart';
 import 'package:sizer/sizer.dart';
 import 'package:zomo/design/const.dart';
@@ -8,7 +9,8 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:zomo/screens/client/car/select_car.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  final bool showDialog;
+  const HomePage({super.key, this.showDialog = false});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -17,6 +19,102 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int selectedIndex = 0;
   int carouselIndex = 0;
+  @override
+  void initState() {
+    super.initState();
+    if (widget.showDialog) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _showRatingModal();
+      });
+    }
+  }
+
+  void _showRatingModal() {
+    showModalBottomSheet(
+      backgroundColor: Colors.white,
+      context: context,
+      isDismissible: false,
+      enableDrag: false,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
+      ),
+      builder: (context) {
+        double rating = 4.0;
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    children: [
+                      CircleAvatar(
+                        radius: 32,
+                        backgroundImage: AssetImage(
+                            'assets/person.png'), // Replace with your asset
+                      ),
+                      SizedBox(width: 16),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Aziz',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 20)),
+                          Text('Voiture confortable',
+                              style: TextStyle(fontSize: 14)),
+                        ],
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 24),
+                  Text(
+                    'Comment évalues-tu ton expérience ?',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                  ),
+                  SizedBox(height: 24),
+                  RatingBar.builder(
+                    initialRating: rating,
+                    minRating: 1,
+                    direction: Axis.horizontal,
+                    allowHalfRating: false,
+                    itemCount: 5,
+                    itemPadding: EdgeInsets.symmetric(horizontal: 4.0),
+                    itemBuilder: (context, _) => Icon(
+                      Icons.star,
+                      color: kPrimaryColor,
+                    ),
+                    onRatingUpdate: (newRating) {
+                      setState(() {
+                        rating = newRating;
+                      });
+                    },
+                  ),
+                  SizedBox(height: 24),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      // Handle rating submission here
+                    },
+                    style: ElevatedButton.styleFrom(
+                      fixedSize: Size(60.w, 7.h),
+                      elevation: 0,
+                      backgroundColor: kPrimaryColor,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                    ),
+                    child: Text('Valider'),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {

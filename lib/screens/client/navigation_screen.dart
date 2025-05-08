@@ -10,7 +10,8 @@ import 'package:zomo/screens/client/profile/profile.dart';
 
 class NavigationScreen extends StatefulWidget {
   final int? index;
-  const NavigationScreen({super.key, this.index});
+  final bool showDialog;
+  const NavigationScreen({super.key, this.index, this.showDialog = false});
 
   @override
   State<NavigationScreen> createState() => _NavigationScreenState();
@@ -84,7 +85,7 @@ class _NavigationScreenState extends State<NavigationScreen>
         dragStartBehavior: DragStartBehavior.down,
         physics: const BouncingScrollPhysics(),
         children: [
-          HomePage(),
+          HomePage(showDialog: widget.showDialog),
           Notificationscreen(),
           Historypage(),
           ProfilePage(),
