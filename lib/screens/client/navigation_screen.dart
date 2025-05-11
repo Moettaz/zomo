@@ -62,7 +62,7 @@ class _NavigationScreenState extends State<NavigationScreen>
       barDecoration: BoxDecoration(
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.5),
+            color: Colors.grey.withValues(alpha: 0.5),
             spreadRadius: 2,
             blurRadius: 5,
             offset: Offset(0, 3),
@@ -70,7 +70,6 @@ class _NavigationScreenState extends State<NavigationScreen>
         ],
         color: colors[_selectedIndex],
         borderRadius: BorderRadius.circular(30.sp),
-        border: Border.all(color: Colors.white),
       ),
       iconDecoration: BoxDecoration(
         color: colors[_selectedIndex],
@@ -114,7 +113,13 @@ class _NavigationScreenState extends State<NavigationScreen>
         ],
         labelColor: kPrimaryColor,
         unselectedLabelColor: kSecondaryColor,
-        indicatorColor: kPrimaryColor,
+        indicator: BoxDecoration(
+          color: Colors.transparent,
+          border: Border(
+            bottom: BorderSide(color: kPrimaryColor),
+          ),
+        ),
+        dividerColor: Colors.transparent,
       ),
     );
   }

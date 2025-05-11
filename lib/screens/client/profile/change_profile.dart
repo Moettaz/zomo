@@ -122,7 +122,7 @@ class _ChangeProfileState extends State<ChangeProfile> {
             width: 20.w,
             height: 20.w,
             decoration: BoxDecoration(
-              color: kPrimaryColor.withOpacity(0.1),
+              color: kPrimaryColor.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(
@@ -172,7 +172,7 @@ class _ChangeProfileState extends State<ChangeProfile> {
                 width: double.infinity,
                 height: 20.h,
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.5),
+                  color: Colors.black.withValues(alpha: 0.5),
                   image: DecorationImage(
                     image: AssetImage('assets/headerImage.png'),
                     fit: BoxFit.cover,

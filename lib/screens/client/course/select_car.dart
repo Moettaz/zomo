@@ -28,8 +28,8 @@ class _SelectCarState extends State<SelectCar> {
   final TextEditingController _destinationController = TextEditingController();
   final PolylinePoints _polylinePoints = PolylinePoints();
   int selectedVehicle = 0;
-  String _selectedPaymentMethod = 'Cash';
-
+  String _selectedPaymentMethod = language == 'fr' ? 'Espèce' : 'Cash';
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   @override
   void initState() {
     super.initState();
@@ -85,8 +85,8 @@ class _SelectCarState extends State<SelectCar> {
   final vehicles = [
     {
       'id': 1,
-      'name': 'Bike',
-      'icon': Icons.motorcycle,
+      'name': 'Voiture confortable',
+      'image': "assets/car confort.png",
       'duration': '15 min',
       'price': '5 DT',
       'distance': '2.5 km',
@@ -94,8 +94,8 @@ class _SelectCarState extends State<SelectCar> {
     },
     {
       'id': 2,
-      'name': '4 Places Car',
-      'icon': Icons.directions_car,
+      'name': 'Voiture luxe',
+      'image': "assets/car luxe.png",
       'duration': '20 min',
       'price': '12 DT',
       'distance': '2.5 km',
@@ -103,8 +103,8 @@ class _SelectCarState extends State<SelectCar> {
     },
     {
       'id': 3,
-      'name': 'Luxury Car',
-      'icon': Icons.directions_car_filled,
+      'name': 'Moto',
+      'image': "assets/single-motorbike.png",
       'duration': '20 min',
       'price': '25 DT',
       'distance': '2.5 km',
@@ -112,8 +112,8 @@ class _SelectCarState extends State<SelectCar> {
     },
     {
       'id': 4,
-      'name': 'Van',
-      'icon': Icons.airport_shuttle,
+      'name': 'Taxi 4 places ',
+      'image': "assets/carblack.png",
       'duration': '25 min',
       'price': '18 DT',
       'distance': '2.5 km',
@@ -131,13 +131,13 @@ class _SelectCarState extends State<SelectCar> {
       'id': 2,
       'name': 'Chauffeur 2',
       'rate': '4.2',
-      'image': 'assets/person.png',
+      'image': 'assets/person1.png',
     },
     {
       'id': 3,
       'name': 'Chauffeur 3',
       'rate': '4.7',
-      'image': 'assets/person.png',
+      'image': 'assets/person2.png',
     },
   ];
   void _onMapCreated(GoogleMapController controller) {
@@ -285,38 +285,41 @@ class _SelectCarState extends State<SelectCar> {
                           height: 13.h,
                           child: Row(
                             children: [
-                              Padding(
-                                padding: EdgeInsets.only(left: 4.w),
-                                child: Column(
-                                  children: [
-                                    Icon(
-                                      Icons.circle_outlined,
-                                      color: Colors.black,
-                                    ),
-                                    SizedBox(height: 0.3.h),
-                                    Icon(
-                                      Icons.circle,
-                                      color: Colors.black,
-                                      size: 10.sp,
-                                    ),
-                                    SizedBox(height: 0.3.h),
-                                    Icon(
-                                      Icons.circle,
-                                      color: Colors.black,
-                                      size: 10.sp,
-                                    ),
-                                    SizedBox(height: 0.3.h),
-                                    Icon(
-                                      Icons.circle,
-                                      color: Colors.black,
-                                      size: 10.sp,
-                                    ),
-                                    Icon(
-                                      Icons.location_on,
-                                      color: kPrimaryColor,
-                                      size: 25.sp,
-                                    ),
-                                  ],
+                              Form(
+                                key: _formKey,
+                                child: Padding(
+                                  padding: EdgeInsets.only(left: 4.w),
+                                  child: Column(
+                                    children: [
+                                      Icon(
+                                        Icons.circle_outlined,
+                                        color: Colors.black,
+                                      ),
+                                      SizedBox(height: 0.3.h),
+                                      Icon(
+                                        Icons.circle,
+                                        color: Colors.black,
+                                        size: 10.sp,
+                                      ),
+                                      SizedBox(height: 0.3.h),
+                                      Icon(
+                                        Icons.circle,
+                                        color: Colors.black,
+                                        size: 10.sp,
+                                      ),
+                                      SizedBox(height: 0.3.h),
+                                      Icon(
+                                        Icons.circle,
+                                        color: Colors.black,
+                                        size: 10.sp,
+                                      ),
+                                      Icon(
+                                        Icons.location_on,
+                                        color: kPrimaryColor,
+                                        size: 25.sp,
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                               SizedBox(width: 2.w),
@@ -326,6 +329,16 @@ class _SelectCarState extends State<SelectCar> {
                                     width: 80.w,
                                     height: 5.h,
                                     child: GooglePlaceAutoCompleteTextField(
+                                      validator: (p0, p1) {
+                                        if (p0 == null ||
+                                            p0.isEmpty ||
+                                            _originController.text == "") {
+                                          return language == 'fr'
+                                              ? 'Obligatoire'
+                                              : 'Required';
+                                        }
+                                        return null;
+                                      },
                                       boxDecoration: BoxDecoration(
                                         borderRadius: BorderRadius.circular(8),
                                         border: Border.all(color: Colors.white),
@@ -366,6 +379,16 @@ class _SelectCarState extends State<SelectCar> {
                                     width: 80.w,
                                     height: 5.h,
                                     child: GooglePlaceAutoCompleteTextField(
+                                      validator: (p0, p1) {
+                                        if (p0 == null ||
+                                            p0.isEmpty ||
+                                            _destinationController.text == "") {
+                                          return language == 'fr'
+                                              ? 'Obligatoire'
+                                              : 'Required';
+                                        }
+                                        return null;
+                                      },
                                       boxDecoration: BoxDecoration(
                                         borderRadius: BorderRadius.circular(8),
                                         border: Border.all(color: Colors.white),
@@ -496,7 +519,7 @@ class _SelectCarState extends State<SelectCar> {
                                     ],
                                   ),
                                   SizedBox(
-                                    height: 42.h,
+                                    height: 35.h,
                                     width: 100.w,
                                     child: ListView.builder(
                                       shrinkWrap: false,
@@ -514,7 +537,7 @@ class _SelectCarState extends State<SelectCar> {
                                             boxShadow: [
                                               BoxShadow(
                                                 color: Colors.grey
-                                                    .withOpacity(0.1),
+                                                    .withValues(alpha: 0.1),
                                                 spreadRadius: 1,
                                                 blurRadius: 5,
                                                 offset: const Offset(0, 2),
@@ -522,10 +545,11 @@ class _SelectCarState extends State<SelectCar> {
                                             ],
                                           ),
                                           child: Material(
-                                            color: selectedVehicle ==
-                                                    vehicle['id']
-                                                ? kPrimaryColor.withOpacity(0.5)
-                                                : Colors.transparent,
+                                            color:
+                                                selectedVehicle == vehicle['id']
+                                                    ? kPrimaryColor.withValues(
+                                                        alpha: 0.5)
+                                                    : Colors.transparent,
                                             borderRadius:
                                                 BorderRadius.circular(15.sp),
                                             child: InkWell(
@@ -547,11 +571,10 @@ class _SelectCarState extends State<SelectCar> {
                                                   children: [
                                                     SizedBox(
                                                       width: 12.w,
-                                                      child: Icon(
-                                                        vehicle['icon']
-                                                            as IconData,
+                                                      child: Image.asset(
+                                                        vehicle['image']
+                                                            .toString(),
                                                         color: Colors.black,
-                                                        size: 30.sp,
                                                       ),
                                                     ),
                                                     SizedBox(width: 2.w),
@@ -670,8 +693,12 @@ class _SelectCarState extends State<SelectCar> {
                                                   color: kPrimaryColor),
                                             ),
                                           ),
-                                          items: ['Cash', 'Card']
-                                              .map((String value) {
+                                          items: [
+                                            language == 'fr'
+                                                ? 'Espèce'
+                                                : 'Cash',
+                                            language == 'fr' ? 'Carte' : 'Card'
+                                          ].map((String value) {
                                             return DropdownMenuItem<String>(
                                               value: value,
                                               child: Text(
@@ -706,9 +733,26 @@ class _SelectCarState extends State<SelectCar> {
                                         ),
                                       ),
                                       onPressed: () {
-                                        setState(() {
-                                          selectedIndex = 1;
-                                        });
+                                        if (_formKey.currentState!.validate()) {
+                                          if (selectedVehicle == 0) {
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              SnackBar(
+                                                content: Text(
+                                                  language == 'fr'
+                                                      ? 'Veuillez sélectionner un véhicule'
+                                                      : 'Please select a vehicle',
+                                                ),
+                                                backgroundColor: kPrimaryColor,
+                                                duration: Duration(seconds: 2),
+                                              ),
+                                            );
+                                          } else {
+                                            setState(() {
+                                              selectedIndex = 1;
+                                            });
+                                          }
+                                        }
                                       },
                                       child: Text(
                                         language == 'fr'
@@ -742,7 +786,7 @@ class _SelectCarState extends State<SelectCar> {
                                             boxShadow: [
                                               BoxShadow(
                                                 color: Colors.grey
-                                                    .withOpacity(0.1),
+                                                    .withValues(alpha: 0.1),
                                                 spreadRadius: 1,
                                                 blurRadius: 5,
                                                 offset: const Offset(0, 2),
@@ -839,6 +883,8 @@ class _SelectCarState extends State<SelectCar> {
                                                           builder: (BuildContext
                                                               context) {
                                                             return Dialog(
+                                                              backgroundColor:
+                                                                  Colors.white,
                                                               shape:
                                                                   RoundedRectangleBorder(
                                                                 borderRadius:
@@ -994,7 +1040,9 @@ class _SelectCarState extends State<SelectCar> {
                                                   height: 7.h,
                                                   child: Center(
                                                     child: Text(
-                                                      'Le Chauffeur est en route',
+                                                      language == 'fr'
+                                                          ? 'Le Chauffeur est en route'
+                                                          : 'The driver is on the way',
                                                       style: TextStyle(
                                                         color: Colors.black,
                                                         fontSize: 17.sp,
@@ -1107,7 +1155,9 @@ class _SelectCarState extends State<SelectCar> {
                                                     ),
                                                     SizedBox(height: 0.5.h),
                                                     Text(
-                                                      "Confort Electrique",
+                                                      language == 'fr'
+                                                          ? 'Confort Electrique'
+                                                          : 'Electric Comfort',
                                                       style: TextStyle(
                                                         fontSize: 16.sp,
                                                         color: Colors.black,
@@ -1119,7 +1169,7 @@ class _SelectCarState extends State<SelectCar> {
                                                 SizedBox(
                                                   width: 12.w,
                                                   child: Image.asset(
-                                                    "assets/cartop.png",
+                                                    "assets/yellow car.png",
                                                     width: 35.w,
                                                     height: 12.h,
                                                     fit: BoxFit.cover,
@@ -1145,6 +1195,8 @@ class _SelectCarState extends State<SelectCar> {
                                                     builder:
                                                         (BuildContext context) {
                                                       return Dialog(
+                                                        backgroundColor:
+                                                            Colors.white,
                                                         shape:
                                                             RoundedRectangleBorder(
                                                           borderRadius:

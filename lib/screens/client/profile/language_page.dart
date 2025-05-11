@@ -30,7 +30,7 @@ class _LanguagePageState extends State<LanguagePage> {
                 width: double.infinity,
                 height: 20.h,
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.5),
+                  color: Colors.black.withValues(alpha: 0.5),
                   image: DecorationImage(
                     image: AssetImage('assets/headerImage.png'),
                     fit: BoxFit.cover,
@@ -90,9 +90,20 @@ class _LanguagePageState extends State<LanguagePage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
+                  Padding(
+                    padding: EdgeInsets.only(left: 10.w, top: 2.h),
+                    child: Text(
+                        language == 'fr'
+                            ? 'Choisir la langue'
+                            : 'Choose language',
+                        style: TextStyle(
+                            fontSize: 20.sp, fontWeight: FontWeight.bold)),
+                  ),
                   SizedBox(height: 3.h),
                   RadioListTile(
-                    title: Text('English'),
+                    title: Text(language == 'fr' ? 'Anglais' : 'English',
+                        style: TextStyle(
+                            fontSize: 15.sp, fontWeight: FontWeight.bold)),
                     value: 'en',
                     groupValue: language,
                     onChanged: (value) {
@@ -102,7 +113,9 @@ class _LanguagePageState extends State<LanguagePage> {
                     },
                   ),
                   RadioListTile(
-                    title: Text('French'),
+                    title: Text(language == 'fr' ? 'Français' : 'French',
+                        style: TextStyle(
+                            fontSize: 15.sp, fontWeight: FontWeight.bold)),
                     value: 'fr',
                     groupValue: language,
                     onChanged: (value) {
@@ -111,6 +124,36 @@ class _LanguagePageState extends State<LanguagePage> {
                       });
                     },
                   ),
+                  Center(
+                    child: SizedBox(
+                      width: 90.w,
+                      child: Divider(
+                        color: Colors.grey,
+                        height: 2.h,
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 2.h),
+                  Align(
+                    alignment: Alignment.center,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        fixedSize: Size(60.w, 7.h),
+                        elevation: 0,
+                        backgroundColor: kPrimaryColor,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(25),
+                        ),
+                      ),
+                      onPressed: () {
+                        Get.back();
+                      },
+                      child: Text(language == 'fr' ? 'Changer' : 'Change',
+                          style: TextStyle(
+                              fontSize: 15.sp, fontWeight: FontWeight.bold)),
+                    ),
+                  )
                 ],
               ).animate().slideX(duration: 500.ms, begin: -1, end: 0),
             ),
@@ -119,6 +162,4 @@ class _LanguagePageState extends State<LanguagePage> {
       ],
     ));
   }
-
-  
 }

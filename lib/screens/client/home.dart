@@ -6,11 +6,14 @@ import 'package:get/get.dart';
 import 'package:sizer/sizer.dart';
 import 'package:zomo/design/const.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:zomo/screens/client/car/select_car.dart';
+import 'package:zomo/screens/client/colis/colis.dart';
+import 'package:zomo/screens/client/course/select_car.dart';
+import 'package:zomo/screens/client/demenagement/reservation.dart';
 
+// ignore: must_be_immutable
 class HomePage extends StatefulWidget {
-  final bool showDialog;
-  const HomePage({super.key, this.showDialog = false});
+  bool showDialog;
+  HomePage({super.key, this.showDialog = false});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -134,7 +137,7 @@ class _HomePageState extends State<HomePage> {
                 width: double.infinity,
                 height: 20.h,
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.5),
+                  color: Colors.black.withValues(alpha: 0.5),
                   image: DecorationImage(
                     image: AssetImage('assets/headerImage.png'),
                     fit: BoxFit.cover,
@@ -436,7 +439,9 @@ class _HomePageState extends State<HomePage> {
                                   padding:
                                       EdgeInsets.symmetric(horizontal: 15.sp),
                                   child: ElevatedButton(
-                                    onPressed: () {},
+                                    onPressed: () {
+                                      Get.to(() => Reservation());
+                                    },
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: kPrimaryColor,
                                       fixedSize: Size(70.w, 6.h),
@@ -531,7 +536,9 @@ class _HomePageState extends State<HomePage> {
                                   padding:
                                       EdgeInsets.symmetric(horizontal: 15.sp),
                                   child: ElevatedButton(
-                                    onPressed: () {},
+                                    onPressed: () {
+                                      Get.to(() => Colis());
+                                    },
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: kPrimaryColor,
                                       fixedSize: Size(70.w, 6.h),

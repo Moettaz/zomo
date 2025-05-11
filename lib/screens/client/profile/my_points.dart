@@ -74,7 +74,7 @@ class MyPointsPage extends StatelessWidget {
                 children: [
                   Container(
                       decoration: BoxDecoration(
-                        color: kPrimaryColor.withOpacity(0.1),
+                        color: kPrimaryColor.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12.sp),
                       ),
                       padding: EdgeInsets.all(10.sp),
@@ -119,7 +119,9 @@ class MyPointsPage extends StatelessWidget {
               ),
               SizedBox(height: 1.h),
               Text(
-                  language == 'fr' ? '$points/$maxPoints points' : '$points/$maxPoints points',
+                  language == 'fr'
+                      ? '$points/$maxPoints points'
+                      : '$points/$maxPoints points',
                   style: TextStyle(fontSize: 15.sp, color: kSecondaryColor)),
               SizedBox(height: 3.h),
               Row(

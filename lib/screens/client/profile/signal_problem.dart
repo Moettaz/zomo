@@ -32,7 +32,7 @@ class _SignalProblemState extends State<SignalProblem> {
                 width: double.infinity,
                 height: 20.h,
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.5),
+                  color: Colors.black.withValues(alpha: 0.5),
                   image: DecorationImage(
                     image: AssetImage('assets/headerImage.png'),
                     fit: BoxFit.cover,
@@ -182,7 +182,7 @@ class _SignalProblemState extends State<SignalProblem> {
             ),
             boxShadow: [
               BoxShadow(
-                color: kSecondaryColor.withOpacity(0.1),
+                color: kSecondaryColor.withValues(alpha: 0.1),
                 blurRadius: 20,
                 offset: const Offset(0, 8),
               ),

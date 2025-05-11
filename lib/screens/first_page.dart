@@ -31,7 +31,7 @@ class _FirstPageState extends State<FirstPage> {
                 Container(
                   width: 100.w,
                   height: 100.h,
-                  color: Colors.black.withOpacity(0.2),
+                  color: Colors.black.withValues(alpha: 0.2),
                 ),
               ],
             ),
