@@ -6,6 +6,7 @@ import 'package:zomo/design/const.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:zomo/screens/client/navigation_screen.dart';
+import 'package:zomo/screens/auth/authserices.dart';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
@@ -42,6 +43,7 @@ class _SignInScreenState extends State<SignInScreen> {
   bool bioLoading = false;
   bool changePassword = false;
   final LocalAuthentication auth = LocalAuthentication();
+  bool _isLoggingIn = false;
 
   Future<bool> _checkBiometric(context) async {
     setState(() {
@@ -91,6 +93,101 @@ class _SignInScreenState extends State<SignInScreen> {
       bioLoading = false;
     });
     return didAuthenticate;
+  }
+
+  // Login function
+  Future<void> _login() async {
+    if (!_loginFormKey.currentState!.validate()) {
+      return;
+    }
+
+    setState(() {
+      _isLoggingIn = true;
+    });
+
+    final result = await AuthServices.login(
+      email: _emailController.text,
+      password: _passwordController.text,
+    );
+
+    setState(() {
+      _isLoggingIn = false;
+    });
+
+    if (result['success']) {
+      // // Navigate based on role
+      // final userData = result['data'];
+      // final user = userData['user'];
+
+      Get.off(() => const NavigationScreen(index: 0));
+    } else {
+      Get.showSnackbar(kErrorSnackBar(language == 'fr'
+          ? "Échec de la connexion : ${result['message']}"
+          : "Login failed: ${result['message']}"));
+    }
+  }
+
+  // Register function
+  Future<void> _register() async {
+    if (!_registerFormKey.currentState!.validate()) {
+      return;
+    }
+
+    if (!_acceptTerms) {
+      Get.showSnackbar(kErrorSnackBar(language == 'fr'
+          ? "Veuillez accepter les termes et conditions"
+          : "Please accept the terms and conditions"));
+      return;
+    }
+
+    setState(() {
+      _isLoggingIn = true;
+    });
+
+    int roleId;
+    switch (selectedRole) {
+      case 'Client':
+        roleId = 2; // Assuming Client role_id is 2
+        break;
+      case 'Transporteur':
+        roleId = 3; // Assuming Transporteur role_id is 3
+        break;
+      case 'Chauffeur':
+        roleId = 4; // Assuming Chauffeur role_id is 4
+        break;
+      default:
+        roleId = 2; // Default to Client
+    }
+
+    final result = await AuthServices.register(
+      name: _nomUtilisatuerController.text,
+      email: _emailController.text,
+      password: _passwordController.text,
+      passwordConfirmation: _confirmPasswordController.text,
+      roleId: roleId,
+      phone: _phoneController.text,
+    );
+
+    setState(() {
+      _isLoggingIn = false;
+    });
+
+    if (result['success']) {
+      // Show success message and switch to login
+      Get.showSnackbar(kSuccessSnackBar(language == 'fr'
+          ? "Inscription réussie ! Vous pouvez maintenant vous connecter."
+          : "Registration successful! You can now log in."));
+
+      setState(() {
+        selectedIndex = 0;
+        _emailController.clear();
+        _passwordController.clear();
+      });
+    } else {
+      Get.showSnackbar(kErrorSnackBar(language == 'fr'
+          ? "Échec de l'inscription : ${result['message']}"
+          : "Registration failed: ${result['message']}"));
+    }
   }
 
   @override
@@ -475,13 +572,8 @@ class _SignInScreenState extends State<SignInScreen> {
                                         padding: EdgeInsets.symmetric(
                                             horizontal: 15.sp),
                                         child: ElevatedButton(
-                                          onPressed: () {
-                                            if (_loginFormKey.currentState!
-                                                .validate()) {
-                                              Get.to(() =>
-                                                  NavigationScreen(index: 0));
-                                            }
-                                          },
+                                          onPressed:
+                                              _isLoggingIn ? null : _login,
                                           style: ElevatedButton.styleFrom(
                                             backgroundColor: kPrimaryColor,
                                             fixedSize: Size(70.w, 6.h),
@@ -490,15 +582,18 @@ class _SignInScreenState extends State<SignInScreen> {
                                                   BorderRadius.circular(25),
                                             ),
                                           ),
-                                          child: Text(
-                                            language == 'fr'
-                                                ? 'Se connecter'
-                                                : 'Login',
-                                            style: TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 16.sp,
-                                            ),
-                                          ),
+                                          child: _isLoggingIn
+                                              ? const CircularProgressIndicator(
+                                                  color: Colors.white)
+                                              : Text(
+                                                  language == 'fr'
+                                                      ? 'Se connecter'
+                                                      : 'Login',
+                                                  style: TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 16.sp,
+                                                  ),
+                                                ),
                                         ),
                                       ),
                                       SizedBox(height: 5.h),
@@ -918,23 +1013,8 @@ class _SignInScreenState extends State<SignInScreen> {
                                           padding: EdgeInsets.symmetric(
                                               horizontal: 15.sp),
                                           child: ElevatedButton(
-                                            onPressed: () {
-                                              if (_registerFormKey.currentState!
-                                                  .validate()) {
-                                                if (_acceptTerms) {
-                                                  _registerFormKey.currentState!
-                                                      .save();
-                                                }
-                                              } else {
-                                                Get.showSnackbar(
-                                                  kErrorSnackBar(
-                                                    language == 'fr'
-                                                        ? "Vous devez accepter les termes et conditions"
-                                                        : "You must accept the terms and conditions",
-                                                  ),
-                                                );
-                                              }
-                                            },
+                                            onPressed:
+                                                _isLoggingIn ? null : _register,
                                             style: ElevatedButton.styleFrom(
                                               backgroundColor: kPrimaryColor,
                                               fixedSize: Size(70.w, 6.h),
@@ -943,15 +1023,18 @@ class _SignInScreenState extends State<SignInScreen> {
                                                     BorderRadius.circular(25),
                                               ),
                                             ),
-                                            child: Text(
-                                              language == 'fr'
-                                                  ? 'Créer un compte'
-                                                  : 'Create an account',
-                                              style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 16.sp,
-                                              ),
-                                            ),
+                                            child: _isLoggingIn
+                                                ? const CircularProgressIndicator(
+                                                    color: Colors.white)
+                                                : Text(
+                                                    language == 'fr'
+                                                        ? 'Créer un compte'
+                                                        : 'Create an account',
+                                                    style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 16.sp,
+                                                    ),
+                                                  ),
                                           ),
                                         ),
                                         SizedBox(height: 5.h),
