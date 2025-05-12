@@ -1,4 +1,4 @@
-package com.example.zomo
+package com.pfe.zomo
 
 import io.flutter.embedding.android.FlutterFragmentActivity
 
