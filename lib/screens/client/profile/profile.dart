@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:zomo/design/const.dart';
 import 'package:sizer/sizer.dart';
-import 'package:zomo/models/user.dart';
 import 'package:zomo/models/client.dart';
 import 'package:zomo/services/authserices.dart';
 import 'package:zomo/screens/auth/signin.dart';
