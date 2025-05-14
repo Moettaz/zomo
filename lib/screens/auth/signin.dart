@@ -130,15 +130,11 @@ class _SignInScreenState extends State<SignInScreen> {
   // Register function
   Future<void> _register() async {
     try {
-      print('Starting registration process');
-      
       if (!_registerFormKey.currentState!.validate()) {
-        print('Form validation failed');
         return;
       }
 
       if (!_acceptTerms) {
-        print('Terms not accepted');
         Get.showSnackbar(kErrorSnackBar(language == 'fr'
             ? "Veuillez accepter les termes et conditions"
             : "Please accept the terms and conditions"));
@@ -149,7 +145,6 @@ class _SignInScreenState extends State<SignInScreen> {
         _isLoggingIn = true;
       });
 
-      print('Selected role: $selectedRole');
       int roleId;
       switch (selectedRole) {
         case 'Client':
@@ -164,12 +159,6 @@ class _SignInScreenState extends State<SignInScreen> {
         default:
           roleId = 2;
       }
-      print('Determined role ID: $roleId');
-
-      print('Submitting registration with:');
-      print('Name: ${_nomUtilisatuerController.text}');
-      print('Email: ${_emailController.text}');
-      print('Phone: ${_phoneController.text}');
 
       final result = await AuthServices.register(
         name: _nomUtilisatuerController.text,
@@ -180,14 +169,11 @@ class _SignInScreenState extends State<SignInScreen> {
         phone: _phoneController.text,
       );
 
-      print('Registration result: $result');
-
       setState(() {
         _isLoggingIn = false;
       });
 
       if (result['success']) {
-        print('Registration successful');
         Get.showSnackbar(kSuccessSnackBar(language == 'fr'
             ? "Inscription réussie ! Vous pouvez maintenant vous connecter."
             : "Registration successful! You can now log in."));
@@ -198,13 +184,11 @@ class _SignInScreenState extends State<SignInScreen> {
           _passwordController.clear();
         });
       } else {
-        print('Registration failed: ${result['message']}');
         Get.showSnackbar(kErrorSnackBar(language == 'fr'
             ? "Échec de l'inscription : ${result['message']}"
             : "Registration failed: ${result['message']}"));
       }
     } catch (e) {
-      print('Error during registration: $e');
       setState(() {
         _isLoggingIn = false;
       });
@@ -1157,7 +1141,7 @@ class _SignInScreenState extends State<SignInScreen> {
                                           )),
                                     ],
                                   )),
-                              selectedIndex == 0
+                              selectedIndex == 0 && clientData != null
                                   ? Padding(
                                       padding: EdgeInsets.only(top: 0.h),
                                       child: InkWell(

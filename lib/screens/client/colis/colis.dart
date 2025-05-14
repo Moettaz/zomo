@@ -258,14 +258,13 @@ class _ColisState extends State<Colis> {
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text(language == 'fr'
-                                      ? 'Adresse'
-                                      : 'Address',
+                                  Text(language == 'fr' ? 'Adresse' : 'Address',
                                       style: TextStyle(
                                           fontWeight: FontWeight.bold)),
-                                  Text(language == 'fr'
-                                      ? 'Réinitialiser'
-                                      : 'Reset',
+                                  Text(
+                                      language == 'fr'
+                                          ? 'Réinitialiser'
+                                          : 'Reset',
                                       style: TextStyle(color: Colors.grey)),
                                 ],
                               ),
@@ -403,14 +402,13 @@ class _ColisState extends State<Colis> {
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text(language == 'fr'
-                                      ? 'Date'
-                                      : 'Date',
+                                  Text(language == 'fr' ? 'Date' : 'Date',
                                       style: TextStyle(
                                           fontWeight: FontWeight.bold)),
-                                  Text(language == 'fr'
-                                      ? 'Réinitialiser'
-                                      : 'Reset',
+                                  Text(
+                                      language == 'fr'
+                                          ? 'Réinitialiser'
+                                          : 'Reset',
                                       style: TextStyle(color: Colors.grey)),
                                 ],
                               ),
@@ -447,8 +445,9 @@ class _ColisState extends State<Colis> {
                                                 surface: Colors.white,
                                                 onSurface: Colors.black,
                                               ),
-                                              dialogBackgroundColor:
-                                                  Colors.white,
+                                              dialogTheme: DialogThemeData(
+                                                  backgroundColor:
+                                                      Colors.white),
                                             ),
                                             child: child!,
                                           );
@@ -481,9 +480,8 @@ class _ColisState extends State<Colis> {
                                       borderSide: BorderSide(
                                           color: Colors.grey.shade200),
                                     ),
-                                    labelText: language == 'fr'
-                                        ? 'Date'
-                                        : 'Date',
+                                    labelText:
+                                        language == 'fr' ? 'Date' : 'Date',
                                     prefixIcon: Icon(Icons.calendar_month,
                                         color: Colors.grey.shade400),
                                     suffixIcon: Align(

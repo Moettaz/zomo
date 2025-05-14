@@ -177,6 +177,7 @@ class _ChangeProfileState extends State<ChangeProfile> {
         });
       }
     } catch (e) {
+      // ignore: avoid_print
       print('Error getting user data: $e');
     }
   }
@@ -684,7 +685,7 @@ class _ChangeProfileState extends State<ChangeProfile> {
                   backgroundColor: Colors.white,
                   backgroundImage: clientData?.imageUrl != null
                       ? NetworkImage(
-                          AuthServices.baseUrl + "/" + clientData!.imageUrl!)
+                          "${AuthServices.baseUrl}/${clientData!.imageUrl!}")
                       : AssetImage('assets/person.png') as ImageProvider,
                 ),
                 Positioned(

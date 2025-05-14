@@ -658,16 +658,18 @@ class _ReservationState extends State<Reservation> {
                                       mainAxisAlignment:
                                           MainAxisAlignment.spaceBetween,
                                       children: [
-                                        Text(language == 'fr'
-                                            ? 'Adresse'
-                                            : 'Address',
+                                        Text(
+                                            language == 'fr'
+                                                ? 'Adresse'
+                                                : 'Address',
                                             style: TextStyle(
                                                 fontWeight: FontWeight.bold)),
                                         TextButton(
                                           onPressed: resetAddressSection,
-                                          child: Text(language == 'fr'
-                                              ? 'Réinitialiser'
-                                              : 'Reset',
+                                          child: Text(
+                                              language == 'fr'
+                                                  ? 'Réinitialiser'
+                                                  : 'Reset',
                                               style: TextStyle(
                                                   color: Colors.grey)),
                                         ),
@@ -800,9 +802,8 @@ class _ReservationState extends State<Reservation> {
                                                     color:
                                                         Colors.grey.shade200),
                                               ),
-                                              labelText: language == 'fr'
-                                                  ? 'A'
-                                                  : 'To',
+                                              labelText:
+                                                  language == 'fr' ? 'A' : 'To',
                                               suffixIcon: Align(
                                                 alignment:
                                                     Alignment.centerRight,
@@ -835,16 +836,18 @@ class _ReservationState extends State<Reservation> {
                                       mainAxisAlignment:
                                           MainAxisAlignment.spaceBetween,
                                       children: [
-                                        Text(language == 'fr'
-                                            ? 'Date et heure'
-                                            : 'Date and time',
+                                        Text(
+                                            language == 'fr'
+                                                ? 'Date et heure'
+                                                : 'Date and time',
                                             style: TextStyle(
                                                 fontWeight: FontWeight.bold)),
                                         TextButton(
                                           onPressed: resetDateTimeSection,
-                                          child: Text(language == 'fr'
-                                              ? 'Réinitialiser'
-                                              : 'Reset',
+                                          child: Text(
+                                              language == 'fr'
+                                                  ? 'Réinitialiser'
+                                                  : 'Reset',
                                               style: TextStyle(
                                                   color: Colors.grey)),
                                         ),
@@ -877,8 +880,10 @@ class _ReservationState extends State<Reservation> {
                                                       surface: Colors.white,
                                                       onSurface: Colors.black,
                                                     ),
-                                                    dialogBackgroundColor:
-                                                        Colors.white,
+                                                    dialogTheme:
+                                                        DialogThemeData(
+                                                            backgroundColor:
+                                                                Colors.white),
                                                   ),
                                                   child: child!,
                                                 );
@@ -975,9 +980,7 @@ class _ReservationState extends State<Reservation> {
                                           ),
                                         ),
                                         SizedBox(width: 8),
-                                        Text(language == 'fr'
-                                            ? ':'
-                                            : ':',
+                                        Text(language == 'fr' ? ':' : ':',
                                             style: TextStyle(
                                                 fontWeight: FontWeight.bold,
                                                 fontSize: 18)),
@@ -1038,9 +1041,10 @@ class _ReservationState extends State<Reservation> {
                                               padding:
                                                   const EdgeInsets.symmetric(
                                                       horizontal: 12.0),
-                                              child: Text(language == 'fr'
-                                                  ? 'AM'
-                                                  : 'AM',
+                                              child: Text(
+                                                  language == 'fr'
+                                                      ? 'AM'
+                                                      : 'AM',
                                                   style: TextStyle(
                                                       fontWeight:
                                                           FontWeight.bold)),
@@ -1049,9 +1053,10 @@ class _ReservationState extends State<Reservation> {
                                               padding:
                                                   const EdgeInsets.symmetric(
                                                       horizontal: 12.0),
-                                              child: Text(language == 'fr'
-                                                  ? 'PM'
-                                                  : 'PM',
+                                              child: Text(
+                                                  language == 'fr'
+                                                      ? 'PM'
+                                                      : 'PM',
                                                   style: TextStyle(
                                                       fontWeight:
                                                           FontWeight.bold)),
@@ -1072,16 +1077,18 @@ class _ReservationState extends State<Reservation> {
                                       mainAxisAlignment:
                                           MainAxisAlignment.spaceBetween,
                                       children: [
-                                        Text(language == 'fr'
-                                            ? 'Etage'
-                                            : 'Floor',
+                                        Text(
+                                            language == 'fr'
+                                                ? 'Etage'
+                                                : 'Floor',
                                             style: TextStyle(
                                                 fontWeight: FontWeight.bold)),
                                         TextButton(
                                           onPressed: resetFloorSection,
-                                          child: Text(language == 'fr'
-                                              ? 'Réinitialiser'
-                                              : 'Reset',
+                                          child: Text(
+                                              language == 'fr'
+                                                  ? 'Réinitialiser'
+                                                  : 'Reset',
                                               style: TextStyle(
                                                   color: Colors.grey)),
                                         ),

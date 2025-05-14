@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use, use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:sizer/sizer.dart';
@@ -9,6 +11,7 @@ import 'package:google_places_flutter/google_places_flutter.dart';
 import 'package:google_places_flutter/model/prediction.dart';
 import 'package:zomo/models/transporteur.dart';
 import 'package:zomo/screens/client/navigation_screen.dart';
+import 'package:zomo/services/trajetservices.dart';
 import 'package:zomo/services/transporteurservices.dart';
 import 'package:shimmer/shimmer.dart';
 // import 'package:geolocator/geolocator.dart';
@@ -23,12 +26,6 @@ class SelectCar extends StatefulWidget {
 class _SelectCarState extends State<SelectCar> {
   List<Transporteur> transporteurs = [];
   bool gettingTransporteurs = false;
-  @override
-  void initState() {
-    super.initState();
-    getTransporteurs();
-  }
-
   getTransporteurs() async {
     setState(() {
       gettingTransporteurs = true;
@@ -36,10 +33,60 @@ class _SelectCarState extends State<SelectCar> {
     try {
       transporteurs = await TransporteurServices.getAllTransporteurs();
     } catch (e) {
+      // ignore: avoid_print
       print('Error fetching transporteurs: $e');
     } finally {
       setState(() {
         gettingTransporteurs = false;
+      });
+    }
+  }
+
+  bool uploadingTrajet = false;
+  Future<Map<String, dynamic>> _storeTrajet() async {
+    setState(() {
+      uploadingTrajet = true;
+    });
+    try {
+      // Validate required data
+      if (clientData?.id == null) {
+        throw Exception('Client ID is null');
+      }
+      if (selectedTransporteur?.id == null) {
+        throw Exception('Selected transporteur ID is null');
+      }
+      if (_originController.text.isEmpty) {
+        throw Exception('Origin location is empty');
+      }
+      if (_destinationController.text.isEmpty) {
+        throw Exception('Destination location is empty');
+      }
+
+      // Store trajet with validated data
+      final result = await TrajetServices.storeTrajet(
+        clientId: clientData!.id!,
+        transporteurId: selectedTransporteur!.id!,
+        serviceId: 1,
+        dateHeureDepart: DateTime.now().toIso8601String(),
+        dateHeureArrivee: DateTime.now().toIso8601String(),
+        pointDepart: _originController.text,
+        pointArrivee: _destinationController.text,
+        prix: 10.0,
+        etat: 'en_attente',
+      );
+
+      // Log success
+      print('Trajet stored successfully: $result');
+      return result;
+    } catch (e) {
+      print('Error storing trajet: $e');
+      return {
+        'success': false,
+        'message': 'Error storing trajet: ${e.toString()}',
+      };
+    } finally {
+      setState(() {
+        uploadingTrajet = false;
       });
     }
   }
@@ -371,510 +418,264 @@ class _SelectCarState extends State<SelectCar> {
                           height: 13.h,
                           child: Row(
                             children: [
-                              Form(
-                                key: _formKey,
-                                child: Padding(
-                                  padding: EdgeInsets.only(left: 4.w),
-                                  child: Column(
-                                    children: [
-                                      Icon(
-                                        Icons.circle_outlined,
-                                        color: Colors.black,
-                                      ),
-                                      SizedBox(height: 0.3.h),
-                                      Icon(
-                                        Icons.circle,
-                                        color: Colors.black,
-                                        size: 10.sp,
-                                      ),
-                                      SizedBox(height: 0.3.h),
-                                      Icon(
-                                        Icons.circle,
-                                        color: Colors.black,
-                                        size: 10.sp,
-                                      ),
-                                      SizedBox(height: 0.3.h),
-                                      Icon(
-                                        Icons.circle,
-                                        color: Colors.black,
-                                        size: 10.sp,
-                                      ),
-                                      Icon(
-                                        Icons.location_on,
-                                        color: kPrimaryColor,
-                                        size: 25.sp,
-                                      ),
-                                    ],
-                                  ),
+                              Padding(
+                                padding: EdgeInsets.only(left: 4.w),
+                                child: Column(
+                                  children: [
+                                    Icon(
+                                      Icons.circle_outlined,
+                                      color: Colors.black,
+                                    ),
+                                    SizedBox(height: 0.3.h),
+                                    Icon(
+                                      Icons.circle,
+                                      color: Colors.black,
+                                      size: 10.sp,
+                                    ),
+                                    SizedBox(height: 0.3.h),
+                                    Icon(
+                                      Icons.circle,
+                                      color: Colors.black,
+                                      size: 10.sp,
+                                    ),
+                                    SizedBox(height: 0.3.h),
+                                    Icon(
+                                      Icons.circle,
+                                      color: Colors.black,
+                                      size: 10.sp,
+                                    ),
+                                    Icon(
+                                      Icons.location_on,
+                                      color: kPrimaryColor,
+                                      size: 25.sp,
+                                    ),
+                                  ],
                                 ),
                               ),
                               SizedBox(width: 2.w),
-                              Column(
-                                children: [
-                                  SizedBox(
-                                    width: 80.w,
-                                    height: 5.h,
-                                    child: GooglePlaceAutoCompleteTextField(
-                                      validator: (p0, p1) {
-                                        if (p0 == null ||
-                                            p0.isEmpty ||
-                                            _originController.text == "") {
-                                          return language == 'fr'
-                                              ? 'Obligatoire'
-                                              : 'Required';
-                                        }
-                                        return null;
-                                      },
-                                      boxDecoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(8),
-                                        border: Border.all(color: Colors.white),
-                                      ),
-                                      googleAPIKey:
-                                          'AIzaSyAAHfvxLbO689cJyTwr5caSdTKyzbJEAOE',
-                                      textEditingController: _originController,
-                                      inputDecoration: InputDecoration(
-                                        hintText: language == 'fr'
-                                            ? "Entrez votre emplacement"
-                                            : "Enter your location",
-                                        border: OutlineInputBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(8),
-                                            borderSide: BorderSide.none),
-                                      ),
-                                      debounceTime: 800,
-                                      countries: const ["tn"],
-                                      isLatLngRequired: true,
-                                      getPlaceDetailWithLatLng:
-                                          (Prediction prediction) {
-                                        _onPlaceSelected(prediction, true);
-                                      },
-                                      itemClick: (Prediction prediction) {
-                                        _onPlaceSelected(prediction, true);
-                                      },
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    width: 80.w,
-                                    height: 1.h,
-                                    child: Divider(
-                                      color: kPrimaryColor,
-                                    ),
-                                  ),
-                                  SizedBox(height: 1.h),
-                                  SizedBox(
-                                    width: 80.w,
-                                    height: 5.h,
-                                    child: GooglePlaceAutoCompleteTextField(
-                                      validator: (p0, p1) {
-                                        if (p0 == null ||
-                                            p0.isEmpty ||
-                                            _destinationController.text == "") {
-                                          return language == 'fr'
-                                              ? 'Obligatoire'
-                                              : 'Required';
-                                        }
-                                        return null;
-                                      },
-                                      boxDecoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(8),
-                                        border: Border.all(color: Colors.white),
-                                      ),
-                                      googleAPIKey:
-                                          'AIzaSyAAHfvxLbO689cJyTwr5caSdTKyzbJEAOE',
-                                      textEditingController:
-                                          _destinationController,
-                                      inputDecoration: InputDecoration(
-                                        hintText: language == 'fr'
-                                            ? "Entrez votre destination"
-                                            : "Enter destination",
-                                        border: OutlineInputBorder(
+                              Form(
+                                key: _formKey,
+                                child: Column(
+                                  children: [
+                                    SizedBox(
+                                      width: 80.w,
+                                      height: 5.h,
+                                      child: GooglePlaceAutoCompleteTextField(
+                                        validator: (p0, p1) {
+                                          if (p0 == null ||
+                                              p0.isEmpty ||
+                                              _originController.text == "") {
+                                            return language == 'fr'
+                                                ? 'Obligatoire'
+                                                : 'Required';
+                                          }
+                                          return null;
+                                        },
+                                        boxDecoration: BoxDecoration(
                                           borderRadius:
                                               BorderRadius.circular(8),
-                                          borderSide: BorderSide.none,
+                                          border:
+                                              Border.all(color: Colors.white),
                                         ),
+                                        googleAPIKey:
+                                            'AIzaSyAAHfvxLbO689cJyTwr5caSdTKyzbJEAOE',
+                                        textEditingController:
+                                            _originController,
+                                        inputDecoration: InputDecoration(
+                                          hintText: language == 'fr'
+                                              ? "Entrez votre emplacement"
+                                              : "Enter your location",
+                                          border: OutlineInputBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                              borderSide: BorderSide.none),
+                                        ),
+                                        debounceTime: 800,
+                                        countries: const ["tn"],
+                                        isLatLngRequired: true,
+                                        getPlaceDetailWithLatLng:
+                                            (Prediction prediction) {
+                                          _onPlaceSelected(prediction, true);
+                                        },
+                                        itemClick: (Prediction prediction) {
+                                          _onPlaceSelected(prediction, true);
+                                        },
                                       ),
-                                      debounceTime: 800,
-                                      countries: const ["tn"],
-                                      isLatLngRequired: true,
-                                      getPlaceDetailWithLatLng:
-                                          (Prediction prediction) {
-                                        _onPlaceSelected(prediction, false);
-                                      },
-                                      itemClick: (Prediction prediction) {
-                                        _onPlaceSelected(prediction, false);
-                                        _getPolyline();
-                                      },
                                     ),
-                                  ),
-                                ],
+                                    SizedBox(
+                                      width: 80.w,
+                                      height: 1.h,
+                                      child: Divider(
+                                        color: kPrimaryColor,
+                                      ),
+                                    ),
+                                    SizedBox(height: 1.h),
+                                    SizedBox(
+                                      width: 80.w,
+                                      height: 5.h,
+                                      child: GooglePlaceAutoCompleteTextField(
+                                        validator: (p0, p1) {
+                                          if (p0 == null ||
+                                              p0.isEmpty ||
+                                              _destinationController.text ==
+                                                  "") {
+                                            return language == 'fr'
+                                                ? 'Obligatoire'
+                                                : 'Required';
+                                          }
+                                          return null;
+                                        },
+                                        boxDecoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                          border:
+                                              Border.all(color: Colors.white),
+                                        ),
+                                        googleAPIKey:
+                                            'AIzaSyAAHfvxLbO689cJyTwr5caSdTKyzbJEAOE',
+                                        textEditingController:
+                                            _destinationController,
+                                        inputDecoration: InputDecoration(
+                                          hintText: language == 'fr'
+                                              ? "Entrez votre destination"
+                                              : "Enter destination",
+                                          border: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(8),
+                                            borderSide: BorderSide.none,
+                                          ),
+                                        ),
+                                        debounceTime: 800,
+                                        countries: const ["tn"],
+                                        isLatLngRequired: true,
+                                        getPlaceDetailWithLatLng:
+                                            (Prediction prediction) {
+                                          _onPlaceSelected(prediction, false);
+                                        },
+                                        itemClick: (Prediction prediction) {
+                                          _onPlaceSelected(prediction, false);
+                                          _getPolyline();
+                                        },
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ],
                           ),
                         ),
                         SizedBox(height: 0.h),
-                        selectedIndex == 0
-                            ? Column(
-                                children: [
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
+                        uploadingTrajet
+                            ? Center(
+                                child: CircularProgressIndicator(
+                                  color: kPrimaryColor,
+                                ),
+                              )
+                            : selectedIndex == 0
+                                ? Column(
                                     children: [
-                                      GestureDetector(
-                                        onTap: () {
-                                          setState(() {
-                                            _selectedGender = 'men';
-                                          });
-                                        },
-                                        child: Container(
-                                          padding: EdgeInsets.symmetric(
-                                              horizontal: 20, vertical: 8),
-                                          decoration: BoxDecoration(
-                                            color: _selectedGender == 'men'
-                                                ? kPrimaryColor
-                                                : Colors.transparent,
-                                            borderRadius:
-                                                BorderRadius.circular(20),
-                                            border: Border.all(
-                                                color: kPrimaryColor),
-                                          ),
-                                          child: Row(
-                                            children: [
-                                              Icon(
-                                                Icons.man,
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          GestureDetector(
+                                            onTap: () {
+                                              setState(() {
+                                                _selectedGender = 'men';
+                                              });
+                                            },
+                                            child: Container(
+                                              padding: EdgeInsets.symmetric(
+                                                  horizontal: 20, vertical: 8),
+                                              decoration: BoxDecoration(
                                                 color: _selectedGender == 'men'
-                                                    ? Colors.white
-                                                    : kPrimaryColor,
+                                                    ? kPrimaryColor
+                                                    : Colors.transparent,
+                                                borderRadius:
+                                                    BorderRadius.circular(20),
+                                                border: Border.all(
+                                                    color: kPrimaryColor),
                                               ),
-                                              Text(
-                                                language == 'fr'
-                                                    ? 'Homme'
-                                                    : 'Men',
-                                                style: TextStyle(
-                                                  color:
-                                                      _selectedGender == 'men'
+                                              child: Row(
+                                                children: [
+                                                  Icon(
+                                                    Icons.man,
+                                                    color:
+                                                        _selectedGender == 'men'
+                                                            ? Colors.white
+                                                            : kPrimaryColor,
+                                                  ),
+                                                  Text(
+                                                    language == 'fr'
+                                                        ? 'Homme'
+                                                        : 'Men',
+                                                    style: TextStyle(
+                                                      color: _selectedGender ==
+                                                              'men'
                                                           ? Colors.white
                                                           : kPrimaryColor,
-                                                ),
+                                                    ),
+                                                  ),
+                                                ],
                                               ),
-                                            ],
+                                            ),
                                           ),
-                                        ),
-                                      ),
-                                      SizedBox(width: 20.sp),
-                                      GestureDetector(
-                                        onTap: () {
-                                          setState(() {
-                                            _selectedGender = 'female';
-                                          });
-                                        },
-                                        child: Container(
-                                          padding: EdgeInsets.symmetric(
-                                              horizontal: 20, vertical: 8),
-                                          decoration: BoxDecoration(
-                                            color: _selectedGender == 'female'
-                                                ? kPrimaryColor
-                                                : Colors.transparent,
-                                            borderRadius:
-                                                BorderRadius.circular(20),
-                                            border: Border.all(
-                                                color: kPrimaryColor),
-                                          ),
-                                          child: Row(
-                                            children: [
-                                              Icon(
-                                                Icons.woman,
+                                          SizedBox(width: 20.sp),
+                                          GestureDetector(
+                                            onTap: () {
+                                              setState(() {
+                                                _selectedGender = 'female';
+                                              });
+                                            },
+                                            child: Container(
+                                              padding: EdgeInsets.symmetric(
+                                                  horizontal: 20, vertical: 8),
+                                              decoration: BoxDecoration(
                                                 color:
                                                     _selectedGender == 'female'
+                                                        ? kPrimaryColor
+                                                        : Colors.transparent,
+                                                borderRadius:
+                                                    BorderRadius.circular(20),
+                                                border: Border.all(
+                                                    color: kPrimaryColor),
+                                              ),
+                                              child: Row(
+                                                children: [
+                                                  Icon(
+                                                    Icons.woman,
+                                                    color: _selectedGender ==
+                                                            'female'
                                                         ? Colors.white
                                                         : kPrimaryColor,
-                                              ),
-                                              Text(
-                                                language == 'fr'
-                                                    ? 'Femme'
-                                                    : 'Women',
-                                                style: TextStyle(
-                                                  color: _selectedGender ==
-                                                          'female'
-                                                      ? Colors.white
-                                                      : kPrimaryColor,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  SizedBox(
-                                    height: 35.h,
-                                    width: 100.w,
-                                    child: ListView.builder(
-                                      shrinkWrap: false,
-                                      physics:
-                                          const NeverScrollableScrollPhysics(),
-                                      itemCount: vehicles.length,
-                                      itemBuilder: (context, index) {
-                                        final vehicle = vehicles[index];
-                                        return Container(
-                                          margin: EdgeInsets.only(bottom: 1.h),
-                                          decoration: BoxDecoration(
-                                            color: Colors.white,
-                                            borderRadius:
-                                                BorderRadius.circular(12),
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: Colors.grey
-                                                    .withValues(alpha: 0.1),
-                                                spreadRadius: 1,
-                                                blurRadius: 5,
-                                                offset: const Offset(0, 2),
-                                              ),
-                                            ],
-                                          ),
-                                          child: Material(
-                                            color: selectedVehicle ==
-                                                    vehicle['type']
-                                                ? kPrimaryColor.withValues(
-                                                    alpha: 0.5)
-                                                : Colors.transparent,
-                                            borderRadius:
-                                                BorderRadius.circular(15.sp),
-                                            child: InkWell(
-                                              onTap: () {
-                                                setState(() {
-                                                  selectedVehicle =
-                                                      vehicle['type']
-                                                          .toString();
-                                                });
-                                                // Handle vehicle selection
-                                              },
-                                              borderRadius:
-                                                  BorderRadius.circular(15.sp),
-                                              child: Padding(
-                                                padding: EdgeInsets.all(2.w),
-                                                child: Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment
-                                                          .spaceBetween,
-                                                  children: [
-                                                    SizedBox(
-                                                      width: 12.w,
-                                                      child: Image.asset(
-                                                        vehicle['image']
-                                                            .toString(),
-                                                        color: Colors.black,
-                                                      ),
+                                                  ),
+                                                  Text(
+                                                    language == 'fr'
+                                                        ? 'Femme'
+                                                        : 'Women',
+                                                    style: TextStyle(
+                                                      color: _selectedGender ==
+                                                              'female'
+                                                          ? Colors.white
+                                                          : kPrimaryColor,
                                                     ),
-                                                    SizedBox(width: 2.w),
-                                                    SizedBox(
-                                                      width: 50.w,
-                                                      child: Column(
-                                                        crossAxisAlignment:
-                                                            CrossAxisAlignment
-                                                                .start,
-                                                        children: [
-                                                          Text(
-                                                            vehicle['name']
-                                                                as String,
-                                                            style: TextStyle(
-                                                              fontSize: 16.sp,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold,
-                                                            ),
-                                                          ),
-                                                          SizedBox(
-                                                              height: 0.5.h),
-                                                          Text(
-                                                            vehicle['distance']
-                                                                as String,
-                                                            style: TextStyle(
-                                                              fontSize: 15.sp,
-                                                              color:
-                                                                  Colors.grey,
-                                                            ),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    ),
-                                                    Spacer(),
-                                                    Expanded(
-                                                      child: Column(
-                                                        crossAxisAlignment:
-                                                            CrossAxisAlignment
-                                                                .start,
-                                                        children: [
-                                                          Text(
-                                                            vehicle['price']
-                                                                as String,
-                                                            style: TextStyle(
-                                                              fontSize: 16.sp,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold,
-                                                            ),
-                                                          ),
-                                                          SizedBox(
-                                                              height: 0.5.h),
-                                                          Text(
-                                                            vehicle['duration']
-                                                                as String,
-                                                            style: TextStyle(
-                                                              fontSize: 15.sp,
-                                                              color:
-                                                                  Colors.grey,
-                                                            ),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
+                                                  ),
+                                                ],
                                               ),
                                             ),
                                           ),
-                                        );
-                                      },
-                                    ),
-                                  ),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                        language == 'fr'
-                                            ? 'Méthode de paiement'
-                                            : 'Payment method',
-                                        style: TextStyle(
-                                          fontSize: 16.sp,
-                                          fontWeight: FontWeight.bold,
-                                        ),
+                                        ],
                                       ),
-                                      SizedBox(width: 2.w),
                                       SizedBox(
-                                        width: 30.w,
-                                        height: 4.h,
-                                        child: DropdownButtonFormField<String>(
-                                          dropdownColor: Colors.white,
-                                          style: TextStyle(
-                                            color: Colors.black,
-                                            fontSize: 15.sp,
-                                          ),
-                                          icon: Icon(Icons.keyboard_arrow_down,
-                                              color: Colors.black),
-                                          value: _selectedPaymentMethod,
-                                          decoration: InputDecoration(
-                                            contentPadding:
-                                                EdgeInsets.symmetric(
-                                                    horizontal: 10),
-                                            fillColor: Colors.white,
-                                            filled: true,
-                                            enabledBorder: OutlineInputBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(15.sp),
-                                              borderSide: BorderSide(
-                                                  color: Colors.grey.shade300),
-                                            ),
-                                            focusedBorder: OutlineInputBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(15.sp),
-                                              borderSide: BorderSide(
-                                                  color: kPrimaryColor),
-                                            ),
-                                          ),
-                                          items: [
-                                            language == 'fr'
-                                                ? 'Espèce'
-                                                : 'Cash',
-                                            language == 'fr' ? 'Carte' : 'Card'
-                                          ].map((String value) {
-                                            return DropdownMenuItem<String>(
-                                              value: value,
-                                              child: Text(
-                                                value,
-                                                style: TextStyle(
-                                                  fontSize: 15.sp,
-                                                  color: Colors.black,
-                                                  fontWeight: FontWeight.w500,
-                                                ),
-                                              ),
-                                            );
-                                          }).toList(),
-                                          onChanged: (String? value) {
-                                            setState(() {
-                                              _selectedPaymentMethod =
-                                                  value ?? 'Cash';
-                                            });
-                                          },
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  SizedBox(height: 2.h),
-                                  ElevatedButton(
-                                      style: ElevatedButton.styleFrom(
-                                        fixedSize: Size(60.w, 7.h),
-                                        elevation: 0,
-                                        backgroundColor: kPrimaryColor,
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(25),
-                                        ),
-                                      ),
-                                      onPressed: () {
-                                        if (_formKey.currentState!.validate()) {
-                                          if (selectedVehicle == '') {
-                                            ScaffoldMessenger.of(context)
-                                                .showSnackBar(
-                                              SnackBar(
-                                                content: Text(
-                                                  language == 'fr'
-                                                      ? 'Veuillez sélectionner un véhicule'
-                                                      : 'Please select a vehicle',
-                                                ),
-                                                backgroundColor: kPrimaryColor,
-                                                duration: Duration(seconds: 2),
-                                              ),
-                                            );
-                                          } else {
-                                            setState(() {
-                                              selectedIndex = 1;
-                                            });
-                                          }
-                                        }
-                                      },
-                                      child: Text(
-                                        language == 'fr'
-                                            ? 'Valider'
-                                            : 'Validate',
-                                        style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 15.sp,
-                                            fontWeight: FontWeight.w600),
-                                      )),
-                                  SizedBox(height: 2.h),
-                                ],
-                              )
-                            : selectedIndex == 1
-                                ? gettingTransporteurs
-                                    ? _buildShimmerLoading()
-                                    : SizedBox(
-                                        height: 42.h,
+                                        height: 35.h,
                                         width: 100.w,
                                         child: ListView.builder(
                                           shrinkWrap: false,
                                           physics:
                                               const NeverScrollableScrollPhysics(),
-                                          itemCount: transporteurs
-                                              .where((element) =>
-                                                  element.vehiculeType ==
-                                                      selectedVehicle &&
-                                                  element.disponibilite ==
-                                                      true &&
-                                                  element.gender ==
-                                                      _selectedGender)
-                                              .length,
+                                          itemCount: vehicles.length,
                                           itemBuilder: (context, index) {
-                                            final transporteur =
-                                                transporteurs[index];
+                                            final vehicle = vehicles[index];
                                             return Container(
                                               margin:
                                                   EdgeInsets.only(bottom: 1.h),
@@ -893,566 +694,874 @@ class _SelectCarState extends State<SelectCar> {
                                                 ],
                                               ),
                                               child: Material(
-                                                color: Colors.transparent,
+                                                color: selectedVehicle ==
+                                                        vehicle['type']
+                                                    ? kPrimaryColor.withValues(
+                                                        alpha: 0.5)
+                                                    : Colors.transparent,
                                                 borderRadius:
                                                     BorderRadius.circular(
                                                         15.sp),
-                                                child: Padding(
-                                                  padding: EdgeInsets.all(2.w),
-                                                  child: Row(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .spaceBetween,
-                                                    children: [
-                                                      SizedBox(width: 2.w),
-                                                      Row(
-                                                        children: [
-                                                          SizedBox(
-                                                            width: 12.w,
-                                                            child: transporteur
-                                                                        .imageUrl !=
-                                                                    null
-                                                                ? Image.network(
-                                                                    '${TransporteurServices
-                                                                            .baseUrl}/storage/${transporteur
-                                                                            .imageUrl}',
-                                                                    width:
-                                                                        30.sp,
-                                                                    height:
-                                                                        30.sp,
-                                                                  )
-                                                                : Image.asset(
-                                                                    'assets/default-avatar.png',
-                                                                  ),
+                                                child: InkWell(
+                                                  onTap: () {
+                                                    setState(() {
+                                                      selectedVehicle =
+                                                          vehicle['type']
+                                                              .toString();
+                                                    });
+                                                    // Handle vehicle selection
+                                                  },
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          15.sp),
+                                                  child: Padding(
+                                                    padding:
+                                                        EdgeInsets.all(2.w),
+                                                    child: Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceBetween,
+                                                      children: [
+                                                        SizedBox(
+                                                          width: 12.w,
+                                                          child: Image.asset(
+                                                            vehicle['image']
+                                                                .toString(),
+                                                            color: Colors.black,
                                                           ),
-                                                          SizedBox(width: 2.w),
-                                                          SizedBox(
-                                                            width: 40.w,
-                                                            child: Column(
-                                                              crossAxisAlignment:
-                                                                  CrossAxisAlignment
-                                                                      .start,
-                                                              children: [
-                                                                Text(
-                                                                  transporteur
-                                                                      .username,
-                                                                  style:
-                                                                      TextStyle(
-                                                                    fontSize:
-                                                                        16.sp,
-                                                                    fontWeight:
-                                                                        FontWeight
-                                                                            .bold,
-                                                                  ),
+                                                        ),
+                                                        SizedBox(width: 2.w),
+                                                        SizedBox(
+                                                          width: 50.w,
+                                                          child: Column(
+                                                            crossAxisAlignment:
+                                                                CrossAxisAlignment
+                                                                    .start,
+                                                            children: [
+                                                              Text(
+                                                                vehicle['name']
+                                                                    as String,
+                                                                style:
+                                                                    TextStyle(
+                                                                  fontSize:
+                                                                      16.sp,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold,
                                                                 ),
-                                                                SizedBox(
-                                                                    height:
-                                                                        0.5.h),
-                                                                Row(
-                                                                  children: [
-                                                                    Text(
-                                                                      transporteur
-                                                                          .noteMoyenne
-                                                                          .toString(),
-                                                                      style:
-                                                                          TextStyle(
-                                                                        fontSize:
-                                                                            17.sp,
-                                                                        color: Colors
-                                                                            .grey,
-                                                                      ),
-                                                                    ),
-                                                                    Icon(
-                                                                      Icons
-                                                                          .star,
-                                                                      color: Colors
-                                                                          .amber,
-                                                                    ),
-                                                                  ],
+                                                              ),
+                                                              SizedBox(
+                                                                  height:
+                                                                      0.5.h),
+                                                              Text(
+                                                                vehicle['distance']
+                                                                    as String,
+                                                                style:
+                                                                    TextStyle(
+                                                                  fontSize:
+                                                                      15.sp,
+                                                                  color: Colors
+                                                                      .grey,
                                                                 ),
-                                                              ],
-                                                            ),
+                                                              ),
+                                                            ],
                                                           ),
-                                                        ],
-                                                      ),
-                                                      ElevatedButton(
-                                                          style: ElevatedButton
-                                                              .styleFrom(
-                                                            fixedSize:
-                                                                Size(30.w, 4.h),
-                                                            elevation: 0,
-                                                            backgroundColor:
-                                                                kPrimaryColor,
-                                                            shape:
-                                                                RoundedRectangleBorder(
-                                                              borderRadius:
-                                                                  BorderRadius
-                                                                      .circular(
-                                                                          25),
-                                                            ),
+                                                        ),
+                                                        Spacer(),
+                                                        Expanded(
+                                                          child: Column(
+                                                            crossAxisAlignment:
+                                                                CrossAxisAlignment
+                                                                    .start,
+                                                            children: [
+                                                              Text(
+                                                                vehicle['price']
+                                                                    as String,
+                                                                style:
+                                                                    TextStyle(
+                                                                  fontSize:
+                                                                      16.sp,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold,
+                                                                ),
+                                                              ),
+                                                              SizedBox(
+                                                                  height:
+                                                                      0.5.h),
+                                                              Text(
+                                                                vehicle['duration']
+                                                                    as String,
+                                                                style:
+                                                                    TextStyle(
+                                                                  fontSize:
+                                                                      15.sp,
+                                                                  color: Colors
+                                                                      .grey,
+                                                                ),
+                                                              ),
+                                                            ],
                                                           ),
-                                                          onPressed: () async {
-                                                            await showDialog(
-                                                              context: context,
-                                                              builder:
-                                                                  (BuildContext
-                                                                      context) {
-                                                                return Dialog(
-                                                                  backgroundColor:
-                                                                      Colors
-                                                                          .white,
-                                                                  shape:
-                                                                      RoundedRectangleBorder(
-                                                                    borderRadius:
-                                                                        BorderRadius.circular(
-                                                                            15),
-                                                                  ),
-                                                                  child:
-                                                                      Container(
-                                                                    padding:
-                                                                        EdgeInsets.all(
-                                                                            20),
-                                                                    child:
-                                                                        Column(
-                                                                      mainAxisSize:
-                                                                          MainAxisSize
-                                                                              .min,
-                                                                      children: [
-                                                                        Icon(
-                                                                          Icons
-                                                                              .check_circle,
-                                                                          color:
-                                                                              kPrimaryColor,
-                                                                          size:
-                                                                              50.sp,
-                                                                        ),
-                                                                        SizedBox(
-                                                                            height:
-                                                                                20),
-                                                                        Text(
-                                                                          language == 'fr'
-                                                                              ? 'Prêt à partir'
-                                                                              : 'Ready to go',
-                                                                          style:
-                                                                              TextStyle(
-                                                                            fontSize:
-                                                                                20.sp,
-                                                                            fontWeight:
-                                                                                FontWeight.bold,
-                                                                          ),
-                                                                        ),
-                                                                        SizedBox(
-                                                                            height:
-                                                                                10),
-                                                                        Text(
-                                                                          language == 'fr'
-                                                                              ? 'Le chauffeur est en chemin. Merci de patienter quelques instants.'
-                                                                              : 'The driver is on the way. Please wait a few moments.',
-                                                                          textAlign:
-                                                                              TextAlign.center,
-                                                                          style:
-                                                                              TextStyle(fontSize: 16.sp),
-                                                                        ),
-                                                                        SizedBox(
-                                                                            height:
-                                                                                20),
-                                                                        Row(
-                                                                          mainAxisAlignment:
-                                                                              MainAxisAlignment.spaceEvenly,
-                                                                          children: [
-                                                                            TextButton(
-                                                                              onPressed: () {
-                                                                                Navigator.of(context).pop();
-                                                                                setState(() {
-                                                                                  selectedIndex = 1;
-                                                                                });
-                                                                              },
-                                                                              child: Text(
-                                                                                language == 'fr' ? 'Annuler' : 'Cancel',
-                                                                                style: TextStyle(
-                                                                                  color: kSecondaryColor,
-                                                                                  fontSize: 17.sp,
-                                                                                  fontWeight: FontWeight.w600,
-                                                                                ),
-                                                                              ),
-                                                                            ),
-                                                                            TextButton(
-                                                                              onPressed: () {
-                                                                                Navigator.of(context).pop();
-                                                                                setState(() {
-                                                                                  selectedTransporteur = transporteur;
-                                                                                  selectedIndex = 2;
-                                                                                });
-                                                                              },
-                                                                              child: Text(
-                                                                                language == 'fr' ? 'Terminer' : 'Finish',
-                                                                                style: TextStyle(
-                                                                                  color: kPrimaryColor,
-                                                                                  fontSize: 17.sp,
-                                                                                  fontWeight: FontWeight.w600,
-                                                                                ),
-                                                                              ),
-                                                                            ),
-                                                                          ],
-                                                                        ),
-                                                                      ],
-                                                                    ),
-                                                                  ),
-                                                                );
-                                                              },
-                                                            );
-                                                          },
-                                                          child: Text(
-                                                            language == 'fr'
-                                                                ? 'Réserver'
-                                                                : 'Book',
-                                                            style: TextStyle(
-                                                                color: Colors
-                                                                    .white,
-                                                                fontSize: 15.sp,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w600),
-                                                          )),
-                                                    ],
+                                                        ),
+                                                      ],
+                                                    ),
                                                   ),
                                                 ),
                                               ),
                                             );
                                           },
                                         ),
-                                      ).animate().slideX(
-                                        duration: 500.ms, begin: 1, end: 0)
-                                : SizedBox(
-                                        height: 42.h,
-                                        width: 100.w,
-                                        child: Column(
-                                          children: [
-                                            Row(
-                                              children: [
-                                                Container(
-                                                  decoration: BoxDecoration(
-                                                    color: kPrimaryColor,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            0.sp),
-                                                  ),
-                                                  width: 70.w,
-                                                  height: 7.h,
-                                                  child: Center(
-                                                    child: Text(
-                                                      language == 'fr'
-                                                          ? 'Le Chauffeur est en route'
-                                                          : 'The driver is on the way',
-                                                      style: TextStyle(
-                                                        color: Colors.black,
-                                                        fontSize: 17.sp,
-                                                        fontWeight:
-                                                            FontWeight.w600,
-                                                      ),
+                                      ),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Text(
+                                            language == 'fr'
+                                                ? 'Méthode de paiement'
+                                                : 'Payment method',
+                                            style: TextStyle(
+                                              fontSize: 16.sp,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          SizedBox(width: 2.w),
+                                          SizedBox(
+                                            width: 30.w,
+                                            height: 4.h,
+                                            child:
+                                                DropdownButtonFormField<String>(
+                                              dropdownColor: Colors.white,
+                                              style: TextStyle(
+                                                color: Colors.black,
+                                                fontSize: 15.sp,
+                                              ),
+                                              icon: Icon(
+                                                  Icons.keyboard_arrow_down,
+                                                  color: Colors.black),
+                                              value: _selectedPaymentMethod,
+                                              decoration: InputDecoration(
+                                                contentPadding:
+                                                    EdgeInsets.symmetric(
+                                                        horizontal: 10),
+                                                fillColor: Colors.white,
+                                                filled: true,
+                                                enabledBorder:
+                                                    OutlineInputBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          15.sp),
+                                                  borderSide: BorderSide(
+                                                      color:
+                                                          Colors.grey.shade300),
+                                                ),
+                                                focusedBorder:
+                                                    OutlineInputBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          15.sp),
+                                                  borderSide: BorderSide(
+                                                      color: kPrimaryColor),
+                                                ),
+                                              ),
+                                              items: [
+                                                language == 'fr'
+                                                    ? 'Espèce'
+                                                    : 'Cash',
+                                                language == 'fr'
+                                                    ? 'Carte'
+                                                    : 'Card'
+                                              ].map((String value) {
+                                                return DropdownMenuItem<String>(
+                                                  value: value,
+                                                  child: Text(
+                                                    value,
+                                                    style: TextStyle(
+                                                      fontSize: 15.sp,
+                                                      color: Colors.black,
+                                                      fontWeight:
+                                                          FontWeight.w500,
                                                     ),
                                                   ),
-                                                ),
-                                                SizedBox(width: 0.w),
-                                                Container(
-                                                  width: 30.w,
-                                                  height: 7.h,
+                                                );
+                                              }).toList(),
+                                              onChanged: (String? value) {
+                                                setState(() {
+                                                  _selectedPaymentMethod =
+                                                      value ?? 'Cash';
+                                                });
+                                              },
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      SizedBox(height: 2.h),
+                                      ElevatedButton(
+                                          style: ElevatedButton.styleFrom(
+                                            fixedSize: Size(60.w, 7.h),
+                                            elevation: 0,
+                                            backgroundColor: kPrimaryColor,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(25),
+                                            ),
+                                          ),
+                                          onPressed: () async {
+                                            if (_formKey.currentState!
+                                                .validate()) {
+                                              if (selectedVehicle == '') {
+                                                ScaffoldMessenger.of(context)
+                                                    .showSnackBar(
+                                                  SnackBar(
+                                                    content: Text(
+                                                      language == 'fr'
+                                                          ? 'Veuillez sélectionner un véhicule'
+                                                          : 'Please select a vehicle',
+                                                    ),
+                                                    backgroundColor:
+                                                        kPrimaryColor,
+                                                    duration:
+                                                        Duration(seconds: 2),
+                                                  ),
+                                                );
+                                              } else {
+                                                setState(() {
+                                                  selectedIndex = 1;
+                                                });
+                                                getTransporteurs();
+                                              }
+                                            }
+                                          },
+                                          child: Text(
+                                            language == 'fr'
+                                                ? 'Valider'
+                                                : 'Validate',
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 15.sp,
+                                                fontWeight: FontWeight.w600),
+                                          )),
+                                      SizedBox(height: 2.h),
+                                    ],
+                                  )
+                                : selectedIndex == 1
+                                    ? gettingTransporteurs
+                                        ? _buildShimmerLoading()
+                                        : SizedBox(
+                                            height: 42.h,
+                                            width: 100.w,
+                                            child: ListView.builder(
+                                              shrinkWrap: false,
+                                              physics:
+                                                  const NeverScrollableScrollPhysics(),
+                                              itemCount: transporteurs
+                                                  .where((element) =>
+                                                      element.vehiculeType ==
+                                                          selectedVehicle &&
+                                                      element.disponibilite ==
+                                                          true &&
+                                                      element.gender ==
+                                                          _selectedGender)
+                                                  .length,
+                                              itemBuilder: (context, index) {
+                                                final filteredTransporteurs = transporteurs
+                                                    .where((element) =>
+                                                        element.vehiculeType ==
+                                                            selectedVehicle &&
+                                                        element.disponibilite ==
+                                                            true &&
+                                                        element.gender ==
+                                                            _selectedGender)
+                                                    .toList();
+                                                final transporteur = filteredTransporteurs[index];
+                                                return Container(
+                                                  margin: EdgeInsets.only(
+                                                      bottom: 1.h),
                                                   decoration: BoxDecoration(
                                                     color: Colors.white,
                                                     borderRadius:
                                                         BorderRadius.circular(
-                                                            0.sp),
-                                                    border: Border.symmetric(
-                                                      horizontal: BorderSide(
-                                                        color: Colors.grey,
+                                                            12),
+                                                    boxShadow: [
+                                                      BoxShadow(
+                                                        color: Colors.grey
+                                                            .withValues(
+                                                                alpha: 0.1),
+                                                        spreadRadius: 1,
+                                                        blurRadius: 5,
+                                                        offset:
+                                                            const Offset(0, 2),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  child: Material(
+                                                    color: Colors.transparent,
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            15.sp),
+                                                    child: Padding(
+                                                      padding:
+                                                          EdgeInsets.all(2.w),
+                                                      child: Row(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .spaceBetween,
+                                                        children: [
+                                                          SizedBox(width: 2.w),
+                                                          Row(
+                                                            children: [
+                                                              SizedBox(
+                                                                width: 12.w,
+                                                                child: transporteur
+                                                                            .imageUrl !=
+                                                                        null
+                                                                    ? Image
+                                                                        .network(
+                                                                        '${TransporteurServices.baseUrl}/storage/${transporteur.imageUrl}',
+                                                                        width: 30
+                                                                            .sp,
+                                                                        height:
+                                                                            30.sp,
+                                                                      )
+                                                                    : Image
+                                                                        .asset(
+                                                                        'assets/default-avatar.png',
+                                                                      ),
+                                                              ),
+                                                              SizedBox(
+                                                                  width: 2.w),
+                                                              SizedBox(
+                                                                width: 40.w,
+                                                                child: Column(
+                                                                  crossAxisAlignment:
+                                                                      CrossAxisAlignment
+                                                                          .start,
+                                                                  children: [
+                                                                    Text(
+                                                                      transporteur
+                                                                          .username,
+                                                                      style:
+                                                                          TextStyle(
+                                                                        fontSize:
+                                                                            16.sp,
+                                                                        fontWeight:
+                                                                            FontWeight.bold,
+                                                                      ),
+                                                                    ),
+                                                                    SizedBox(
+                                                                        height:
+                                                                            0.5.h),
+                                                                    Row(
+                                                                      children: [
+                                                                        Text(
+                                                                          transporteur
+                                                                              .noteMoyenne
+                                                                              .toString(),
+                                                                          style:
+                                                                              TextStyle(
+                                                                            fontSize:
+                                                                                17.sp,
+                                                                            color:
+                                                                                Colors.grey,
+                                                                          ),
+                                                                        ),
+                                                                        Icon(
+                                                                          Icons
+                                                                              .star,
+                                                                          color:
+                                                                              Colors.amber,
+                                                                        ),
+                                                                      ],
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                          ElevatedButton(
+                                                              style:
+                                                                  ElevatedButton
+                                                                      .styleFrom(
+                                                                fixedSize: Size(
+                                                                    30.w, 4.h),
+                                                                elevation: 0,
+                                                                backgroundColor:
+                                                                    kPrimaryColor,
+                                                                shape:
+                                                                    RoundedRectangleBorder(
+                                                                  borderRadius:
+                                                                      BorderRadius
+                                                                          .circular(
+                                                                              25),
+                                                                ),
+                                                              ),
+                                                              onPressed:
+                                                                  () async {
+                                                                setState(() {
+                                                                  selectedTransporteur =
+                                                                      transporteur;
+                                                                });
+                                                                await showDialog(
+                                                                  context:
+                                                                      context,
+                                                                  builder:
+                                                                      (BuildContext
+                                                                          context) {
+                                                                    return Dialog(
+                                                                      backgroundColor:
+                                                                          Colors
+                                                                              .white,
+                                                                      shape:
+                                                                          RoundedRectangleBorder(
+                                                                        borderRadius:
+                                                                            BorderRadius.circular(15),
+                                                                      ),
+                                                                      child:
+                                                                          Container(
+                                                                        padding:
+                                                                            EdgeInsets.all(20),
+                                                                        child:
+                                                                            Column(
+                                                                          mainAxisSize:
+                                                                              MainAxisSize.min,
+                                                                          children: [
+                                                                            Icon(
+                                                                              Icons.check_circle,
+                                                                              color: kPrimaryColor,
+                                                                              size: 50.sp,
+                                                                            ),
+                                                                            SizedBox(height: 20),
+                                                                            Text(
+                                                                              language == 'fr' ? 'Prêt à partir' : 'Ready to go',
+                                                                              style: TextStyle(
+                                                                                fontSize: 20.sp,
+                                                                                fontWeight: FontWeight.bold,
+                                                                              ),
+                                                                            ),
+                                                                            SizedBox(height: 10),
+                                                                            Text(
+                                                                              language == 'fr' ? 'Le chauffeur est en chemin. Merci de patienter quelques instants.' : 'The driver is on the way. Please wait a few moments.',
+                                                                              textAlign: TextAlign.center,
+                                                                              style: TextStyle(fontSize: 16.sp),
+                                                                            ),
+                                                                            SizedBox(height: 20),
+                                                                            Row(
+                                                                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                                                              children: [
+                                                                                TextButton(
+                                                                                  onPressed: () {
+                                                                                    Navigator.of(context).pop();
+                                                                                    setState(() {
+                                                                                      selectedIndex = 1;
+                                                                                    });
+                                                                                  },
+                                                                                  child: Text(
+                                                                                    language == 'fr' ? 'Annuler' : 'Cancel',
+                                                                                    style: TextStyle(
+                                                                                      color: kSecondaryColor,
+                                                                                      fontSize: 17.sp,
+                                                                                      fontWeight: FontWeight.w600,
+                                                                                    ),
+                                                                                  ),
+                                                                                ),
+                                                                                TextButton(
+                                                                                  onPressed: () async {
+                                                                                    await _storeTrajet();
+                                                                                    Navigator.of(context).pop();
+                                                                                    setState(() {
+                                                                                      selectedTransporteur = transporteur;
+                                                                                      selectedIndex = 2;
+                                                                                    });
+                                                                                  },
+                                                                                  child: Text(
+                                                                                    language == 'fr' ? 'Terminer' : 'Finish',
+                                                                                    style: TextStyle(
+                                                                                      color: kPrimaryColor,
+                                                                                      fontSize: 17.sp,
+                                                                                      fontWeight: FontWeight.w600,
+                                                                                    ),
+                                                                                  ),
+                                                                                ),
+                                                                              ],
+                                                                            ),
+                                                                          ],
+                                                                        ),
+                                                                      ),
+                                                                    );
+                                                                  },
+                                                                );
+                                                              },
+                                                              child: Text(
+                                                                language == 'fr'
+                                                                    ? 'Réserver'
+                                                                    : 'Book',
+                                                                style: TextStyle(
+                                                                    color: Colors
+                                                                        .white,
+                                                                    fontSize:
+                                                                        15.sp,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .w600),
+                                                              )),
+                                                        ],
                                                       ),
                                                     ),
                                                   ),
-                                                  padding: EdgeInsets.symmetric(
-                                                      horizontal: 2.w),
-                                                  child: Center(
-                                                    child: Text(
-                                                      "3 mn",
-                                                      style: TextStyle(
-                                                        color: Colors.grey,
-                                                        fontSize: 17.sp,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                )
-                                              ],
+                                                );
+                                              },
                                             ),
-                                            SizedBox(height: 2.h),
-                                            Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
+                                          ).animate().slideX(
+                                            duration: 500.ms, begin: 1, end: 0)
+                                    : SizedBox(
+                                            height: 42.h,
+                                            width: 100.w,
+                                            child: Column(
                                               children: [
-                                                SizedBox(
-                                                  width: 20.w,
-                                                  child: selectedTransporteur!
+                                                Row(
+                                                  children: [
+                                                    Container(
+                                                      decoration: BoxDecoration(
+                                                        color: kPrimaryColor,
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(0.sp),
+                                                      ),
+                                                      width: 70.w,
+                                                      height: 7.h,
+                                                      child: Center(
+                                                        child: Text(
+                                                          language == 'fr'
+                                                              ? 'Le Chauffeur est en route'
+                                                              : 'The driver is on the way',
+                                                          style: TextStyle(
+                                                            color: Colors.black,
+                                                            fontSize: 17.sp,
+                                                            fontWeight:
+                                                                FontWeight.w600,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    SizedBox(width: 0.w),
+                                                    Container(
+                                                      width: 30.w,
+                                                      height: 7.h,
+                                                      decoration: BoxDecoration(
+                                                        color: Colors.white,
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(0.sp),
+                                                        border:
+                                                            Border.symmetric(
+                                                          horizontal:
+                                                              BorderSide(
+                                                            color: Colors.grey,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      padding:
+                                                          EdgeInsets.symmetric(
+                                                              horizontal: 2.w),
+                                                      child: Center(
+                                                        child: Text(
+                                                          "3 mn",
+                                                          style: TextStyle(
+                                                            color: Colors.grey,
+                                                            fontSize: 17.sp,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    )
+                                                  ],
+                                                ),
+                                                SizedBox(height: 2.h),
+                                                Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  children: [
+                                                    SizedBox(
+                                                      width: 20.w,
+                                                      child: selectedTransporteur!
                                                                   .imageUrl !=
                                                               null
                                                           ? Image.network(
-                                                              '${TransporteurServices
-                                                                      .baseUrl}/storage/${selectedTransporteur!
-                                                                      .imageUrl}',
+                                                              '${TransporteurServices.baseUrl}/storage/${selectedTransporteur!.imageUrl}',
                                                               width: 50.sp,
                                                               height: 50.sp,
                                                             )
                                                           : Image.asset(
                                                               'assets/default-avatar.png',
                                                             ),
-                                                ),
-                                                SizedBox(width: 2.w),
-                                                Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Text(
-                                                      selectedTransporteur!
-                                                          .username,
-                                                      style: TextStyle(
-                                                        fontSize: 16.sp,
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                      ),
                                                     ),
-                                                    SizedBox(height: 0.5.h),
-                                                    Row(
+                                                    SizedBox(width: 2.w),
+                                                    Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
                                                       children: [
                                                         Text(
                                                           selectedTransporteur!
-                                                              .noteMoyenne
+                                                              .username,
+                                                          style: TextStyle(
+                                                            fontSize: 16.sp,
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                          ),
+                                                        ),
+                                                        SizedBox(height: 0.5.h),
+                                                        Row(
+                                                          children: [
+                                                            Text(
+                                                              selectedTransporteur!
+                                                                  .noteMoyenne
+                                                                  .toString(),
+                                                              style: TextStyle(
+                                                                fontSize: 16.sp,
+                                                              ),
+                                                            ),
+                                                            Icon(
+                                                              Icons
+                                                                  .star_outline,
+                                                              color:
+                                                                  kSecondaryColor,
+                                                            ),
+                                                          ],
+                                                        ),
+                                                        SizedBox(height: 0.5.h),
+                                                        Row(
+                                                          children: [
+                                                            for (var i = 0;
+                                                                i <
+                                                                    selectedTransporteur!
+                                                                        .noteMoyenne!
+                                                                        .floor();
+                                                                i++)
+                                                              Icon(
+                                                                Icons.star,
+                                                                color: Colors
+                                                                    .amber,
+                                                              ),
+                                                          ],
+                                                        ),
+                                                        SizedBox(height: 0.5.h),
+                                                        Text(
+                                                          selectedTransporteur!
+                                                              .serviceId
                                                               .toString(),
                                                           style: TextStyle(
                                                             fontSize: 16.sp,
+                                                            fontWeight:
+                                                                FontWeight.w600,
+                                                            color: Colors.grey,
                                                           ),
                                                         ),
-                                                        Icon(
-                                                          Icons.star_outline,
-                                                          color:
-                                                              kSecondaryColor,
-                                                        ),
-                                                      ],
-                                                    ),
-                                                    SizedBox(height: 0.5.h),
-                                                    Row(
-                                                      children: [
-                                                        for (var i = 0;
-                                                            i <
-                                                                selectedTransporteur!
-                                                                    .noteMoyenne!
-                                                                    .floor();
-                                                            i++)
-                                                          Icon(
-                                                            Icons.star,
-                                                            color: Colors.amber,
-                                                          ),
-                                                      ],
-                                                    ),
-                                                    SizedBox(height: 0.5.h),
-                                                    Text(
-                                                      selectedTransporteur!
-                                                          .serviceId
-                                                          .toString(),
-                                                      style: TextStyle(
-                                                        fontSize: 16.sp,
-                                                        fontWeight:
-                                                            FontWeight.w600,
-                                                        color: Colors.grey,
-                                                      ),
-                                                    ),
-                                                    SizedBox(height: 0.5.h),
-                                                    Text(
-                                                      selectedTransporteur!
-                                                                  .vehiculeType ==
-                                                              "confort"
-                                                          ? language == 'fr'
-                                                              ? 'Confort Electrique'
-                                                              : 'Electric Comfort'
-                                                          : selectedTransporteur!
+                                                        SizedBox(height: 0.5.h),
+                                                        Text(
+                                                          selectedTransporteur!
                                                                       .vehiculeType ==
-                                                                  "luxe"
+                                                                  "confort"
                                                               ? language == 'fr'
-                                                                  ? 'Voiture confortable'
-                                                                  : 'Comfortable Car'
+                                                                  ? 'Confort Electrique'
+                                                                  : 'Electric Comfort'
                                                               : selectedTransporteur!
                                                                           .vehiculeType ==
-                                                                      "moto"
+                                                                      "luxe"
                                                                   ? language ==
                                                                           'fr'
-                                                                      ? 'Moto'
-                                                                      : 'Moto'
-                                                                  : language ==
-                                                                          'fr'
-                                                                      ? 'Taxi 4 places'
-                                                                      : 'Taxi 4 places',
-                                                      style: TextStyle(
-                                                        fontSize: 16.sp,
-                                                        color: Colors.black,
+                                                                      ? 'Voiture confortable'
+                                                                      : 'Comfortable Car'
+                                                                  : selectedTransporteur!
+                                                                              .vehiculeType ==
+                                                                          "moto"
+                                                                      ? language ==
+                                                                              'fr'
+                                                                          ? 'Moto'
+                                                                          : 'Moto'
+                                                                      : language ==
+                                                                              'fr'
+                                                                          ? 'Taxi 4 places'
+                                                                          : 'Taxi 4 places',
+                                                          style: TextStyle(
+                                                            fontSize: 16.sp,
+                                                            color: Colors.black,
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    SizedBox(width: 10.w),
+                                                    SizedBox(
+                                                      width: 12.w,
+                                                      child: Image.asset(
+                                                        "assets/yellow car.png",
+                                                        width: 35.w,
+                                                        height: 12.h,
+                                                        fit: BoxFit.cover,
                                                       ),
                                                     ),
                                                   ],
                                                 ),
-                                                SizedBox(width: 10.w),
-                                                SizedBox(
-                                                  width: 12.w,
-                                                  child: Image.asset(
-                                                    "assets/yellow car.png",
-                                                    width: 35.w,
-                                                    height: 12.h,
-                                                    fit: BoxFit.cover,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                            ElevatedButton(
-                                                style: ElevatedButton.styleFrom(
-                                                  fixedSize: Size(60.w, 7.h),
-                                                  elevation: 0,
-                                                  backgroundColor:
-                                                      kPrimaryColor,
-                                                  shape: RoundedRectangleBorder(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            25),
-                                                  ),
-                                                ),
-                                                onPressed: () async {
-                                                  await showDialog(
-                                                    context: context,
-                                                    builder:
-                                                        (BuildContext context) {
-                                                      return Dialog(
-                                                        backgroundColor:
-                                                            Colors.white,
-                                                        shape:
-                                                            RoundedRectangleBorder(
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(15),
-                                                        ),
-                                                        child: Container(
-                                                          padding:
-                                                              EdgeInsets.all(
-                                                                  20),
-                                                          child: Column(
-                                                            mainAxisSize:
-                                                                MainAxisSize
-                                                                    .min,
-                                                            children: [
-                                                              Container(
-                                                                decoration:
-                                                                    BoxDecoration(
-                                                                  color: Colors
-                                                                      .white,
-                                                                  shape: BoxShape
-                                                                      .circle,
-                                                                  border: Border
-                                                                      .all(
-                                                                    color:
-                                                                        kPrimaryColor,
-                                                                  ),
-                                                                ),
-                                                                child: Padding(
-                                                                  padding:
-                                                                      EdgeInsets
-                                                                          .all(10
-                                                                              .sp),
-                                                                  child: Icon(
-                                                                    Icons
-                                                                        .attach_money_outlined,
-                                                                    color:
-                                                                        kPrimaryColor,
-                                                                    size: 40.sp,
-                                                                  ),
-                                                                ),
-                                                              ),
-                                                              SizedBox(
-                                                                  height: 20),
-                                                              Text(
-                                                                language == 'fr'
-                                                                    ? 'Vous avez gagné x points'
-                                                                    : 'You have won x points',
-                                                                textAlign:
-                                                                    TextAlign
-                                                                        .center,
-                                                                style: TextStyle(
-                                                                    fontSize:
-                                                                        16.sp),
-                                                              ),
-                                                              SizedBox(
-                                                                  height: 1.h),
-                                                              Divider(
-                                                                color:
-                                                                    kPrimaryColor,
-                                                              ),
-                                                              SizedBox(
-                                                                  height: 1.h),
-                                                              Row(
-                                                                mainAxisAlignment:
-                                                                    MainAxisAlignment
-                                                                        .center,
+                                                ElevatedButton(
+                                                    style: ElevatedButton
+                                                        .styleFrom(
+                                                      fixedSize:
+                                                          Size(60.w, 7.h),
+                                                      elevation: 0,
+                                                      backgroundColor:
+                                                          kPrimaryColor,
+                                                      shape:
+                                                          RoundedRectangleBorder(
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(25),
+                                                      ),
+                                                    ),
+                                                    onPressed: () async {
+                                                      await showDialog(
+                                                        context: context,
+                                                        builder: (BuildContext
+                                                            context) {
+                                                          return Dialog(
+                                                            backgroundColor:
+                                                                Colors.white,
+                                                            shape:
+                                                                RoundedRectangleBorder(
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          15),
+                                                            ),
+                                                            child: Container(
+                                                              padding:
+                                                                  EdgeInsets
+                                                                      .all(20),
+                                                              child: Column(
+                                                                mainAxisSize:
+                                                                    MainAxisSize
+                                                                        .min,
                                                                 children: [
-                                                                  TextButton(
-                                                                    onPressed:
-                                                                        () {
-                                                                      Get.to(() =>
-                                                                          NavigationScreen(
-                                                                            showDialog:
-                                                                                true,
-                                                                          ));
-                                                                    },
-                                                                    child: Text(
-                                                                      language ==
-                                                                              'fr'
-                                                                          ? 'Génial'
-                                                                          : 'Great',
-                                                                      style:
-                                                                          TextStyle(
+                                                                  Container(
+                                                                    decoration:
+                                                                        BoxDecoration(
+                                                                      color: Colors
+                                                                          .white,
+                                                                      shape: BoxShape
+                                                                          .circle,
+                                                                      border:
+                                                                          Border
+                                                                              .all(
                                                                         color:
                                                                             kPrimaryColor,
-                                                                        fontSize:
-                                                                            17.sp,
-                                                                        fontWeight:
-                                                                            FontWeight.w600,
+                                                                      ),
+                                                                    ),
+                                                                    child:
+                                                                        Padding(
+                                                                      padding: EdgeInsets
+                                                                          .all(10
+                                                                              .sp),
+                                                                      child:
+                                                                          Icon(
+                                                                        Icons
+                                                                            .attach_money_outlined,
+                                                                        color:
+                                                                            kPrimaryColor,
+                                                                        size: 40
+                                                                            .sp,
                                                                       ),
                                                                     ),
                                                                   ),
+                                                                  SizedBox(
+                                                                      height:
+                                                                          20),
+                                                                  Text(
+                                                                    language ==
+                                                                            'fr'
+                                                                        ? 'Vous avez gagné x points'
+                                                                        : 'You have won x points',
+                                                                    textAlign:
+                                                                        TextAlign
+                                                                            .center,
+                                                                    style: TextStyle(
+                                                                        fontSize:
+                                                                            16.sp),
+                                                                  ),
+                                                                  SizedBox(
+                                                                      height:
+                                                                          1.h),
+                                                                  Divider(
+                                                                    color:
+                                                                        kPrimaryColor,
+                                                                  ),
+                                                                  SizedBox(
+                                                                      height:
+                                                                          1.h),
+                                                                  Row(
+                                                                    mainAxisAlignment:
+                                                                        MainAxisAlignment
+                                                                            .center,
+                                                                    children: [
+                                                                      TextButton(
+                                                                        onPressed:
+                                                                            () {
+                                                                          Get.to(() =>
+                                                                              NavigationScreen(
+                                                                                showDialog: true,
+                                                                              ));
+                                                                        },
+                                                                        child:
+                                                                            Text(
+                                                                          language == 'fr'
+                                                                              ? 'Génial'
+                                                                              : 'Great',
+                                                                          style:
+                                                                              TextStyle(
+                                                                            color:
+                                                                                kPrimaryColor,
+                                                                            fontSize:
+                                                                                17.sp,
+                                                                            fontWeight:
+                                                                                FontWeight.w600,
+                                                                          ),
+                                                                        ),
+                                                                      ),
+                                                                    ],
+                                                                  ),
                                                                 ],
                                                               ),
-                                                            ],
-                                                          ),
-                                                        ),
+                                                            ),
+                                                          );
+                                                        },
                                                       );
                                                     },
-                                                  );
-                                                },
-                                                child: Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment.center,
-                                                  children: [
-                                                    Icon(
-                                                      Icons.phone_outlined,
-                                                      color: Colors.white,
-                                                    ),
-                                                    SizedBox(width: 2.w),
-                                                    Text(
-                                                      language == 'fr'
-                                                          ? 'Appeler'
-                                                          : 'Call',
-                                                      style: TextStyle(
+                                                    child: Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .center,
+                                                      children: [
+                                                        Icon(
+                                                          Icons.phone_outlined,
                                                           color: Colors.white,
-                                                          fontSize: 15.sp,
-                                                          fontWeight:
-                                                              FontWeight.w600),
-                                                    ),
-                                                  ],
-                                                )),
-                                          ],
-                                        ))
-                                    .animate()
-                                    .slideX(duration: 500.ms, begin: 1, end: 0),
+                                                        ),
+                                                        SizedBox(width: 2.w),
+                                                        Text(
+                                                          language == 'fr'
+                                                              ? 'Appeler'
+                                                              : 'Call',
+                                                          style: TextStyle(
+                                                              color:
+                                                                  Colors.white,
+                                                              fontSize: 15.sp,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w600),
+                                                        ),
+                                                      ],
+                                                    )),
+                                              ],
+                                            ))
+                                        .animate()
+                                        .slideX(
+                                            duration: 500.ms, begin: 1, end: 0),
                       ],
                     ),
                   ),

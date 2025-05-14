@@ -21,12 +21,6 @@ class AuthServices {
     required String phone,
   }) async {
     try {
-      print('Attempting registration with:');
-      print('Name: $name');
-      print('Email: $email');
-      print('Role ID: $roleId');
-      print('Phone: $phone');
-
       final response = await http.post(
         Uri.parse('$baseUrl/api/register'),
         headers: <String, String>{
@@ -43,13 +37,9 @@ class AuthServices {
         }),
       );
 
-      print('Response status code: ${response.statusCode}');
-      print('Response body: ${response.body}');
-
       final responseData = jsonDecode(response.body);
 
       if (response.statusCode == 201) {
-        print('Registration successful');
         // Registration successful
         await _saveUserData(responseData);
         return {
@@ -57,7 +47,6 @@ class AuthServices {
           'data': responseData,
         };
       } else {
-        print('Registration failed with status code: ${response.statusCode}');
         // Registration failed
         return {
           'success': false,
@@ -65,7 +54,6 @@ class AuthServices {
         };
       }
     } catch (e) {
-      print('Registration error: $e');
       return {
         'success': false,
         'message': 'Network error: $e',
@@ -223,7 +211,7 @@ class AuthServices {
       final prefs = await SharedPreferences.getInstance();
 
       // Add authorization header
-      String? token = await prefs.getString('token');
+      String? token =  prefs.getString('token');
       if (token != null) {
         request.headers.addAll({
           'Authorization': 'Bearer $token',
@@ -239,7 +227,6 @@ class AuthServices {
         throw Exception('Failed to update client: ${response.body}');
       }
     } catch (e) {
-      print('Error updating client: $e');
       return null;
     }
   }
