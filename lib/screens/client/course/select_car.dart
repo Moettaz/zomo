@@ -7,7 +7,10 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:google_places_flutter/google_places_flutter.dart';
 import 'package:google_places_flutter/model/prediction.dart';
+import 'package:zomo/models/transporteur.dart';
 import 'package:zomo/screens/client/navigation_screen.dart';
+import 'package:zomo/services/transporteurservices.dart';
+import 'package:shimmer/shimmer.dart';
 // import 'package:geolocator/geolocator.dart';
 
 class SelectCar extends StatefulWidget {
@@ -18,6 +21,29 @@ class SelectCar extends StatefulWidget {
 }
 
 class _SelectCarState extends State<SelectCar> {
+  List<Transporteur> transporteurs = [];
+  bool gettingTransporteurs = false;
+  @override
+  void initState() {
+    super.initState();
+    getTransporteurs();
+  }
+
+  getTransporteurs() async {
+    setState(() {
+      gettingTransporteurs = true;
+    });
+    try {
+      transporteurs = await TransporteurServices.getAllTransporteurs();
+    } catch (e) {
+      print('Error fetching transporteurs: $e');
+    } finally {
+      setState(() {
+        gettingTransporteurs = false;
+      });
+    }
+  }
+
   GoogleMapController? mapController;
   final LatLng _center = const LatLng(36.8065, 10.1815);
   final Set<Marker> _markers = {};
@@ -27,15 +53,9 @@ class _SelectCarState extends State<SelectCar> {
   final TextEditingController _originController = TextEditingController();
   final TextEditingController _destinationController = TextEditingController();
   final PolylinePoints _polylinePoints = PolylinePoints();
-  int selectedVehicle = 0;
+  String selectedVehicle = '';
   String _selectedPaymentMethod = language == 'fr' ? 'Espèce' : 'Cash';
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  @override
-  void initState() {
-    super.initState();
-    // _getCurrentLocation();
-  }
-
   @override
   void dispose() {
     _originController.dispose();
@@ -91,6 +111,7 @@ class _SelectCarState extends State<SelectCar> {
       'price': '5 DT',
       'distance': '2.5 km',
       'color': Colors.orange,
+      'type': 'confort',
     },
     {
       'id': 2,
@@ -100,6 +121,7 @@ class _SelectCarState extends State<SelectCar> {
       'price': '12 DT',
       'distance': '2.5 km',
       'color': Colors.blue,
+      'type': 'luxe',
     },
     {
       'id': 3,
@@ -109,6 +131,7 @@ class _SelectCarState extends State<SelectCar> {
       'price': '25 DT',
       'distance': '2.5 km',
       'color': Colors.purple,
+      'type': 'moto',
     },
     {
       'id': 4,
@@ -118,35 +141,17 @@ class _SelectCarState extends State<SelectCar> {
       'price': '18 DT',
       'distance': '2.5 km',
       'color': Colors.green,
+      'type': 'taxi',
     },
   ];
-  final chauffeurs = [
-    {
-      'id': 1,
-      'name': 'Chauffeur 1',
-      'rate': '4.5',
-      'image': 'assets/person.png',
-    },
-    {
-      'id': 2,
-      'name': 'Chauffeur 2',
-      'rate': '4.2',
-      'image': 'assets/person1.png',
-    },
-    {
-      'id': 3,
-      'name': 'Chauffeur 3',
-      'rate': '4.7',
-      'image': 'assets/person2.png',
-    },
-  ];
+
   void _onMapCreated(GoogleMapController controller) {
     mapController = controller;
   }
 
-  String _selectedGender = 'women';
+  String _selectedGender = 'female';
   int selectedIndex = 0;
-  int selectedChauffeur = 0;
+  Transporteur? selectedTransporteur;
   Future<void> _getPolyline() async {
     if (_origin == null || _destination == null) return;
 
@@ -186,6 +191,87 @@ class _SelectCarState extends State<SelectCar> {
     } else {
       _destinationController.text = prediction.description ?? '';
     }
+  }
+
+  Widget _buildShimmerLoading() {
+    return SizedBox(
+      height: 42.h,
+      width: 100.w,
+      child: ListView.builder(
+        shrinkWrap: false,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: 3, // Show 3 shimmer items
+        itemBuilder: (context, index) {
+          return Shimmer.fromColors(
+            baseColor: kPrimaryColor.withOpacity(0.2),
+            highlightColor: kPrimaryColor.withOpacity(0.4),
+            child: Container(
+              margin: EdgeInsets.only(bottom: 1.h),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Material(
+                color: Colors.transparent,
+                borderRadius: BorderRadius.circular(15.sp),
+                child: Padding(
+                  padding: EdgeInsets.all(2.w),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      SizedBox(width: 2.w),
+                      Row(
+                        children: [
+                          Container(
+                            width: 12.w,
+                            height: 12.w,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          SizedBox(width: 2.w),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                width: 40.w,
+                                height: 20,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                              ),
+                              SizedBox(height: 0.5.h),
+                              Container(
+                                width: 20.w,
+                                height: 15,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      Container(
+                        width: 30.w,
+                        height: 4.h,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(25),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    ).animate().slideX(duration: 500.ms, begin: 1, end: 0);
   }
 
   @override
@@ -477,14 +563,14 @@ class _SelectCarState extends State<SelectCar> {
                                       GestureDetector(
                                         onTap: () {
                                           setState(() {
-                                            _selectedGender = 'women';
+                                            _selectedGender = 'female';
                                           });
                                         },
                                         child: Container(
                                           padding: EdgeInsets.symmetric(
                                               horizontal: 20, vertical: 8),
                                           decoration: BoxDecoration(
-                                            color: _selectedGender == 'women'
+                                            color: _selectedGender == 'female'
                                                 ? kPrimaryColor
                                                 : Colors.transparent,
                                             borderRadius:
@@ -497,7 +583,7 @@ class _SelectCarState extends State<SelectCar> {
                                               Icon(
                                                 Icons.woman,
                                                 color:
-                                                    _selectedGender == 'women'
+                                                    _selectedGender == 'female'
                                                         ? Colors.white
                                                         : kPrimaryColor,
                                               ),
@@ -506,10 +592,10 @@ class _SelectCarState extends State<SelectCar> {
                                                     ? 'Femme'
                                                     : 'Women',
                                                 style: TextStyle(
-                                                  color:
-                                                      _selectedGender == 'women'
-                                                          ? Colors.white
-                                                          : kPrimaryColor,
+                                                  color: _selectedGender ==
+                                                          'female'
+                                                      ? Colors.white
+                                                      : kPrimaryColor,
                                                 ),
                                               ),
                                             ],
@@ -545,18 +631,19 @@ class _SelectCarState extends State<SelectCar> {
                                             ],
                                           ),
                                           child: Material(
-                                            color:
-                                                selectedVehicle == vehicle['id']
-                                                    ? kPrimaryColor.withValues(
-                                                        alpha: 0.5)
-                                                    : Colors.transparent,
+                                            color: selectedVehicle ==
+                                                    vehicle['type']
+                                                ? kPrimaryColor.withValues(
+                                                    alpha: 0.5)
+                                                : Colors.transparent,
                                             borderRadius:
                                                 BorderRadius.circular(15.sp),
                                             child: InkWell(
                                               onTap: () {
                                                 setState(() {
                                                   selectedVehicle =
-                                                      vehicle['id'] as int;
+                                                      vehicle['type']
+                                                          .toString();
                                                 });
                                                 // Handle vehicle selection
                                               },
@@ -734,7 +821,7 @@ class _SelectCarState extends State<SelectCar> {
                                       ),
                                       onPressed: () {
                                         if (_formKey.currentState!.validate()) {
-                                          if (selectedVehicle == 0) {
+                                          if (selectedVehicle == '') {
                                             ScaffoldMessenger.of(context)
                                                 .showSnackBar(
                                               SnackBar(
@@ -767,261 +854,275 @@ class _SelectCarState extends State<SelectCar> {
                                 ],
                               )
                             : selectedIndex == 1
-                                ? SizedBox(
-                                    height: 42.h,
-                                    width: 100.w,
-                                    child: ListView.builder(
-                                      shrinkWrap: false,
-                                      physics:
-                                          const NeverScrollableScrollPhysics(),
-                                      itemCount: chauffeurs.length,
-                                      itemBuilder: (context, index) {
-                                        final chauffeur = chauffeurs[index];
-                                        return Container(
-                                          margin: EdgeInsets.only(bottom: 1.h),
-                                          decoration: BoxDecoration(
-                                            color: Colors.white,
-                                            borderRadius:
-                                                BorderRadius.circular(12),
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: Colors.grey
-                                                    .withValues(alpha: 0.1),
-                                                spreadRadius: 1,
-                                                blurRadius: 5,
-                                                offset: const Offset(0, 2),
+                                ? gettingTransporteurs
+                                    ? _buildShimmerLoading()
+                                    : SizedBox(
+                                        height: 42.h,
+                                        width: 100.w,
+                                        child: ListView.builder(
+                                          shrinkWrap: false,
+                                          physics:
+                                              const NeverScrollableScrollPhysics(),
+                                          itemCount: transporteurs
+                                              .where((element) =>
+                                                  element.vehiculeType ==
+                                                      selectedVehicle &&
+                                                  element.disponibilite ==
+                                                      true &&
+                                                  element.gender ==
+                                                      _selectedGender)
+                                              .length,
+                                          itemBuilder: (context, index) {
+                                            final transporteur =
+                                                transporteurs[index];
+                                            return Container(
+                                              margin:
+                                                  EdgeInsets.only(bottom: 1.h),
+                                              decoration: BoxDecoration(
+                                                color: Colors.white,
+                                                borderRadius:
+                                                    BorderRadius.circular(12),
+                                                boxShadow: [
+                                                  BoxShadow(
+                                                    color: Colors.grey
+                                                        .withValues(alpha: 0.1),
+                                                    spreadRadius: 1,
+                                                    blurRadius: 5,
+                                                    offset: const Offset(0, 2),
+                                                  ),
+                                                ],
                                               ),
-                                            ],
-                                          ),
-                                          child: Material(
-                                            color: Colors.transparent,
-                                            borderRadius:
-                                                BorderRadius.circular(15.sp),
-                                            child: Padding(
-                                              padding: EdgeInsets.all(2.w),
-                                              child: Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment
-                                                        .spaceBetween,
-                                                children: [
-                                                  SizedBox(width: 2.w),
-                                                  Row(
+                                              child: Material(
+                                                color: Colors.transparent,
+                                                borderRadius:
+                                                    BorderRadius.circular(
+                                                        15.sp),
+                                                child: Padding(
+                                                  padding: EdgeInsets.all(2.w),
+                                                  child: Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .spaceBetween,
                                                     children: [
-                                                      SizedBox(
-                                                        width: 12.w,
-                                                        child: Image.asset(
-                                                          chauffeur['image']
-                                                              .toString(),
-                                                          width: 30.sp,
-                                                          height: 30.sp,
-                                                        ),
-                                                      ),
                                                       SizedBox(width: 2.w),
-                                                      SizedBox(
-                                                        width: 40.w,
-                                                        child: Column(
-                                                          crossAxisAlignment:
-                                                              CrossAxisAlignment
-                                                                  .start,
-                                                          children: [
-                                                            Text(
-                                                              chauffeur['name']
-                                                                  as String,
-                                                              style: TextStyle(
-                                                                fontSize: 16.sp,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .bold,
-                                                              ),
-                                                            ),
-                                                            SizedBox(
-                                                                height: 0.5.h),
-                                                            Row(
+                                                      Row(
+                                                        children: [
+                                                          SizedBox(
+                                                            width: 12.w,
+                                                            child: transporteur
+                                                                        .imageUrl !=
+                                                                    null
+                                                                ? Image.network(
+                                                                    '${TransporteurServices
+                                                                            .baseUrl}/storage/${transporteur
+                                                                            .imageUrl}',
+                                                                    width:
+                                                                        30.sp,
+                                                                    height:
+                                                                        30.sp,
+                                                                  )
+                                                                : Image.asset(
+                                                                    'assets/default-avatar.png',
+                                                                  ),
+                                                          ),
+                                                          SizedBox(width: 2.w),
+                                                          SizedBox(
+                                                            width: 40.w,
+                                                            child: Column(
+                                                              crossAxisAlignment:
+                                                                  CrossAxisAlignment
+                                                                      .start,
                                                               children: [
                                                                 Text(
-                                                                  chauffeur[
-                                                                          'rate']
-                                                                      as String,
+                                                                  transporteur
+                                                                      .username,
                                                                   style:
                                                                       TextStyle(
                                                                     fontSize:
-                                                                        17.sp,
-                                                                    color: Colors
-                                                                        .grey,
+                                                                        16.sp,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .bold,
                                                                   ),
                                                                 ),
-                                                                Icon(
-                                                                  Icons.star,
-                                                                  color: Colors
-                                                                      .amber,
-                                                                ),
-                                                              ],
-                                                            ),
-                                                          ],
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  ElevatedButton(
-                                                      style: ElevatedButton
-                                                          .styleFrom(
-                                                        fixedSize:
-                                                            Size(30.w, 4.h),
-                                                        elevation: 0,
-                                                        backgroundColor:
-                                                            kPrimaryColor,
-                                                        shape:
-                                                            RoundedRectangleBorder(
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(25),
-                                                        ),
-                                                      ),
-                                                      onPressed: () async {
-                                                        await showDialog(
-                                                          context: context,
-                                                          builder: (BuildContext
-                                                              context) {
-                                                            return Dialog(
-                                                              backgroundColor:
-                                                                  Colors.white,
-                                                              shape:
-                                                                  RoundedRectangleBorder(
-                                                                borderRadius:
-                                                                    BorderRadius
-                                                                        .circular(
-                                                                            15),
-                                                              ),
-                                                              child: Container(
-                                                                padding:
-                                                                    EdgeInsets
-                                                                        .all(
-                                                                            20),
-                                                                child: Column(
-                                                                  mainAxisSize:
-                                                                      MainAxisSize
-                                                                          .min,
+                                                                SizedBox(
+                                                                    height:
+                                                                        0.5.h),
+                                                                Row(
                                                                   children: [
-                                                                    Icon(
-                                                                      Icons
-                                                                          .check_circle,
-                                                                      color:
-                                                                          kPrimaryColor,
-                                                                      size:
-                                                                          50.sp,
-                                                                    ),
-                                                                    SizedBox(
-                                                                        height:
-                                                                            20),
                                                                     Text(
-                                                                      language ==
-                                                                              'fr'
-                                                                          ? 'Prêt à partir'
-                                                                          : 'Ready to go',
+                                                                      transporteur
+                                                                          .noteMoyenne
+                                                                          .toString(),
                                                                       style:
                                                                           TextStyle(
                                                                         fontSize:
-                                                                            20.sp,
-                                                                        fontWeight:
-                                                                            FontWeight.bold,
+                                                                            17.sp,
+                                                                        color: Colors
+                                                                            .grey,
                                                                       ),
                                                                     ),
-                                                                    SizedBox(
-                                                                        height:
-                                                                            10),
-                                                                    Text(
-                                                                      language ==
-                                                                              'fr'
-                                                                          ? 'Le chauffeur est en chemin. Merci de patienter quelques instants.'
-                                                                          : 'The driver is on the way. Please wait a few moments.',
-                                                                      textAlign:
-                                                                          TextAlign
-                                                                              .center,
-                                                                      style: TextStyle(
-                                                                          fontSize:
-                                                                              16.sp),
-                                                                    ),
-                                                                    SizedBox(
-                                                                        height:
-                                                                            20),
-                                                                    Row(
-                                                                      mainAxisAlignment:
-                                                                          MainAxisAlignment
-                                                                              .spaceEvenly,
-                                                                      children: [
-                                                                        TextButton(
-                                                                          onPressed:
-                                                                              () {
-                                                                            Navigator.of(context).pop();
-                                                                            setState(() {
-                                                                              selectedIndex = 1;
-                                                                            });
-                                                                          },
-                                                                          child:
-                                                                              Text(
-                                                                            language == 'fr'
-                                                                                ? 'Annuler'
-                                                                                : 'Cancel',
-                                                                            style:
-                                                                                TextStyle(
-                                                                              color: kSecondaryColor,
-                                                                              fontSize: 17.sp,
-                                                                              fontWeight: FontWeight.w600,
-                                                                            ),
-                                                                          ),
-                                                                        ),
-                                                                        TextButton(
-                                                                          onPressed:
-                                                                              () {
-                                                                            Navigator.of(context).pop();
-                                                                            setState(() {
-                                                                              selectedChauffeur = chauffeur['id'] as int;
-                                                                              selectedIndex = 2;
-                                                                            });
-                                                                          },
-                                                                          child:
-                                                                              Text(
-                                                                            language == 'fr'
-                                                                                ? 'Terminer'
-                                                                                : 'Finish',
-                                                                            style:
-                                                                                TextStyle(
-                                                                              color: kPrimaryColor,
-                                                                              fontSize: 17.sp,
-                                                                              fontWeight: FontWeight.w600,
-                                                                            ),
-                                                                          ),
-                                                                        ),
-                                                                      ],
+                                                                    Icon(
+                                                                      Icons
+                                                                          .star,
+                                                                      color: Colors
+                                                                          .amber,
                                                                     ),
                                                                   ],
                                                                 ),
-                                                              ),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                      ElevatedButton(
+                                                          style: ElevatedButton
+                                                              .styleFrom(
+                                                            fixedSize:
+                                                                Size(30.w, 4.h),
+                                                            elevation: 0,
+                                                            backgroundColor:
+                                                                kPrimaryColor,
+                                                            shape:
+                                                                RoundedRectangleBorder(
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          25),
+                                                            ),
+                                                          ),
+                                                          onPressed: () async {
+                                                            await showDialog(
+                                                              context: context,
+                                                              builder:
+                                                                  (BuildContext
+                                                                      context) {
+                                                                return Dialog(
+                                                                  backgroundColor:
+                                                                      Colors
+                                                                          .white,
+                                                                  shape:
+                                                                      RoundedRectangleBorder(
+                                                                    borderRadius:
+                                                                        BorderRadius.circular(
+                                                                            15),
+                                                                  ),
+                                                                  child:
+                                                                      Container(
+                                                                    padding:
+                                                                        EdgeInsets.all(
+                                                                            20),
+                                                                    child:
+                                                                        Column(
+                                                                      mainAxisSize:
+                                                                          MainAxisSize
+                                                                              .min,
+                                                                      children: [
+                                                                        Icon(
+                                                                          Icons
+                                                                              .check_circle,
+                                                                          color:
+                                                                              kPrimaryColor,
+                                                                          size:
+                                                                              50.sp,
+                                                                        ),
+                                                                        SizedBox(
+                                                                            height:
+                                                                                20),
+                                                                        Text(
+                                                                          language == 'fr'
+                                                                              ? 'Prêt à partir'
+                                                                              : 'Ready to go',
+                                                                          style:
+                                                                              TextStyle(
+                                                                            fontSize:
+                                                                                20.sp,
+                                                                            fontWeight:
+                                                                                FontWeight.bold,
+                                                                          ),
+                                                                        ),
+                                                                        SizedBox(
+                                                                            height:
+                                                                                10),
+                                                                        Text(
+                                                                          language == 'fr'
+                                                                              ? 'Le chauffeur est en chemin. Merci de patienter quelques instants.'
+                                                                              : 'The driver is on the way. Please wait a few moments.',
+                                                                          textAlign:
+                                                                              TextAlign.center,
+                                                                          style:
+                                                                              TextStyle(fontSize: 16.sp),
+                                                                        ),
+                                                                        SizedBox(
+                                                                            height:
+                                                                                20),
+                                                                        Row(
+                                                                          mainAxisAlignment:
+                                                                              MainAxisAlignment.spaceEvenly,
+                                                                          children: [
+                                                                            TextButton(
+                                                                              onPressed: () {
+                                                                                Navigator.of(context).pop();
+                                                                                setState(() {
+                                                                                  selectedIndex = 1;
+                                                                                });
+                                                                              },
+                                                                              child: Text(
+                                                                                language == 'fr' ? 'Annuler' : 'Cancel',
+                                                                                style: TextStyle(
+                                                                                  color: kSecondaryColor,
+                                                                                  fontSize: 17.sp,
+                                                                                  fontWeight: FontWeight.w600,
+                                                                                ),
+                                                                              ),
+                                                                            ),
+                                                                            TextButton(
+                                                                              onPressed: () {
+                                                                                Navigator.of(context).pop();
+                                                                                setState(() {
+                                                                                  selectedTransporteur = transporteur;
+                                                                                  selectedIndex = 2;
+                                                                                });
+                                                                              },
+                                                                              child: Text(
+                                                                                language == 'fr' ? 'Terminer' : 'Finish',
+                                                                                style: TextStyle(
+                                                                                  color: kPrimaryColor,
+                                                                                  fontSize: 17.sp,
+                                                                                  fontWeight: FontWeight.w600,
+                                                                                ),
+                                                                              ),
+                                                                            ),
+                                                                          ],
+                                                                        ),
+                                                                      ],
+                                                                    ),
+                                                                  ),
+                                                                );
+                                                              },
                                                             );
                                                           },
-                                                        );
-                                                      },
-                                                      child: Text(
-                                                        language == 'fr'
-                                                            ? 'Réserver'
-                                                            : 'Book',
-                                                        style: TextStyle(
-                                                            color: Colors.white,
-                                                            fontSize: 15.sp,
-                                                            fontWeight:
-                                                                FontWeight
-                                                                    .w600),
-                                                      )),
-                                                ],
+                                                          child: Text(
+                                                            language == 'fr'
+                                                                ? 'Réserver'
+                                                                : 'Book',
+                                                            style: TextStyle(
+                                                                color: Colors
+                                                                    .white,
+                                                                fontSize: 15.sp,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w600),
+                                                          )),
+                                                    ],
+                                                  ),
+                                                ),
                                               ),
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                    ),
-                                  )
-                                    .animate()
-                                    .slideX(duration: 500.ms, begin: 1, end: 0)
+                                            );
+                                          },
+                                        ),
+                                      ).animate().slideX(
+                                        duration: 500.ms, begin: 1, end: 0)
                                 : SizedBox(
                                         height: 42.h,
                                         width: 100.w,
@@ -1088,12 +1189,19 @@ class _SelectCarState extends State<SelectCar> {
                                               children: [
                                                 SizedBox(
                                                   width: 20.w,
-                                                  child: Image.asset(
-                                                    chauffeurs[0]['image']
-                                                        .toString(),
-                                                    width: 50.sp,
-                                                    height: 50.sp,
-                                                  ),
+                                                  child: selectedTransporteur!
+                                                                  .imageUrl !=
+                                                              null
+                                                          ? Image.network(
+                                                              '${TransporteurServices
+                                                                      .baseUrl}/storage/${selectedTransporteur!
+                                                                      .imageUrl}',
+                                                              width: 50.sp,
+                                                              height: 50.sp,
+                                                            )
+                                                          : Image.asset(
+                                                              'assets/default-avatar.png',
+                                                            ),
                                                 ),
                                                 SizedBox(width: 2.w),
                                                 Column(
@@ -1101,8 +1209,8 @@ class _SelectCarState extends State<SelectCar> {
                                                       CrossAxisAlignment.start,
                                                   children: [
                                                     Text(
-                                                      chauffeurs[0]['name']
-                                                          as String,
+                                                      selectedTransporteur!
+                                                          .username,
                                                       style: TextStyle(
                                                         fontSize: 16.sp,
                                                         fontWeight:
@@ -1113,8 +1221,9 @@ class _SelectCarState extends State<SelectCar> {
                                                     Row(
                                                       children: [
                                                         Text(
-                                                          chauffeurs[0]['rate']
-                                                              as String,
+                                                          selectedTransporteur!
+                                                              .noteMoyenne
+                                                              .toString(),
                                                           style: TextStyle(
                                                             fontSize: 16.sp,
                                                           ),
@@ -1131,10 +1240,8 @@ class _SelectCarState extends State<SelectCar> {
                                                       children: [
                                                         for (var i = 0;
                                                             i <
-                                                                double.parse(chauffeurs[0]
-                                                                            [
-                                                                            'rate']
-                                                                        .toString())
+                                                                selectedTransporteur!
+                                                                    .noteMoyenne!
                                                                     .floor();
                                                             i++)
                                                           Icon(
@@ -1145,7 +1252,9 @@ class _SelectCarState extends State<SelectCar> {
                                                     ),
                                                     SizedBox(height: 0.5.h),
                                                     Text(
-                                                      "6MH65MD",
+                                                      selectedTransporteur!
+                                                          .serviceId
+                                                          .toString(),
                                                       style: TextStyle(
                                                         fontSize: 16.sp,
                                                         fontWeight:
@@ -1155,9 +1264,29 @@ class _SelectCarState extends State<SelectCar> {
                                                     ),
                                                     SizedBox(height: 0.5.h),
                                                     Text(
-                                                      language == 'fr'
-                                                          ? 'Confort Electrique'
-                                                          : 'Electric Comfort',
+                                                      selectedTransporteur!
+                                                                  .vehiculeType ==
+                                                              "confort"
+                                                          ? language == 'fr'
+                                                              ? 'Confort Electrique'
+                                                              : 'Electric Comfort'
+                                                          : selectedTransporteur!
+                                                                      .vehiculeType ==
+                                                                  "luxe"
+                                                              ? language == 'fr'
+                                                                  ? 'Voiture confortable'
+                                                                  : 'Comfortable Car'
+                                                              : selectedTransporteur!
+                                                                          .vehiculeType ==
+                                                                      "moto"
+                                                                  ? language ==
+                                                                          'fr'
+                                                                      ? 'Moto'
+                                                                      : 'Moto'
+                                                                  : language ==
+                                                                          'fr'
+                                                                      ? 'Taxi 4 places'
+                                                                      : 'Taxi 4 places',
                                                       style: TextStyle(
                                                         fontSize: 16.sp,
                                                         color: Colors.black,

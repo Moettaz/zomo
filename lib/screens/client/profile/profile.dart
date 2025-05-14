@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:zomo/design/const.dart';
 import 'package:sizer/sizer.dart';
+import 'package:zomo/models/user.dart';
+import 'package:zomo/models/client.dart';
+import 'package:zomo/services/authserices.dart';
 import 'package:zomo/screens/auth/signin.dart';
 import 'package:zomo/screens/client/profile/change_profile.dart';
 import 'package:zomo/screens/client/profile/language_page.dart';
@@ -17,6 +20,34 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
+  Client? clientData;
+
+  @override
+  void initState() {
+    super.initState();
+    getUserData();
+  }
+
+  Future<void> getUserData() async {
+    try {
+      final response = await AuthServices.getCurrentUser();
+      if (response != null) {
+        setState(() {
+          if (response['specific_data'] != null) {
+            if (response['specific_data'] is Client) {
+              clientData = response['specific_data'];
+            } else {
+              clientData = Client.fromJson(response['specific_data']);
+            }
+          }
+        });
+      }
+    } catch (e) {
+      // ignore: avoid_print
+      print('Error getting user data: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -46,7 +77,11 @@ class _ProfilePageState extends State<ProfilePage> {
                     padding: const EdgeInsets.all(8.0),
                     child: CircleAvatar(
                       radius: 60,
-                      backgroundImage: AssetImage('assets/person.png'),
+                      backgroundImage: clientData?.imageUrl != null
+                          ? NetworkImage(AuthServices.baseUrl +
+                              "/" +
+                              clientData!.imageUrl!)
+                          : AssetImage('assets/person.png') as ImageProvider,
                     ),
                   ),
                   Column(
@@ -56,20 +91,24 @@ class _ProfilePageState extends State<ProfilePage> {
                       SizedBox(height: 1.h),
                       // Name and email
                       Text(
-                        'Nom Prénom',
+                        clientData?.username ?? 'Nom Prénom',
                         style: TextStyle(
                             fontSize: 20.sp, fontWeight: FontWeight.bold),
                       ),
                       SizedBox(height: 1.h),
                       Text(
-                        'email@example.com',
+                        clientData?.email ?? 'email@example.com',
                         style:
                             TextStyle(fontSize: 15.sp, color: Colors.grey[600]),
                       ),
                       SizedBox(height: 1.h),
                       // Edit profile button
                       ElevatedButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          Get.to(() => ChangeProfile(
+                                changingProfile: true,
+                              ));
+                        },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: kPrimaryColor,
                           shape: RoundedRectangleBorder(

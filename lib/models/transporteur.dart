@@ -10,6 +10,8 @@ class Transporteur {
   final int? serviceId;
   final bool? disponibilite;
   final double? noteMoyenne;
+  final String? gender;
+  final String? vehiculeType;
 
   Transporteur({
     this.id,
@@ -23,6 +25,8 @@ class Transporteur {
     this.serviceId,
     this.disponibilite,
     this.noteMoyenne,
+    this.gender,
+    this.vehiculeType,
   });
 
   factory Transporteur.fromJson(Map<String, dynamic> json) {
@@ -36,8 +40,10 @@ class Transporteur {
       points: json['points'],
       imageUrl: json['image_url'],
       serviceId: json['service_id'],
-      disponibilite: json['disponibilite'],
-      noteMoyenne: json['note_moyenne'],
+      disponibilite: json['disponibilite'] == 1,
+      noteMoyenne: double.parse(json['note_moyenne'].toString()),
+      gender: json['gender'],
+      vehiculeType: json['vehicule_type'],
     );
   }
 
@@ -54,6 +60,8 @@ class Transporteur {
       'service_id': serviceId,
       'disponibilite': disponibilite,
       'note_moyenne': noteMoyenne,
+      'gender': gender,
+      'vehicule_type': vehiculeType,
     };
   }
-} 
+}

@@ -6,7 +6,7 @@ import 'package:zomo/design/const.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:zomo/screens/client/navigation_screen.dart';
-import 'package:zomo/screens/auth/authserices.dart';
+import 'package:zomo/services/authserices.dart';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
@@ -129,64 +129,88 @@ class _SignInScreenState extends State<SignInScreen> {
 
   // Register function
   Future<void> _register() async {
-    if (!_registerFormKey.currentState!.validate()) {
-      return;
-    }
+    try {
+      print('Starting registration process');
+      
+      if (!_registerFormKey.currentState!.validate()) {
+        print('Form validation failed');
+        return;
+      }
 
-    if (!_acceptTerms) {
-      Get.showSnackbar(kErrorSnackBar(language == 'fr'
-          ? "Veuillez accepter les termes et conditions"
-          : "Please accept the terms and conditions"));
-      return;
-    }
-
-    setState(() {
-      _isLoggingIn = true;
-    });
-
-    int roleId;
-    switch (selectedRole) {
-      case 'Client':
-        roleId = 2; // Assuming Client role_id is 2
-        break;
-      case 'Transporteur':
-        roleId = 3; // Assuming Transporteur role_id is 3
-        break;
-      case 'Chauffeur':
-        roleId = 4; // Assuming Chauffeur role_id is 4
-        break;
-      default:
-        roleId = 2; // Default to Client
-    }
-
-    final result = await AuthServices.register(
-      name: _nomUtilisatuerController.text,
-      email: _emailController.text,
-      password: _passwordController.text,
-      passwordConfirmation: _confirmPasswordController.text,
-      roleId: roleId,
-      phone: _phoneController.text,
-    );
-
-    setState(() {
-      _isLoggingIn = false;
-    });
-
-    if (result['success']) {
-      // Show success message and switch to login
-      Get.showSnackbar(kSuccessSnackBar(language == 'fr'
-          ? "Inscription réussie ! Vous pouvez maintenant vous connecter."
-          : "Registration successful! You can now log in."));
+      if (!_acceptTerms) {
+        print('Terms not accepted');
+        Get.showSnackbar(kErrorSnackBar(language == 'fr'
+            ? "Veuillez accepter les termes et conditions"
+            : "Please accept the terms and conditions"));
+        return;
+      }
 
       setState(() {
-        selectedIndex = 0;
-        _emailController.clear();
-        _passwordController.clear();
+        _isLoggingIn = true;
       });
-    } else {
+
+      print('Selected role: $selectedRole');
+      int roleId;
+      switch (selectedRole) {
+        case 'Client':
+          roleId = 2;
+          break;
+        case 'Transporteur':
+          roleId = 3;
+          break;
+        case 'Chauffeur':
+          roleId = 4;
+          break;
+        default:
+          roleId = 2;
+      }
+      print('Determined role ID: $roleId');
+
+      print('Submitting registration with:');
+      print('Name: ${_nomUtilisatuerController.text}');
+      print('Email: ${_emailController.text}');
+      print('Phone: ${_phoneController.text}');
+
+      final result = await AuthServices.register(
+        name: _nomUtilisatuerController.text,
+        email: _emailController.text,
+        password: _passwordController.text,
+        passwordConfirmation: _confirmPasswordController.text,
+        roleId: roleId,
+        phone: _phoneController.text,
+      );
+
+      print('Registration result: $result');
+
+      setState(() {
+        _isLoggingIn = false;
+      });
+
+      if (result['success']) {
+        print('Registration successful');
+        Get.showSnackbar(kSuccessSnackBar(language == 'fr'
+            ? "Inscription réussie ! Vous pouvez maintenant vous connecter."
+            : "Registration successful! You can now log in."));
+
+        setState(() {
+          selectedIndex = 0;
+          _emailController.clear();
+          _passwordController.clear();
+        });
+      } else {
+        print('Registration failed: ${result['message']}');
+        Get.showSnackbar(kErrorSnackBar(language == 'fr'
+            ? "Échec de l'inscription : ${result['message']}"
+            : "Registration failed: ${result['message']}"));
+      }
+    } catch (e) {
+      print('Error during registration: $e');
+      setState(() {
+        _isLoggingIn = false;
+      });
       Get.showSnackbar(kErrorSnackBar(language == 'fr'
-          ? "Échec de l'inscription : ${result['message']}"
-          : "Registration failed: ${result['message']}"));
+          ? "Une erreur inattendue s'est produite"
+          : "An unexpected error occurred"));
     }
   }
 

@@ -1,0 +1,2 @@
+C:/Users/moetaz/Project/Saphir-test/zomo/android/app/.cxx/Debug/1p734y5s/armeabi-v7a/CMakeFiles/edit_cache.dir
+C:/Users/moetaz/Project/Saphir-test/zomo/android/app/.cxx/Debug/1p734y5s/armeabi-v7a/CMakeFiles/rebuild_cache.dir

@@ -6,9 +6,12 @@ import 'package:zomo/design/const.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import 'package:zomo/services/authserices.dart';
+import 'package:zomo/models/client.dart';
 
 class ChangeProfile extends StatefulWidget {
-  const ChangeProfile({super.key});
+  final bool changingProfile;
+  const ChangeProfile({super.key, this.changingProfile = false});
 
   @override
   State<ChangeProfile> createState() => _ChangeProfileState();
@@ -21,6 +24,8 @@ class _ChangeProfileState extends State<ChangeProfile> {
   final _phoneController = TextEditingController();
   final ImagePicker _picker = ImagePicker();
   File? _image;
+  bool isLoading = false;
+  Client? clientData;
 
   final _registerFormKey = GlobalKey<FormState>();
   bool _isRegisterPasswordVisible = false;
@@ -37,6 +42,7 @@ class _ChangeProfileState extends State<ChangeProfile> {
       if (pickedFile != null) {
         setState(() {
           _image = File(pickedFile.path);
+          changingProfile = true;
         });
       }
     } catch (e) {
@@ -146,12 +152,94 @@ class _ChangeProfileState extends State<ChangeProfile> {
 
   @override
   void initState() {
-    _emailController.text = 'email@example.com';
-    _passwordController.text = '12345678';
-    _nomUtilisatuerController.text = 'Nom Prénom';
-    _phoneController.text = '12345678';
-    selectedRole = 'Client';
     super.initState();
+    changingProfile = widget.changingProfile;
+    getUserData();
+  }
+
+  Future<void> getUserData() async {
+    try {
+      final response = await AuthServices.getCurrentUser();
+      if (response != null) {
+        setState(() {
+          if (response['specific_data'] != null) {
+            if (response['specific_data'] is Client) {
+              clientData = response['specific_data'];
+            } else {
+              clientData = Client.fromJson(response['specific_data']);
+            }
+
+            // Set initial values
+            _emailController.text = clientData?.email ?? '';
+            _nomUtilisatuerController.text = clientData?.username ?? '';
+            _phoneController.text = clientData?.phone ?? '';
+          }
+        });
+      }
+    } catch (e) {
+      print('Error getting user data: $e');
+    }
+  }
+
+  Future<void> updateProfile() async {
+    if (!_registerFormKey.currentState!.validate()) {
+      return;
+    }
+
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      final data = {
+        'email': _emailController.text,
+        'username': _nomUtilisatuerController.text,
+        'phone': _phoneController.text,
+      };
+
+      if (_passwordController.text.isNotEmpty) {
+        data['password'] = _passwordController.text;
+      }
+
+      final response = await AuthServices.updateClient(
+        clientData?.id ?? 0,
+        data,
+        imageFile: _image,
+      );
+
+      if (response != null && response['success'] == true) {
+        Get.showSnackbar(kErrorSnackBar(
+          language == 'fr'
+              ? 'Profil modifié avec succès !'
+              : 'Profile updated successfully!',
+          color: kPrimaryColor,
+        ));
+        setState(() {
+          changingProfile = false;
+        });
+
+        // Refresh user data
+        await getUserData();
+      } else {
+        Get.showSnackbar(kErrorSnackBar(
+          language == 'fr'
+              ? 'Erreur lors de la modification du profil'
+              : 'Error updating profile',
+          color: Colors.red,
+        ));
+      }
+    } catch (e) {
+      Get.showSnackbar(kErrorSnackBar(
+        language == 'fr'
+            ? 'Erreur lors de la modification du profil'
+            : 'Error updating profile',
+        color: Colors.red,
+      ));
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 
   @override
@@ -235,7 +323,9 @@ class _ChangeProfileState extends State<ChangeProfile> {
                   child: Column(
                     children: [
                       Text(
-                        language == 'fr' ? 'Nom Prénom' : 'Name Surname',
+                        language == 'fr'
+                            ? clientData?.username ?? 'Nom Prénom'
+                            : clientData?.username ?? 'Name Surname',
                         style: TextStyle(
                           fontSize: 15.sp,
                           fontWeight: FontWeight.bold,
@@ -243,8 +333,8 @@ class _ChangeProfileState extends State<ChangeProfile> {
                       ),
                       Text(
                         language == 'fr'
-                            ? 'email@example.com'
-                            : 'email@example.com',
+                            ? clientData?.email ?? 'email@example.com'
+                            : clientData?.email ?? 'email@example.com',
                         style: TextStyle(
                           fontSize: 15.sp,
                           fontWeight: FontWeight.normal,
@@ -373,19 +463,6 @@ class _ChangeProfileState extends State<ChangeProfile> {
                           cursorColor: kPrimaryColor,
                           controller: _passwordController,
                           obscureText: _isRegisterPasswordVisible,
-                          validator: (value) {
-                            if (value!.isEmpty) {
-                              return language == 'fr'
-                                  ? 'Mot de passe est obligatoire'
-                                  : 'Password is required';
-                            }
-                            if (value.length < 8) {
-                              return language == 'fr'
-                                  ? 'Mot de passe doit contenir au moins 8 caractères'
-                                  : 'Password must contain at least 8 characters';
-                            }
-                            return null;
-                          },
                           decoration: InputDecoration(
                             labelText:
                                 language == 'fr' ? 'Mot de passe' : 'Password',
@@ -550,24 +627,17 @@ class _ChangeProfileState extends State<ChangeProfile> {
                       Padding(
                         padding: EdgeInsets.symmetric(horizontal: 15.sp),
                         child: ElevatedButton(
-                          onPressed: () {
-                            if (changingProfile) {
-                              if (_registerFormKey.currentState!.validate()) {
-                                Get.showSnackbar(kErrorSnackBar(
-                                    language == 'fr'
-                                        ? 'Profil modifié avec succès !'
-                                        : 'Profile updated successfully !',
-                                    color: kPrimaryColor));
-                                setState(() {
-                                  changingProfile = false;
-                                });
-                              }
-                            } else {
-                              setState(() {
-                                changingProfile = true;
-                              });
-                            }
-                          },
+                          onPressed: isLoading
+                              ? null
+                              : () {
+                                  if (changingProfile) {
+                                    updateProfile();
+                                  } else {
+                                    setState(() {
+                                      changingProfile = true;
+                                    });
+                                  }
+                                },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: kPrimaryColor,
                             fixedSize: Size(70.w, 6.h),
@@ -575,19 +645,21 @@ class _ChangeProfileState extends State<ChangeProfile> {
                               borderRadius: BorderRadius.circular(25),
                             ),
                           ),
-                          child: Text(
-                            changingProfile
-                                ? language == 'fr'
-                                    ? 'Enregistrer'
-                                    : 'Save'
-                                : language == 'fr'
-                                    ? 'Modifier le profil'
-                                    : 'Edit profile',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16.sp,
-                            ),
-                          ),
+                          child: isLoading
+                              ? CircularProgressIndicator(color: Colors.white)
+                              : Text(
+                                  changingProfile
+                                      ? language == 'fr'
+                                          ? 'Enregistrer'
+                                          : 'Save'
+                                      : language == 'fr'
+                                          ? 'Modifier le profil'
+                                          : 'Edit profile',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16.sp,
+                                  ),
+                                ),
                         ),
                       ),
                       SizedBox(height: 5.h),
@@ -610,8 +682,9 @@ class _ChangeProfileState extends State<ChangeProfile> {
                 CircleAvatar(
                   radius: 30.sp,
                   backgroundColor: Colors.white,
-                  backgroundImage: _image != null
-                      ? FileImage(_image!)
+                  backgroundImage: clientData?.imageUrl != null
+                      ? NetworkImage(
+                          AuthServices.baseUrl + "/" + clientData!.imageUrl!)
                       : AssetImage('assets/person.png') as ImageProvider,
                 ),
                 Positioned(

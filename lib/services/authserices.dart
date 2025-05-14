@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:zomo/models/client.dart';
@@ -8,8 +9,8 @@ import 'package:zomo/models/user.dart';
 
 class AuthServices {
   // Base URL for the API
-  static const String baseUrl = 'http://your-backend-url.com/api';
-  
+  static const String baseUrl = 'http://10.0.2.2:8000';
+
   // Registration method
   static Future<Map<String, dynamic>> register({
     required String name,
@@ -20,10 +21,17 @@ class AuthServices {
     required String phone,
   }) async {
     try {
+      print('Attempting registration with:');
+      print('Name: $name');
+      print('Email: $email');
+      print('Role ID: $roleId');
+      print('Phone: $phone');
+
       final response = await http.post(
-        Uri.parse('$baseUrl/register'),
+        Uri.parse('$baseUrl/api/register'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
+          'Accept': 'application/json',
         },
         body: jsonEncode(<String, dynamic>{
           'name': name,
@@ -35,9 +43,13 @@ class AuthServices {
         }),
       );
 
+      print('Response status code: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
       final responseData = jsonDecode(response.body);
-      
+
       if (response.statusCode == 201) {
+        print('Registration successful');
         // Registration successful
         await _saveUserData(responseData);
         return {
@@ -45,6 +57,7 @@ class AuthServices {
           'data': responseData,
         };
       } else {
+        print('Registration failed with status code: ${response.statusCode}');
         // Registration failed
         return {
           'success': false,
@@ -52,6 +65,7 @@ class AuthServices {
         };
       }
     } catch (e) {
+      print('Registration error: $e');
       return {
         'success': false,
         'message': 'Network error: $e',
@@ -66,9 +80,10 @@ class AuthServices {
   }) async {
     try {
       final response = await http.post(
-        Uri.parse('$baseUrl/login'),
+        Uri.parse('$baseUrl/api/login'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
+          'Accept': 'application/json',
         },
         body: jsonEncode(<String, String>{
           'email': email,
@@ -77,7 +92,7 @@ class AuthServices {
       );
 
       final responseData = jsonDecode(response.body);
-      
+
       if (response.statusCode == 200) {
         // Login successful
         await _saveUserData(responseData);
@@ -103,22 +118,23 @@ class AuthServices {
   // Helper method to save user data in SharedPreferences
   static Future<void> _saveUserData(Map<String, dynamic> data) async {
     final prefs = await SharedPreferences.getInstance();
-    
+
     // Save token
     await prefs.setString('token', data['token']);
-    
+
     // Save user data
     if (data['user'] != null) {
       await prefs.setString('user', jsonEncode(data['user']));
-      
+
       // Save role ID for easy access
       final user = User.fromJson(data['user']);
       await prefs.setInt('role_id', user.roleId);
-      
+
       // If role-specific data is available, save it based on role
       if (data['specific_data'] != null) {
-        await prefs.setString('specific_data', jsonEncode(data['specific_data']));
-        
+        await prefs.setString(
+            'specific_data', jsonEncode(data['specific_data']));
+
         if (user.role != null) {
           switch (user.role!.slug) {
             case 'client':
@@ -139,22 +155,22 @@ class AuthServices {
   // Method to get the current user from SharedPreferences
   static Future<Map<String, dynamic>?> getCurrentUser() async {
     final prefs = await SharedPreferences.getInstance();
-    
+
     final token = prefs.getString('token');
     final userData = prefs.getString('user');
     final specificData = prefs.getString('specific_data');
     final userType = prefs.getString('user_type');
-    
+
     if (token == null || userData == null) {
       return null; // Not logged in
     }
-    
+
     final user = User.fromJson(jsonDecode(userData));
-    
+
     dynamic typedSpecificData;
     if (specificData != null && userType != null) {
       final decodedData = jsonDecode(specificData);
-      
+
       switch (userType) {
         case 'client':
           typedSpecificData = Client.fromJson(decodedData);
@@ -167,7 +183,7 @@ class AuthServices {
           break;
       }
     }
-    
+
     return {
       'user': user,
       'token': token,
@@ -184,5 +200,47 @@ class AuthServices {
     await prefs.remove('specific_data');
     await prefs.remove('user_type');
     await prefs.remove('role_id');
+  }
+
+  static Future<Map<String, dynamic>?> updateClient(
+      int id, Map<String, String> data,
+      {File? imageFile}) async {
+    try {
+      var request =
+          http.MultipartRequest('POST', Uri.parse('$baseUrl/api/clients/$id'));
+      request.fields.addAll(data);
+
+      // Add _method field to simulate PUT request
+      request.fields['_method'] = 'PUT';
+
+      // If image file is provided, attach it to the request
+      if (imageFile != null) {
+        request.files.add(await http.MultipartFile.fromPath(
+          'image',
+          imageFile.path,
+        ));
+      }
+      final prefs = await SharedPreferences.getInstance();
+
+      // Add authorization header
+      String? token = await prefs.getString('token');
+      if (token != null) {
+        request.headers.addAll({
+          'Authorization': 'Bearer $token',
+        });
+      }
+
+      var streamedResponse = await request.send();
+      var response = await http.Response.fromStream(streamedResponse);
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        throw Exception('Failed to update client: ${response.body}');
+      }
+    } catch (e) {
+      print('Error updating client: $e');
+      return null;
+    }
   }
 }
