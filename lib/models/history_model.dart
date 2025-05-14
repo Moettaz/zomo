@@ -1,57 +1,83 @@
-class HistoryModel {
-  final String title;
-  final String demandeId;
-  final String date;
-  final String time;
-  final String transporteur;
-  final String emplacement;
-  final String point;
-  final String status;
-  final double amount;
-  final bool isTransporteur;
+import 'package:zomo/models/client.dart';
+import 'package:zomo/models/transporteur.dart';
 
+class HistoryModel {
+  final int id;
+  final int clientId;
+  final int transporteurId;
+  final int serviceId;
+  final DateTime departureDateTime;
+  final DateTime arrivalDateTime;
+  final String startPoint;
+  final String endPoint;
+  final double price;
+  final String? note;
+  final String status;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final Transporteur? transporteur;
+  final Client? client;
   HistoryModel({
-    required this.isTransporteur,
-    required this.title,
-    required this.demandeId,
-    required this.date,
-    required this.time,
-    required this.transporteur,
-    required this.emplacement,
-    required this.point,
+    required this.id,
+    required this.clientId,
+    required this.transporteurId,
+    required this.serviceId,
+    required this.departureDateTime,
+    required this.arrivalDateTime,
+    required this.startPoint,
+    required this.endPoint,
+    required this.price,
+    this.note,
     required this.status,
-    required this.amount,
+    required this.createdAt,
+    required this.updatedAt,
+    this.transporteur,
+    this.client,
   });
 
   // Convert Map to HistoryModel
-  factory HistoryModel.fromMap(Map<String, dynamic> map) {
+  factory HistoryModel.fromJson(Map<String, dynamic> json) {
     return HistoryModel(
-      isTransporteur: map["isTansporteur"] as bool,
-      title: map['title'] as String,
-      demandeId: map['demandeId'] as String,
-      date: map['date'] as String,
-      time: map['time'] as String,
-      transporteur: map['transporteur'] as String,
-      emplacement: map['emplacement'] as String,
-      point: map['point'] as String,
-      status: map['status'] as String,
-      amount: (map['amount'] as num).toDouble(),
+      id: json['id'] as int,
+      clientId: json['client_id'] as int,
+      transporteurId: json['transporteur_id'] as int,
+      serviceId: json['service_id'] as int,
+      departureDateTime: DateTime.parse(json['date_heure_depart']),
+      arrivalDateTime: DateTime.parse(json['date_heure_arrivee']),
+      startPoint: json['point_depart'] as String,
+      endPoint: json['point_arrivee'] as String,
+      price: double.parse(json['prix'].toString()),
+      note: json['note'] as String?,
+      status: json['etat'] as String,
+      createdAt: DateTime.parse(json['created_at']),
+      updatedAt: DateTime.parse(json['updated_at']),
+      transporteur: json['transporteur'] != null
+          ? Transporteur.fromJson(json['transporteur'])
+          : null,
+      client: json['client'] != null
+          ? Client.fromJson(json['client'])
+          : null,
     );
   }
 
   // Convert HistoryModel to Map
-  Map<String, dynamic> toMap() {
+  Map<String, dynamic> toJson() {
     return {
-      'title': title,
-      'demandeId': demandeId,
-      'isTransporteur' :isTransporteur,
-      'date': date,
-      'time': time,
-      'transporteur': transporteur,
-      'emplacement': emplacement,
-      'point': point,
-      'status': status,
-      'amount': amount,
+      'id': id,
+      'client_id': clientId,
+      'transporteur_id': transporteurId,
+      'service_id': serviceId,
+      'date_heure_depart': departureDateTime.toIso8601String(),
+      'date_heure_arrivee': arrivalDateTime.toIso8601String(),
+      'point_depart': startPoint,
+      'point_arrivee': endPoint,
+      'prix': price,
+      'note': note,
+      'etat': status,
+      'created_at': createdAt.toIso8601String(),
+      'updated_at': updatedAt.toIso8601String(),
+      'transporteur': transporteur?.toJson(),
+      'client': client?.toJson(),
     };
   }
 }

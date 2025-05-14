@@ -3,10 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
 import 'package:sizer/sizer.dart';
 import 'package:zomo/design/const.dart';
+import 'package:zomo/models/client.dart';
 import 'package:zomo/screens/client/history_page.dart';
 import 'package:zomo/screens/client/home.dart';
 import 'package:zomo/screens/client/notification_screen.dart';
 import 'package:zomo/screens/client/profile/profile.dart';
+import 'package:zomo/services/authserices.dart';
 
 class NavigationScreen extends StatefulWidget {
   final int? index;
@@ -17,8 +19,30 @@ class NavigationScreen extends StatefulWidget {
   State<NavigationScreen> createState() => _NavigationScreenState();
 }
 
+Client? clientData;
+
 class _NavigationScreenState extends State<NavigationScreen>
     with SingleTickerProviderStateMixin {
+  Future<void> getUserData() async {
+    try {
+      final response = await AuthServices.getCurrentUser();
+      if (response != null) {
+        setState(() {
+          if (response['specific_data'] != null) {
+            if (response['specific_data'] is Client) {
+              clientData = response['specific_data'];
+            } else {
+              clientData = Client.fromJson(response['specific_data']);
+            }
+          }
+        });
+      }
+    } catch (e) {
+      // ignore: avoid_print
+      print('Error getting user data: $e');
+    }
+  }
+
   int _selectedIndex = 0;
   late TabController _tabController;
   final List<Color> colors = [
@@ -30,6 +54,8 @@ class _NavigationScreenState extends State<NavigationScreen>
 
   @override
   void initState() {
+    getUserData();
+
     _selectedIndex = widget.index ?? 0;
     _tabController =
         TabController(length: 4, vsync: this, initialIndex: _selectedIndex);

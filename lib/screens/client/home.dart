@@ -104,11 +104,12 @@ class _HomePageState extends State<HomePage> {
                       fixedSize: Size(60.w, 7.h),
                       elevation: 0,
                       backgroundColor: kPrimaryColor,
+                      foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(25),
                       ),
                     ),
-                    child: Text('Valider'),
+                    child: Text(language == 'fr' ? 'Valider' : 'Validate'),
                   ),
                 ],
               ),

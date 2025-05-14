@@ -52,6 +52,7 @@ dependencies:
   # geolocator: ^10.1.0
   flutter_polyline_points: ^2.0.0
   google_places_flutter: ^2.0.8
+  http: ^1.4.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

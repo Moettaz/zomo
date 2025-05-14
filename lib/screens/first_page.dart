@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:sizer/sizer.dart';
 import 'package:zomo/design/const.dart';
+import 'package:zomo/models/client.dart';
 import 'package:zomo/screens/auth/signin.dart';
+import 'package:zomo/screens/client/navigation_screen.dart';
+import 'package:zomo/services/authserices.dart';
 
 class FirstPage extends StatefulWidget {
   const FirstPage({super.key});
@@ -12,6 +15,32 @@ class FirstPage extends StatefulWidget {
 }
 
 class _FirstPageState extends State<FirstPage> {
+  @override
+  void initState() {
+    super.initState();
+    getUserData();
+  }
+
+  Future<void> getUserData() async {
+    try {
+      final response = await AuthServices.getCurrentUser();
+      if (response != null) {
+        setState(() {
+          if (response['specific_data'] != null) {
+            if (response['specific_data'] is Client) {
+              clientData = response['specific_data'];
+            } else {
+              clientData = Client.fromJson(response['specific_data']);
+            }
+          }
+        });
+      }
+    } catch (e) {
+      // ignore: avoid_print
+      print('Error getting user data: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:sizer/sizer.dart';
 import 'package:zomo/design/const.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:zomo/models/history_model.dart';
+import 'package:zomo/screens/client/navigation_screen.dart';
+import 'package:zomo/services/trajetservices.dart';
 
 class Historypage extends StatefulWidget {
   const Historypage({super.key});
@@ -12,33 +15,41 @@ class Historypage extends StatefulWidget {
 }
 
 class _HistorypageState extends State<Historypage> {
-  bool empty = false;
-  List<HistoryModel> history = [
-    HistoryModel(
-      isTransporteur: true,
-      title: 'Livraison 8kg',
-      demandeId: 'Demande #002',
-      date: '20 avril 2025',
-      time: '15:20',
-      transporteur: 'Aziz',
-      emplacement: 'Tunis, Bab Saadoun - Alger, El Harrach',
-      point: '10',
-      status: 'En cours',
-      amount: 90,
-    ),
-    HistoryModel(
-      isTransporteur: false,
-      title: 'Trajet VTC',
-      demandeId: 'Demande #001',
-      date: '18 avril 2025',
-      time: '11:00',
-      transporteur: 'Chiheb',
-      emplacement: 'Tunis, Bab Saadoun - Alger, El Harrach',
-      point: '10',
-      status: 'En cours',
-      amount: 90,
-    ),
-  ];
+  bool loading = false;
+  List<HistoryModel> history = [];
+  @override
+  void initState() {
+    super.initState();
+    getHistory();
+  }
+
+  Future<void> getHistory() async {
+    try {
+      setState(() {
+        loading = true;
+      });
+      final result = await TrajetServices.getTrajetsByClient(clientData!.id!);
+      setState(() {
+        loading = false;
+      });
+      if (result['success']) {
+        setState(() {
+          history = (result['data'] as List)
+              .map((item) => HistoryModel.fromJson(item))
+              .toList();
+        });
+      } else {
+        setState(() {
+          loading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        loading = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -94,33 +105,34 @@ class _HistorypageState extends State<Historypage> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   SizedBox(height: 3.h),
-                  InkWell(
-                    onTap: () => setState(() {
-                      empty = !empty;
-                    }),
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 5.w),
-                      child: Text(
-                        language == 'fr' ? 'Historique' : 'History',
-                        style: TextStyle(
-                          fontSize: 18.sp,
-                          fontWeight: FontWeight.bold,
-                        ),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 5.w),
+                    child: Text(
+                      language == 'fr' ? 'Historique' : 'History',
+                      style: TextStyle(
+                        fontSize: 18.sp,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
-                  SizedBox(height: empty ? 20.h : 1.h),
-                  empty
-                      ? Center(child: _buildEmptyState())
-                      : SizedBox(
-                          height: 70.h,
-                          child: ListView.builder(
-                            itemCount: history.length,
-                            itemBuilder: (context, index) {
-                              return historyItem(history[index]);
-                            },
+                  SizedBox(height: history.isEmpty ? 20.h : 1.h),
+                  loading
+                      ? Center(
+                          child: CircularProgressIndicator(
+                            color: kPrimaryColor,
                           ),
                         )
+                      : history.isEmpty
+                          ? Center(child: _buildEmptyState())
+                          : SizedBox(
+                              height: 70.h,
+                              child: ListView.builder(
+                                itemCount: history.length,
+                                itemBuilder: (context, index) {
+                                  return historyItem(history[index]);
+                                },
+                              ),
+                            )
                 ],
               ).animate().slideX(duration: 500.ms, begin: -1, end: 0),
             ),
@@ -218,29 +230,29 @@ class _HistorypageState extends State<Historypage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(history.title,
+                  Text(history.startPoint,
                       style: TextStyle(
                         fontSize: 18.sp,
                         fontWeight: FontWeight.bold,
                       )),
                   SizedBox(height: 1.h),
-                  Text(history.demandeId),
+                  Text(history.endPoint),
                   SizedBox(height: 1.h),
-                  Text('${history.date} ${history.time}'),
+                  Text(
+                      '${history.departureDateTime.toString().substring(0, 16)}\n${history.arrivalDateTime.toString().substring(0, 16)}'),
                   SizedBox(height: 1.h),
                   Row(
                     children: [
                       Text(
-                        language == 'fr'
-                            ? '${history.isTransporteur ? 'Transporteur' : 'Chauffeur'} : '
-                            : '${history.isTransporteur ? 'Driver' : 'Transporteur'} : ',
+                        language == 'fr' ? 'Chauffeur ' : 'Transporteur ',
                         style: TextStyle(
                           fontSize: 14.sp,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       Text(
-                        history.transporteur,
+                        history.transporteur!.username.capitalizeFirst!
+                            .replaceAll('_', ' '),
                         style: TextStyle(
                           fontSize: 14.sp,
                           fontWeight: FontWeight.bold,
@@ -251,8 +263,8 @@ class _HistorypageState extends State<Historypage> {
                   SizedBox(height: 1.h),
                   Text(
                       language == 'fr'
-                          ? "${history.amount.toString()} TND"
-                          : "${history.amount.toString()} DT",
+                          ? "${history.price.toString()} TND"
+                          : "${history.price.toString()} DT",
                       style: TextStyle(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.bold,
@@ -266,19 +278,16 @@ class _HistorypageState extends State<Historypage> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text(history.status,
+                  Text(history.status.capitalizeFirst!.replaceAll('_', ' '),
                       style: TextStyle(
-                        fontSize: 14.sp,
+                        fontSize: 17.sp,
                         color: kPrimaryColor,
                         fontWeight: FontWeight.bold,
                       )),
                   SizedBox(height: 12.h),
-                  Text(
-                      language == 'fr'
-                          ? "+ ${history.point} Pts"
-                          : "+ ${history.point} Points",
+                  Text(language == 'fr' ? "+ 115 points" : "+ 115 points",
                       style: TextStyle(
-                        fontSize: 14.sp,
+                        fontSize: 15.sp,
                         fontWeight: FontWeight.bold,
                       )),
                 ],
