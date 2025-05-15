@@ -6,6 +6,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 // ignore: depend_on_referenced_packages
 import 'package:intl/intl.dart';
 import 'package:zomo/screens/client/navigation_screen.dart';
+import 'package:zomo/services/reservationservices.dart';
 
 class Reservation extends StatefulWidget {
   const Reservation({super.key});
@@ -86,6 +87,21 @@ class _ReservationState extends State<Reservation> {
       'vehicle': 'Camionnette',
     },
   ];
+  Future<void> storeReservation() async {
+    final reservation = await ReservationServices.storeReservation(
+      clientId: clientId,
+      transporteurId: chauffeurId,
+      serviceId: serviceId,
+      typeMenagement: selectedType,
+      typeVehicule: selectedSize,
+      distance: selectedDistance,
+      from: fromController.text,
+      to: destinationController.text,
+      heureReservation: '$selectedHour:$selectedMinute $selectedPeriod',
+      etage: selectedFloor,
+    );
+  }
+
   int selectedChauffeur = 0;
   void resetAll() {
     resetAddressSection();
