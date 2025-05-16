@@ -718,12 +718,20 @@ class _ReservationState extends State<Reservation> {
                                               }
                                               return null;
                                             },
+                                            onChanged: (value) {
+                                              setState(() {
+                                                fromController.text = value;
+                                              });
+                                              print(value);
+                                            },
                                             style: TextStyle(
-                                                fontSize: 15.sp,
+                                                fontSize: 10.sp,
                                                 fontWeight: FontWeight.bold,
                                                 color: Colors.black),
                                             cursorColor: Colors.black,
                                             decoration: InputDecoration(
+                                              fillColor: Colors.white,
+                                              filled: true,
                                               border: OutlineInputBorder(
                                                 borderRadius:
                                                     BorderRadius.circular(
