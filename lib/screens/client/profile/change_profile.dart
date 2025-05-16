@@ -5,6 +5,7 @@ import 'package:sizer/sizer.dart';
 import 'package:zomo/design/const.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:zomo/screens/client/navigation_screen.dart';
 import 'dart:io';
 import 'package:zomo/services/authserices.dart';
 import 'package:zomo/models/client.dart';
@@ -179,6 +180,10 @@ class _ChangeProfileState extends State<ChangeProfile> {
     } catch (e) {
       // ignore: avoid_print
       print('Error getting user data: $e');
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
     }
   }
 
@@ -221,6 +226,7 @@ class _ChangeProfileState extends State<ChangeProfile> {
 
         // Refresh user data
         await getUserData();
+        Get.offAll(() => NavigationScreen(index: 3));
       } else {
         Get.showSnackbar(kErrorSnackBar(
           language == 'fr'
@@ -683,10 +689,12 @@ class _ChangeProfileState extends State<ChangeProfile> {
                 CircleAvatar(
                   radius: 30.sp,
                   backgroundColor: Colors.white,
-                  backgroundImage: clientData?.imageUrl != null
-                      ? NetworkImage(
-                          "${AuthServices.baseUrl}/${clientData!.imageUrl!}")
-                      : AssetImage('assets/person.png') as ImageProvider,
+                  backgroundImage: _image != null
+                      ? FileImage(_image!)
+                      : clientData?.imageUrl != null
+                          ? NetworkImage(
+                              "${AuthServices.baseUrl}/${clientData!.imageUrl!}")
+                          : AssetImage('assets/person.png') as ImageProvider,
                 ),
                 Positioned(
                   bottom: 0,

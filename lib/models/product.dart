@@ -1,10 +1,11 @@
 class Product {
   final int? id;
   final String name;
-
+  final String? image;
   Product({
     this.id,
     required this.name,
+    this.image,
   });
 
   factory Product.fromJson(Map<String, dynamic> json) {
@@ -20,4 +21,4 @@ class Product {
       'name': name,
     };
   }
-} 
+}

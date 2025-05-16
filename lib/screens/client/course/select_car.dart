@@ -1476,8 +1476,8 @@ class _SelectCarState extends State<SelectCar> {
                                                                   Text(
                                                                     language ==
                                                                             'fr'
-                                                                        ? 'Vous avez gagné x points'
-                                                                        : 'You have won x points',
+                                                                        ? 'Vous avez gagné 15 points'
+                                                                        : 'You have won 15 points',
                                                                     textAlign:
                                                                         TextAlign
                                                                             .center,

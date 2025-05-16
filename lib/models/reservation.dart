@@ -1,4 +1,6 @@
+import 'package:zomo/models/client.dart';
 import 'package:zomo/models/product.dart';
+import 'package:zomo/models/transporteur.dart';
 
 class Reservation {
   final int? id;
@@ -8,14 +10,17 @@ class Reservation {
   final String dateReservation;
   final String status;
   final String? commentaire;
-  final String typeMenagement;
-  final String typeVehicule;
-  final double distance;
+  final String? colisSize;
+  final String? typeMenagement;
+  final String? typeVehicule;
+  final String? distance;
   final String from;
   final String to;
-  final String heureReservation;
-  final int etage;
-  final List<Product> products;
+  final String? heureReservation;
+  final int? etage;
+  final List<Product>? products;
+  final Client? client;
+  final Transporteur? transporteur;
 
   Reservation({
     this.id,
@@ -25,14 +30,17 @@ class Reservation {
     required this.dateReservation,
     required this.status,
     this.commentaire,
-    required this.typeMenagement,
-    required this.typeVehicule,
-    required this.distance,
+    this.colisSize,
+    this.typeMenagement,
+    this.typeVehicule,
+    this.distance,
     required this.from,
     required this.to,
-    required this.heureReservation,
-    required this.etage,
-    required this.products,
+    this.heureReservation,
+    this.etage,
+    this.products,
+    this.client,
+    this.transporteur,
   });
 
   factory Reservation.fromJson(Map<String, dynamic> json) {
@@ -44,9 +52,10 @@ class Reservation {
       dateReservation: json['date_reservation'],
       status: json['status'],
       commentaire: json['commentaire'],
+      colisSize: json['colis_size'],
       typeMenagement: json['type_menagement'],
       typeVehicule: json['type_vehicule'],
-      distance: json['distance'].toDouble(),
+      distance: json['distance'],
       from: json['from'],
       to: json['to'],
       heureReservation: json['heure_reservation'],
@@ -55,6 +64,10 @@ class Reservation {
               ?.map((product) => Product.fromJson(product))
               .toList() ??
           [],
+      client: json['client'] != null ? Client.fromJson(json['client']) : null,
+      transporteur: json['transporteur'] != null
+          ? Transporteur.fromJson(json['transporteur'])
+          : null,
     );
   }
 
@@ -67,6 +80,7 @@ class Reservation {
       'date_reservation': dateReservation,
       'status': status,
       if (commentaire != null) 'commentaire': commentaire,
+      'colis_size': colisSize,
       'type_menagement': typeMenagement,
       'type_vehicule': typeVehicule,
       'distance': distance,
@@ -74,7 +88,7 @@ class Reservation {
       'to': to,
       'heure_reservation': heureReservation,
       'etage': etage,
-      'products': products.map((product) => product.toJson()).toList(),
+      'products': products?.map((product) => product.toJson()).toList(),
     };
   }
 }

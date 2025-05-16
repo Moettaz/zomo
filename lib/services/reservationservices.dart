@@ -16,27 +16,32 @@ class ReservationServices {
     required String dateReservation,
     required String status,
     String? commentaire,
-    required String typeMenagement,
-    required String typeVehicule,
-    required double distance,
+    String? colisSize,
+    String? typeMenagement,
+    String? typeVehicule,
+    String? distance,
     required String from,
     required String to,
-    required String heureReservation,
-    required int etage,
-    required List<Product> products,
+    String? heureReservation,
+    int? etage,   
+    List<Product>? products,
   }) async {
     try {
       // Input validation
       if (clientId <= 0) throw Exception('Invalid client ID');
       if (transporteurId <= 0) throw Exception('Invalid transporteur ID');
       if (serviceId <= 0) throw Exception('Invalid service ID');
-      if (dateReservation.isEmpty) throw Exception('Date reservation cannot be empty');
+      if (dateReservation.isEmpty)
+        throw Exception('Date reservation cannot be empty');
       if (status.isEmpty) throw Exception('Status cannot be empty');
-      if (typeMenagement.isEmpty) throw Exception('Type menagement cannot be empty');
-      if (typeVehicule.isEmpty) throw Exception('Type vehicule cannot be empty');
+      if (typeMenagement != null && typeMenagement.isEmpty)
+        throw Exception('Type menagement cannot be empty');
+      if (typeVehicule != null && typeVehicule.isEmpty)
+        throw Exception('Type vehicule cannot be empty');
       if (from.isEmpty) throw Exception('From location cannot be empty');
       if (to.isEmpty) throw Exception('To location cannot be empty');
-      if (heureReservation.isEmpty) throw Exception('Heure reservation cannot be empty');
+      if (heureReservation != null && heureReservation.isEmpty)
+        throw Exception('Heure reservation cannot be empty');
 
       // Get the token from SharedPreferences
       final prefs = await SharedPreferences.getInstance();
@@ -71,14 +76,16 @@ class ReservationServices {
           'date_reservation': dateReservation,
           'status': status,
           if (commentaire != null) 'commentaire': commentaire,
-          'type_menagement': typeMenagement,
-          'type_vehicule': typeVehicule,
-          'distance': distance,
+          if (colisSize != null) 'colis_size': colisSize,
+          if (typeMenagement != null) 'type_menagement': typeMenagement,
+          if (typeVehicule != null) 'type_vehicule': typeVehicule,
+          if (distance != null) 'distance': distance,
           'from': from,
           'to': to,
-          'heure_reservation': heureReservation,
-          'etage': etage,
-          'products': products.map((product) => product.toJson()).toList(),
+          if (heureReservation != null) 'heure_reservation': heureReservation,
+          if (etage != null) 'etage': etage,
+          if (products != null)
+            'products': products.map((product) => product.toJson()).toList(),
         }),
       );
 
@@ -94,10 +101,11 @@ class ReservationServices {
           'data': Reservation.fromJson(responseData['data']),
         };
       } else {
-        print('Failed to create reservation. Status code: ${response.statusCode}');
+        print(
+            'Failed to create reservation. Status code: ${response.statusCode}');
         print('Error message: ${responseData['message']}');
         print('Error details: ${responseData['errors']}');
-        
+
         return {
           'success': false,
           'message': responseData['message'] ?? 'Failed to create reservation',
@@ -110,7 +118,7 @@ class ReservationServices {
       print(e);
       print('Stack trace:');
       print(stackTrace);
-      
+
       return {
         'success': false,
         'message': 'Network error: $e',
@@ -120,7 +128,8 @@ class ReservationServices {
   }
 
   // Get all reservations for a transporteur
-  static Future<Map<String, dynamic>> getReservationsByTransporteur(int transporteurId) async {
+  static Future<Map<String, dynamic>> getReservationsByTransporteur(
+      int transporteurId) async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token');
@@ -165,7 +174,8 @@ class ReservationServices {
   }
 
   // Get all reservations for a client
-  static Future<Map<String, dynamic>> getReservationsByClient(int clientId) async {
+  static Future<Map<String, dynamic>> getReservationsByClient(
+      int clientId) async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token');
@@ -177,6 +187,9 @@ class ReservationServices {
         };
       }
 
+      print('Fetching reservations for client $clientId');
+      print('Using token: $token');
+
       final response = await http.get(
         Uri.parse('$baseUrl/api/reservations/client/$clientId'),
         headers: <String, String>{
@@ -185,23 +198,36 @@ class ReservationServices {
         },
       );
 
+      print('Response status code: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
       final responseData = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
-        final List<Reservation> reservations = (responseData['data'] as List)
-            .map((json) => Reservation.fromJson(json))
+        final List<dynamic> data = responseData['data'] as List;
+        print('Number of reservations: ${data.length}');
+        
+        final List<Reservation> reservations = data
+            .map((json) {
+              print('Processing reservation: $json');
+              return Reservation.fromJson(json);
+            })
             .toList();
+            
         return {
           'success': true,
           'data': reservations,
         };
       } else {
+        print('Error response: $responseData');
         return {
           'success': false,
           'message': responseData['message'] ?? 'Failed to fetch reservations',
         };
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
+      print('Error fetching reservations: $e');
+      print('Stack trace: $stackTrace');
       return {
         'success': false,
         'message': 'Network error: $e',
@@ -294,7 +320,8 @@ class ReservationServices {
         if (to != null) 'to': to,
         if (heureReservation != null) 'heure_reservation': heureReservation,
         if (etage != null) 'etage': etage,
-        if (products != null) 'products': products.map((product) => product.toJson()).toList(),
+        if (products != null)
+          'products': products.map((product) => product.toJson()).toList(),
       };
 
       final response = await http.put(
@@ -330,7 +357,8 @@ class ReservationServices {
   }
 
   // Delete a reservation
-  static Future<Map<String, dynamic>> deleteReservation(int reservationId) async {
+  static Future<Map<String, dynamic>> deleteReservation(
+      int reservationId) async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token');
