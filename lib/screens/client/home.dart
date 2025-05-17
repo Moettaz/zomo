@@ -9,11 +9,14 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:zomo/screens/client/colis/colis.dart';
 import 'package:zomo/screens/client/course/select_car.dart';
 import 'package:zomo/screens/client/demenagement/reservation.dart';
+import 'package:zomo/screens/client/navigation_screen.dart';
+import 'package:zomo/services/transporteurservices.dart';
 
 // ignore: must_be_immutable
 class HomePage extends StatefulWidget {
-  bool showDialog;
-  HomePage({super.key, this.showDialog = false});
+  const HomePage({
+    super.key,
+  });
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -25,11 +28,14 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    if (widget.showDialog) {
+    if (showwDialog != null && showwDialog == true) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _showRatingModal();
       });
     }
+    setState(() {
+      showwDialog = false;
+    });
   }
 
   void _showRatingModal() {
@@ -54,17 +60,17 @@ class _HomePageState extends State<HomePage> {
                     children: [
                       CircleAvatar(
                         radius: 32,
-                        backgroundImage: AssetImage(
-                            'assets/person.png'), // Replace with your asset
+                        backgroundImage: NetworkImage(
+                            '${TransporteurServices.baseUrl}/storage/${rateTransporteur!.imageUrl}'), // Replace with your asset
                       ),
                       SizedBox(width: 16),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Aziz',
+                          Text(rateTransporteur!.username,
                               style: TextStyle(
                                   fontWeight: FontWeight.bold, fontSize: 20)),
-                          Text('Voiture confortable',
+                          Text(rateTransporteur!.vehiculeType.toString(),
                               style: TextStyle(fontSize: 14)),
                         ],
                       ),
@@ -96,7 +102,15 @@ class _HomePageState extends State<HomePage> {
                   ),
                   SizedBox(height: 24),
                   ElevatedButton(
-                    onPressed: () {
+                    onPressed: () async {
+                      await TransporteurServices.updateTransporteur(
+                        rateTransporteur!.id!,
+                        {
+                          'note_moyenne':
+                              (rateTransporteur!.noteMoyenne! + rating) / 2,
+                        },
+                      );
+                      // ignore: use_build_context_synchronously
                       Navigator.pop(context);
                       // Handle rating submission here
                     },

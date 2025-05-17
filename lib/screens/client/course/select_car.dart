@@ -76,10 +76,8 @@ class _SelectCarState extends State<SelectCar> {
       );
 
       // Log success
-      print('Trajet stored successfully: $result');
       return result;
     } catch (e) {
-      print('Error storing trajet: $e');
       return {
         'success': false,
         'message': 'Error storing trajet: ${e.toString()}',
@@ -947,272 +945,310 @@ class _SelectCarState extends State<SelectCar> {
                                 : selectedIndex == 1
                                     ? gettingTransporteurs
                                         ? _buildShimmerLoading()
-                                        : SizedBox(
-                                            height: 42.h,
-                                            width: 100.w,
-                                            child: ListView.builder(
-                                              shrinkWrap: false,
-                                              physics:
-                                                  const NeverScrollableScrollPhysics(),
-                                              itemCount: transporteurs
-                                                  .where((element) =>
-                                                      element.vehiculeType ==
-                                                          selectedVehicle &&
-                                                      element.disponibilite ==
-                                                          true &&
-                                                      element.gender ==
-                                                          _selectedGender)
-                                                  .length,
-                                              itemBuilder: (context, index) {
-                                                final filteredTransporteurs = transporteurs
-                                                    .where((element) =>
-                                                        element.vehiculeType ==
-                                                            selectedVehicle &&
-                                                        element.disponibilite ==
-                                                            true &&
-                                                        element.gender ==
-                                                            _selectedGender)
-                                                    .toList();
-                                                final transporteur = filteredTransporteurs[index];
-                                                return Container(
-                                                  margin: EdgeInsets.only(
-                                                      bottom: 1.h),
-                                                  decoration: BoxDecoration(
-                                                    color: Colors.white,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            12),
-                                                    boxShadow: [
-                                                      BoxShadow(
-                                                        color: Colors.grey
-                                                            .withValues(
-                                                                alpha: 0.1),
-                                                        spreadRadius: 1,
-                                                        blurRadius: 5,
-                                                        offset:
-                                                            const Offset(0, 2),
+                                        : transporteurs
+                                                .where((element) =>
+                                                    element.vehiculeType ==
+                                                        selectedVehicle &&
+                                                    element.disponibilite ==
+                                                        true &&
+                                                    element.gender ==
+                                                        _selectedGender)
+                                                .isEmpty
+                                            ? Center(
+                                                child: Text(
+                                                  language == 'fr'
+                                                      ? 'Aucun chauffeur disponible'
+                                                      : 'No driver available',
+                                                  style: TextStyle(
+                                                      fontSize: 17.sp,
+                                                      fontWeight:
+                                                          FontWeight.bold),
+                                                ),
+                                              )
+                                            : SizedBox(
+                                                height: 42.h,
+                                                width: 100.w,
+                                                child: ListView.builder(
+                                                  shrinkWrap: false,
+                                                  physics:
+                                                      const NeverScrollableScrollPhysics(),
+                                                  itemCount: transporteurs
+                                                      .where((element) =>
+                                                          element.vehiculeType ==
+                                                              selectedVehicle &&
+                                                          element.disponibilite ==
+                                                              true &&
+                                                          element.gender ==
+                                                              _selectedGender)
+                                                      .length,
+                                                  itemBuilder:
+                                                      (context, index) {
+                                                    final filteredTransporteurs = transporteurs
+                                                        .where((element) =>
+                                                            element.vehiculeType ==
+                                                                selectedVehicle &&
+                                                            element.disponibilite ==
+                                                                true &&
+                                                            element.gender ==
+                                                                _selectedGender)
+                                                        .toList();
+                                                    final transporteur =
+                                                        filteredTransporteurs[
+                                                            index];
+                                                    return Container(
+                                                      margin: EdgeInsets.only(
+                                                          bottom: 1.h),
+                                                      decoration: BoxDecoration(
+                                                        color: Colors.white,
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(12),
+                                                        boxShadow: [
+                                                          BoxShadow(
+                                                            color: Colors.grey
+                                                                .withValues(
+                                                                    alpha: 0.1),
+                                                            spreadRadius: 1,
+                                                            blurRadius: 5,
+                                                            offset:
+                                                                const Offset(
+                                                                    0, 2),
+                                                          ),
+                                                        ],
                                                       ),
-                                                    ],
-                                                  ),
-                                                  child: Material(
-                                                    color: Colors.transparent,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            15.sp),
-                                                    child: Padding(
-                                                      padding:
-                                                          EdgeInsets.all(2.w),
-                                                      child: Row(
-                                                        mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .spaceBetween,
-                                                        children: [
-                                                          SizedBox(width: 2.w),
-                                                          Row(
+                                                      child: Material(
+                                                        color:
+                                                            Colors.transparent,
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(
+                                                                    15.sp),
+                                                        child: Padding(
+                                                          padding:
+                                                              EdgeInsets.all(
+                                                                  2.w),
+                                                          child: Row(
+                                                            mainAxisAlignment:
+                                                                MainAxisAlignment
+                                                                    .spaceBetween,
                                                             children: [
                                                               SizedBox(
-                                                                width: 12.w,
-                                                                child: transporteur
-                                                                            .imageUrl !=
-                                                                        null
-                                                                    ? Image
-                                                                        .network(
-                                                                        '${TransporteurServices.baseUrl}/storage/${transporteur.imageUrl}',
-                                                                        width: 30
-                                                                            .sp,
-                                                                        height:
-                                                                            30.sp,
-                                                                      )
-                                                                    : Image
-                                                                        .asset(
-                                                                        'assets/default-avatar.png',
-                                                                      ),
-                                                              ),
-                                                              SizedBox(
                                                                   width: 2.w),
-                                                              SizedBox(
-                                                                width: 40.w,
-                                                                child: Column(
-                                                                  crossAxisAlignment:
-                                                                      CrossAxisAlignment
-                                                                          .start,
-                                                                  children: [
-                                                                    Text(
-                                                                      transporteur
-                                                                          .username,
-                                                                      style:
-                                                                          TextStyle(
-                                                                        fontSize:
-                                                                            16.sp,
-                                                                        fontWeight:
-                                                                            FontWeight.bold,
-                                                                      ),
-                                                                    ),
-                                                                    SizedBox(
-                                                                        height:
-                                                                            0.5.h),
-                                                                    Row(
+                                                              Row(
+                                                                children: [
+                                                                  SizedBox(
+                                                                    width: 12.w,
+                                                                    child: transporteur.imageUrl !=
+                                                                            null
+                                                                        ? Image
+                                                                            .network(
+                                                                            '${TransporteurServices.baseUrl}/storage/${transporteur.imageUrl}',
+                                                                            width:
+                                                                                30.sp,
+                                                                            height:
+                                                                                30.sp,
+                                                                            errorBuilder: (context, error, stackTrace) =>
+                                                                                Image.asset(
+                                                                              'assets/person.png',
+                                                                            ),
+                                                                          )
+                                                                        : Image
+                                                                            .asset(
+                                                                            'assets/person.png',
+                                                                          ),
+                                                                  ),
+                                                                  SizedBox(
+                                                                      width:
+                                                                          2.w),
+                                                                  SizedBox(
+                                                                    width: 40.w,
+                                                                    child:
+                                                                        Column(
+                                                                      crossAxisAlignment:
+                                                                          CrossAxisAlignment
+                                                                              .start,
                                                                       children: [
                                                                         Text(
                                                                           transporteur
-                                                                              .noteMoyenne
-                                                                              .toString(),
+                                                                              .username,
                                                                           style:
                                                                               TextStyle(
                                                                             fontSize:
-                                                                                17.sp,
-                                                                            color:
-                                                                                Colors.grey,
+                                                                                16.sp,
+                                                                            fontWeight:
+                                                                                FontWeight.bold,
                                                                           ),
                                                                         ),
-                                                                        Icon(
-                                                                          Icons
-                                                                              .star,
-                                                                          color:
-                                                                              Colors.amber,
-                                                                        ),
-                                                                      ],
-                                                                    ),
-                                                                  ],
-                                                                ),
-                                                              ),
-                                                            ],
-                                                          ),
-                                                          ElevatedButton(
-                                                              style:
-                                                                  ElevatedButton
-                                                                      .styleFrom(
-                                                                fixedSize: Size(
-                                                                    30.w, 4.h),
-                                                                elevation: 0,
-                                                                backgroundColor:
-                                                                    kPrimaryColor,
-                                                                shape:
-                                                                    RoundedRectangleBorder(
-                                                                  borderRadius:
-                                                                      BorderRadius
-                                                                          .circular(
-                                                                              25),
-                                                                ),
-                                                              ),
-                                                              onPressed:
-                                                                  () async {
-                                                                setState(() {
-                                                                  selectedTransporteur =
-                                                                      transporteur;
-                                                                });
-                                                                await showDialog(
-                                                                  context:
-                                                                      context,
-                                                                  builder:
-                                                                      (BuildContext
-                                                                          context) {
-                                                                    return Dialog(
-                                                                      backgroundColor:
-                                                                          Colors
-                                                                              .white,
-                                                                      shape:
-                                                                          RoundedRectangleBorder(
-                                                                        borderRadius:
-                                                                            BorderRadius.circular(15),
-                                                                      ),
-                                                                      child:
-                                                                          Container(
-                                                                        padding:
-                                                                            EdgeInsets.all(20),
-                                                                        child:
-                                                                            Column(
-                                                                          mainAxisSize:
-                                                                              MainAxisSize.min,
+                                                                        SizedBox(
+                                                                            height:
+                                                                                0.5.h),
+                                                                        Row(
                                                                           children: [
-                                                                            Icon(
-                                                                              Icons.check_circle,
-                                                                              color: kPrimaryColor,
-                                                                              size: 50.sp,
-                                                                            ),
-                                                                            SizedBox(height: 20),
                                                                             Text(
-                                                                              language == 'fr' ? 'Prêt à partir' : 'Ready to go',
+                                                                              transporteur.noteMoyenne.toString(),
                                                                               style: TextStyle(
-                                                                                fontSize: 20.sp,
-                                                                                fontWeight: FontWeight.bold,
+                                                                                fontSize: 17.sp,
+                                                                                color: Colors.grey,
                                                                               ),
                                                                             ),
-                                                                            SizedBox(height: 10),
-                                                                            Text(
-                                                                              language == 'fr' ? 'Le chauffeur est en chemin. Merci de patienter quelques instants.' : 'The driver is on the way. Please wait a few moments.',
-                                                                              textAlign: TextAlign.center,
-                                                                              style: TextStyle(fontSize: 16.sp),
-                                                                            ),
-                                                                            SizedBox(height: 20),
-                                                                            Row(
-                                                                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                                                              children: [
-                                                                                TextButton(
-                                                                                  onPressed: () {
-                                                                                    Navigator.of(context).pop();
-                                                                                    setState(() {
-                                                                                      selectedIndex = 1;
-                                                                                    });
-                                                                                  },
-                                                                                  child: Text(
-                                                                                    language == 'fr' ? 'Annuler' : 'Cancel',
-                                                                                    style: TextStyle(
-                                                                                      color: kSecondaryColor,
-                                                                                      fontSize: 17.sp,
-                                                                                      fontWeight: FontWeight.w600,
-                                                                                    ),
-                                                                                  ),
-                                                                                ),
-                                                                                TextButton(
-                                                                                  onPressed: () async {
-                                                                                    await _storeTrajet();
-                                                                                    Navigator.of(context).pop();
-                                                                                    setState(() {
-                                                                                      selectedTransporteur = transporteur;
-                                                                                      selectedIndex = 2;
-                                                                                    });
-                                                                                  },
-                                                                                  child: Text(
-                                                                                    language == 'fr' ? 'Terminer' : 'Finish',
-                                                                                    style: TextStyle(
-                                                                                      color: kPrimaryColor,
-                                                                                      fontSize: 17.sp,
-                                                                                      fontWeight: FontWeight.w600,
-                                                                                    ),
-                                                                                  ),
-                                                                                ),
-                                                                              ],
+                                                                            Icon(
+                                                                              Icons.star,
+                                                                              color: Colors.amber,
                                                                             ),
                                                                           ],
                                                                         ),
-                                                                      ),
+                                                                      ],
+                                                                    ),
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                              ElevatedButton(
+                                                                  style: ElevatedButton
+                                                                      .styleFrom(
+                                                                    fixedSize:
+                                                                        Size(
+                                                                            30.w,
+                                                                            4.h),
+                                                                    elevation:
+                                                                        0,
+                                                                    backgroundColor:
+                                                                        kPrimaryColor,
+                                                                    shape:
+                                                                        RoundedRectangleBorder(
+                                                                      borderRadius:
+                                                                          BorderRadius.circular(
+                                                                              25),
+                                                                    ),
+                                                                  ),
+                                                                  onPressed:
+                                                                      () async {
+                                                                    setState(
+                                                                        () {
+                                                                      selectedTransporteur =
+                                                                          transporteur;
+                                                                    });
+                                                                    await showDialog(
+                                                                      context:
+                                                                          context,
+                                                                      builder:
+                                                                          (BuildContext
+                                                                              context) {
+                                                                        return Dialog(
+                                                                          backgroundColor:
+                                                                              Colors.white,
+                                                                          shape:
+                                                                              RoundedRectangleBorder(
+                                                                            borderRadius:
+                                                                                BorderRadius.circular(15),
+                                                                          ),
+                                                                          child:
+                                                                              Container(
+                                                                            padding:
+                                                                                EdgeInsets.all(20),
+                                                                            child:
+                                                                                Column(
+                                                                              mainAxisSize: MainAxisSize.min,
+                                                                              children: [
+                                                                                Icon(
+                                                                                  Icons.check_circle,
+                                                                                  color: kPrimaryColor,
+                                                                                  size: 50.sp,
+                                                                                ),
+                                                                                SizedBox(height: 20),
+                                                                                Text(
+                                                                                  language == 'fr' ? 'Prêt à partir' : 'Ready to go',
+                                                                                  style: TextStyle(
+                                                                                    fontSize: 20.sp,
+                                                                                    fontWeight: FontWeight.bold,
+                                                                                  ),
+                                                                                ),
+                                                                                SizedBox(height: 10),
+                                                                                Text(
+                                                                                  language == 'fr' ? 'Le chauffeur est en chemin. Merci de patienter quelques instants.' : 'The driver is on the way. Please wait a few moments.',
+                                                                                  textAlign: TextAlign.center,
+                                                                                  style: TextStyle(fontSize: 16.sp),
+                                                                                ),
+                                                                                SizedBox(height: 20),
+                                                                                Row(
+                                                                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                                                                  children: [
+                                                                                    TextButton(
+                                                                                      onPressed: () {
+                                                                                        Navigator.of(context).pop();
+                                                                                        setState(() {
+                                                                                          selectedIndex = 1;
+                                                                                        });
+                                                                                      },
+                                                                                      child: Text(
+                                                                                        language == 'fr' ? 'Annuler' : 'Cancel',
+                                                                                        style: TextStyle(
+                                                                                          color: kSecondaryColor,
+                                                                                          fontSize: 17.sp,
+                                                                                          fontWeight: FontWeight.w600,
+                                                                                        ),
+                                                                                      ),
+                                                                                    ),
+                                                                                    TextButton(
+                                                                                      onPressed: () async {
+                                                                                        final result = await _storeTrajet();
+                                                                                        if (result['success']) {
+                                                                                          Navigator.of(context).pop();
+                                                                                          setState(() {
+                                                                                            selectedTransporteur = transporteur;
+                                                                                            selectedIndex = 2;
+                                                                                          });
+                                                                                        } else {
+                                                                                          Navigator.of(context).pop();
+
+                                                                                          ScaffoldMessenger.of(context).showSnackBar(
+                                                                                            SnackBar(
+                                                                                              content: Text(language == 'fr' ? 'Une erreur est survenue' : 'An error occurred'),
+                                                                                            ),
+                                                                                          );
+                                                                                        }
+                                                                                      },
+                                                                                      child: Text(
+                                                                                        language == 'fr' ? 'Terminer' : 'Finish',
+                                                                                        style: TextStyle(
+                                                                                          color: kPrimaryColor,
+                                                                                          fontSize: 17.sp,
+                                                                                          fontWeight: FontWeight.w600,
+                                                                                        ),
+                                                                                      ),
+                                                                                    ),
+                                                                                  ],
+                                                                                ),
+                                                                              ],
+                                                                            ),
+                                                                          ),
+                                                                        );
+                                                                      },
                                                                     );
                                                                   },
-                                                                );
-                                                              },
-                                                              child: Text(
-                                                                language == 'fr'
-                                                                    ? 'Réserver'
-                                                                    : 'Book',
-                                                                style: TextStyle(
-                                                                    color: Colors
-                                                                        .white,
-                                                                    fontSize:
-                                                                        15.sp,
-                                                                    fontWeight:
-                                                                        FontWeight
-                                                                            .w600),
-                                                              )),
-                                                        ],
+                                                                  child: Text(
+                                                                    language ==
+                                                                            'fr'
+                                                                        ? 'Réserver'
+                                                                        : 'Book',
+                                                                    style: TextStyle(
+                                                                        color: Colors
+                                                                            .white,
+                                                                        fontSize: 15
+                                                                            .sp,
+                                                                        fontWeight:
+                                                                            FontWeight.w600),
+                                                                  )),
+                                                            ],
+                                                          ),
+                                                        ),
                                                       ),
-                                                    ),
-                                                  ),
-                                                );
-                                              },
-                                            ),
-                                          ).animate().slideX(
-                                            duration: 500.ms, begin: 1, end: 0)
+                                                    );
+                                                  },
+                                                ),
+                                              ).animate().slideX(
+                                                duration: 500.ms,
+                                                begin: 1,
+                                                end: 0)
                                     : SizedBox(
                                             height: 42.h,
                                             width: 100.w,
@@ -1289,9 +1325,15 @@ class _SelectCarState extends State<SelectCar> {
                                                               '${TransporteurServices.baseUrl}/storage/${selectedTransporteur!.imageUrl}',
                                                               width: 50.sp,
                                                               height: 50.sp,
+                                                              errorBuilder: (context,
+                                                                      error,
+                                                                      stackTrace) =>
+                                                                  Image.asset(
+                                                                'assets/person.png',
+                                                              ),
                                                             )
                                                           : Image.asset(
-                                                              'assets/default-avatar.png',
+                                                              'assets/person.png',
                                                             ),
                                                     ),
                                                     SizedBox(width: 2.w),
@@ -1503,10 +1545,15 @@ class _SelectCarState extends State<SelectCar> {
                                                                       TextButton(
                                                                         onPressed:
                                                                             () {
+                                                                          setState(
+                                                                              () {
+                                                                            showwDialog =
+                                                                                true;
+                                                                            rateTransporteur =
+                                                                                selectedTransporteur;
+                                                                          });
                                                                           Get.to(() =>
-                                                                              NavigationScreen(
-                                                                                showDialog: true,
-                                                                              ));
+                                                                              NavigationScreen());
                                                                         },
                                                                         child:
                                                                             Text(

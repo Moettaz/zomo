@@ -18,33 +18,18 @@ class TrajetServices {
     required String etat,
   }) async {
     try {
-      // Input validation
-      if (clientId <= 0) throw Exception('Invalid client ID');
-      if (transporteurId <= 0) throw Exception('Invalid transporteur ID');
-      if (serviceId <= 0) throw Exception('Invalid service ID');
-      if (pointDepart.isEmpty) throw Exception('Point depart cannot be empty');
-      if (pointArrivee.isEmpty)
-        throw Exception('Point arrivee cannot be empty');
-      if (prix <= 0) throw Exception('Prix must be greater than 0');
-
+    
       // Get the token from SharedPreferences
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token');
 
       if (token == null) {
-        print('Authentication error: Token is null');
         return {
           'success': false,
           'message': 'Not authenticated',
         };
       }
 
-      print('Sending request to create trajet with data:');
-      print('Client ID: $clientId');
-      print('Transporteur ID: $transporteurId');
-      print('Service ID: $serviceId');
-      print('Point depart: $pointDepart');
-      print('Point arrivee: $pointArrivee');
 
       final response = await http.post(
         Uri.parse('$baseUrl/api/trajets'),
@@ -66,21 +51,15 @@ class TrajetServices {
         }),
       );
 
-      print('Response status code: ${response.statusCode}');
-      print('Response body: ${response.body}');
 
       final responseData = jsonDecode(response.body);
 
       if (response.statusCode == 201) {
-        print('Successfully created trajet');
         return {
           'success': true,
           'data': responseData['data'],
         };
       } else {
-        print('Failed to create trajet. Status code: ${response.statusCode}');
-        print('Error message: ${responseData['message']}');
-        print('Error details: ${responseData['errors']}');
 
         return {
           'success': false,
@@ -90,10 +69,6 @@ class TrajetServices {
         };
       }
     } catch (e, stackTrace) {
-      print('Exception occurred while creating trajet:');
-      print(e);
-      print('Stack trace:');
-      print(stackTrace);
 
       return {
         'success': false,

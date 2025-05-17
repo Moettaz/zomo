@@ -4,6 +4,7 @@ import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
 import 'package:sizer/sizer.dart';
 import 'package:zomo/design/const.dart';
 import 'package:zomo/models/client.dart';
+import 'package:zomo/models/transporteur.dart';
 import 'package:zomo/screens/client/history_page.dart';
 import 'package:zomo/screens/client/home.dart';
 import 'package:zomo/screens/client/notification_screen.dart';
@@ -12,14 +13,18 @@ import 'package:zomo/services/authserices.dart';
 
 class NavigationScreen extends StatefulWidget {
   final int? index;
-  final bool showDialog;
-  const NavigationScreen({super.key, this.index, this.showDialog = false});
+  const NavigationScreen({
+    super.key,
+    this.index,
+  });
 
   @override
   State<NavigationScreen> createState() => _NavigationScreenState();
 }
 
 Client? clientData;
+bool? showwDialog;
+Transporteur? rateTransporteur;
 
 class _NavigationScreenState extends State<NavigationScreen>
     with SingleTickerProviderStateMixin {
@@ -110,7 +115,7 @@ class _NavigationScreenState extends State<NavigationScreen>
         dragStartBehavior: DragStartBehavior.down,
         physics: const BouncingScrollPhysics(),
         children: [
-          HomePage(showDialog: widget.showDialog),
+          HomePage(),
           Notificationscreen(),
           Historypage(),
           ProfilePage(),

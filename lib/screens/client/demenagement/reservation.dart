@@ -1,4 +1,4 @@
-// ignore_for_file: use_build_context_synchronously
+// ignore_for_file: use_build_context_synchronously, deprecated_member_use
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -704,9 +704,7 @@ class _ReservationState extends State<Reservation> {
                                       mainAxisAlignment:
                                           MainAxisAlignment.spaceBetween,
                                       children: [
-                                        SizedBox(
-                                          height: 5.h,
-                                          width: 40.w,
+                                        Expanded(
                                           child: TextFormField(
                                             controller: fromController,
                                             validator: (value) {
@@ -722,10 +720,9 @@ class _ReservationState extends State<Reservation> {
                                               setState(() {
                                                 fromController.text = value;
                                               });
-                                              print(value);
                                             },
                                             style: TextStyle(
-                                                fontSize: 10.sp,
+                                                fontSize: 15.sp,
                                                 fontWeight: FontWeight.bold,
                                                 color: Colors.black),
                                             cursorColor: Colors.black,
@@ -766,23 +763,8 @@ class _ReservationState extends State<Reservation> {
                                               labelText: language == 'fr'
                                                   ? 'De'
                                                   : 'From',
-                                              suffixIcon: Align(
-                                                alignment:
-                                                    Alignment.centerRight,
-                                                child: Container(
-                                                    decoration: BoxDecoration(
-                                                      color:
-                                                          Colors.grey.shade200,
-                                                      shape: BoxShape.circle,
-                                                    ),
-                                                    child: Padding(
-                                                      padding:
-                                                          const EdgeInsets.all(
-                                                              8.0),
-                                                      child: Icon(Icons
-                                                          .location_on_outlined),
-                                                    )),
-                                              ),
+                                              suffixIcon: Icon(Icons
+                                                  .share_location_outlined),
                                             ),
                                           ),
                                         ),
@@ -833,23 +815,8 @@ class _ReservationState extends State<Reservation> {
                                               ),
                                               labelText:
                                                   language == 'fr' ? 'A' : 'To',
-                                              suffixIcon: Align(
-                                                alignment:
-                                                    Alignment.centerRight,
-                                                child: Container(
-                                                    decoration: BoxDecoration(
-                                                      color:
-                                                          Colors.grey.shade200,
-                                                      shape: BoxShape.circle,
-                                                    ),
-                                                    child: Padding(
-                                                      padding:
-                                                          const EdgeInsets.all(
-                                                              8.0),
-                                                      child: Icon(Icons
-                                                          .location_on_outlined),
-                                                    )),
-                                              ),
+                                              suffixIcon: Icon(Icons
+                                                  .share_location_outlined),
                                             ),
                                           ),
                                         ),
@@ -926,7 +893,13 @@ class _ReservationState extends State<Reservation> {
                                             });
                                           }
                                         },
+                                        style: TextStyle(
+                                            fontSize: 15.sp,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.black),
                                         decoration: InputDecoration(
+                                          contentPadding: EdgeInsets.symmetric(
+                                              horizontal: 10.w, vertical: 1.h),
                                           border: OutlineInputBorder(
                                             borderRadius:
                                                 BorderRadius.circular(25.sp),
@@ -950,20 +923,8 @@ class _ReservationState extends State<Reservation> {
                                               : 'Date',
                                           prefixIcon: Icon(Icons.calendar_month,
                                               color: Colors.grey.shade400),
-                                          suffixIcon: Align(
-                                            alignment: Alignment.centerRight,
-                                            child: Container(
-                                                decoration: BoxDecoration(
-                                                  color: Colors.grey.shade200,
-                                                  shape: BoxShape.circle,
-                                                ),
-                                                child: Padding(
-                                                  padding:
-                                                      const EdgeInsets.all(8.0),
-                                                  child: Icon(
-                                                      Icons.arrow_drop_down),
-                                                )),
-                                          ),
+                                          suffixIcon: Icon(
+                                              Icons.calendar_month_outlined),
                                         ),
                                       ),
                                     ),
@@ -1173,20 +1134,6 @@ class _ReservationState extends State<Reservation> {
                                               : 'Floor',
                                           prefixIcon: Icon(Icons.home_work,
                                               color: Colors.grey.shade400),
-                                          suffixIcon: Align(
-                                            alignment: Alignment.centerRight,
-                                            child: Container(
-                                                decoration: BoxDecoration(
-                                                  color: Colors.grey.shade200,
-                                                  shape: BoxShape.circle,
-                                                ),
-                                                child: Padding(
-                                                  padding:
-                                                      const EdgeInsets.all(8.0),
-                                                  child: Icon(
-                                                      Icons.arrow_drop_down),
-                                                )),
-                                          ),
                                         ),
                                       ),
                                     ),
@@ -1321,6 +1268,12 @@ class _ReservationState extends State<Reservation> {
                                                             '${TransporteurServices.baseUrl}/storage/${transporteur.imageUrl}',
                                                             width: 30.sp,
                                                             height: 30.sp,
+                                                            errorBuilder: (context,
+                                                                    error,
+                                                                    stackTrace) =>
+                                                                Image.asset(
+                                                              'assets/person.png',
+                                                            ),
                                                           ),
                                                         ),
                                                         SizedBox(width: 2.w),
@@ -1500,78 +1453,90 @@ class _ReservationState extends State<Reservation> {
                                                                               setState(() {
                                                                                 selectedTransporteur = transporteur;
                                                                               });
-                                                                              await storeReservation();
+                                                                              final result = await storeReservation();
                                                                               Navigator.of(context).pop();
                                                                               setState(() {
                                                                                 selectedTransporteur = transporteur;
                                                                               });
-                                                                              await showDialog(
-                                                                                context: context,
-                                                                                builder: (BuildContext context) {
-                                                                                  return Dialog(
-                                                                                    backgroundColor: Colors.white,
-                                                                                    shape: RoundedRectangleBorder(
-                                                                                      borderRadius: BorderRadius.circular(15),
-                                                                                    ),
-                                                                                    child: Container(
-                                                                                      padding: EdgeInsets.all(20),
-                                                                                      child: Column(
-                                                                                        mainAxisSize: MainAxisSize.min,
-                                                                                        children: [
-                                                                                          Container(
-                                                                                            decoration: BoxDecoration(
-                                                                                              color: Colors.white,
-                                                                                              shape: BoxShape.circle,
-                                                                                              border: Border.all(
-                                                                                                color: kPrimaryColor,
-                                                                                              ),
-                                                                                            ),
-                                                                                            child: Padding(
-                                                                                              padding: EdgeInsets.all(10.sp),
-                                                                                              child: Icon(
-                                                                                                Icons.attach_money_outlined,
-                                                                                                color: kPrimaryColor,
-                                                                                                size: 40.sp,
-                                                                                              ),
-                                                                                            ),
-                                                                                          ),
-                                                                                          SizedBox(height: 20),
-                                                                                          Text(
-                                                                                            language == 'fr' ? 'Vous avez gagné 5 points' : 'You have won 5 points',
-                                                                                            textAlign: TextAlign.center,
-                                                                                            style: TextStyle(fontSize: 16.sp),
-                                                                                          ),
-                                                                                          SizedBox(height: 1.h),
-                                                                                          Divider(
-                                                                                            color: kPrimaryColor,
-                                                                                          ),
-                                                                                          SizedBox(height: 1.h),
-                                                                                          Row(
-                                                                                            mainAxisAlignment: MainAxisAlignment.center,
-                                                                                            children: [
-                                                                                              TextButton(
-                                                                                                onPressed: () {
-                                                                                                  Get.to(() => NavigationScreen(
-                                                                                                        showDialog: true,
-                                                                                                      ));
-                                                                                                },
-                                                                                                child: Text(
-                                                                                                  language == 'fr' ? 'Génial' : 'Great',
-                                                                                                  style: TextStyle(
-                                                                                                    color: kPrimaryColor,
-                                                                                                    fontSize: 17.sp,
-                                                                                                    fontWeight: FontWeight.w600,
-                                                                                                  ),
+                                                                              if (result['success']) {
+                                                                                await showDialog(
+                                                                                  context: context,
+                                                                                  builder: (BuildContext context) {
+                                                                                    return Dialog(
+                                                                                      backgroundColor: Colors.white,
+                                                                                      shape: RoundedRectangleBorder(
+                                                                                        borderRadius: BorderRadius.circular(15),
+                                                                                      ),
+                                                                                      child: Container(
+                                                                                        padding: EdgeInsets.all(20),
+                                                                                        child: Column(
+                                                                                          mainAxisSize: MainAxisSize.min,
+                                                                                          children: [
+                                                                                            Container(
+                                                                                              decoration: BoxDecoration(
+                                                                                                color: Colors.white,
+                                                                                                shape: BoxShape.circle,
+                                                                                                border: Border.all(
+                                                                                                  color: kPrimaryColor,
                                                                                                 ),
                                                                                               ),
-                                                                                            ],
-                                                                                          ),
-                                                                                        ],
+                                                                                              child: Padding(
+                                                                                                padding: EdgeInsets.all(10.sp),
+                                                                                                child: Icon(
+                                                                                                  Icons.attach_money_outlined,
+                                                                                                  color: kPrimaryColor,
+                                                                                                  size: 40.sp,
+                                                                                                ),
+                                                                                              ),
+                                                                                            ),
+                                                                                            SizedBox(height: 20),
+                                                                                            Text(
+                                                                                              language == 'fr' ? 'Vous avez gagné 5 points' : 'You have won 5 points',
+                                                                                              textAlign: TextAlign.center,
+                                                                                              style: TextStyle(fontSize: 16.sp),
+                                                                                            ),
+                                                                                            SizedBox(height: 1.h),
+                                                                                            Divider(
+                                                                                              color: kPrimaryColor,
+                                                                                            ),
+                                                                                            SizedBox(height: 1.h),
+                                                                                            Row(
+                                                                                              mainAxisAlignment: MainAxisAlignment.center,
+                                                                                              children: [
+                                                                                                TextButton(
+                                                                                                  onPressed: () {
+                                                                                                    setState(() {
+                                                                                                      showwDialog = true;
+                                                                                                      rateTransporteur = selectedTransporteur;
+                                                                                                    });
+                                                                                                    Get.to(() => NavigationScreen());
+                                                                                                  },
+                                                                                                  child: Text(
+                                                                                                    language == 'fr' ? 'Génial' : 'Great',
+                                                                                                    style: TextStyle(
+                                                                                                      color: kPrimaryColor,
+                                                                                                      fontSize: 17.sp,
+                                                                                                      fontWeight: FontWeight.w600,
+                                                                                                    ),
+                                                                                                  ),
+                                                                                                ),
+                                                                                              ],
+                                                                                            ),
+                                                                                          ],
+                                                                                        ),
                                                                                       ),
-                                                                                    ),
-                                                                                  );
-                                                                                },
-                                                                              );
+                                                                                    );
+                                                                                  },
+                                                                                );
+                                                                              } else {
+                                                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                                                  SnackBar(
+                                                                                    content: Text(language == 'fr' ? 'Une erreur est survenue' : 'An error occurred'),
+                                                                                    backgroundColor: kPrimaryColor,
+                                                                                    duration: Duration(seconds: 2),
+                                                                                  ),
+                                                                                );
+                                                                              }
                                                                             },
                                                                             child:
                                                                                 Text(

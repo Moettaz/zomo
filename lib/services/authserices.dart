@@ -238,15 +238,12 @@ class AuthServices {
       String? token = prefs.getString('token');
 
       if (token == null) {
-        print('Token is null - user not authenticated');
         return {
           'success': false,
           'message': 'Not authenticated',
         };
       }
 
-      print('Making API request to: $baseUrl/api/profile/$userId');
-      print('Using token: $token');
 
       final response = await http.get(
         Uri.parse('$baseUrl/api/profile/$userId'),
@@ -256,15 +253,10 @@ class AuthServices {
         },
       );
 
-      print('Response status code: ${response.statusCode}');
-      print('Response body: ${response.body}');
 
       final responseData = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
-        print('Successfully retrieved profile data');
-        print('User data: ${responseData['user']}');
-        print('Specific data: ${responseData['specific_data']}');
 
         // Update the local storage with new data
         await _saveUserData({
@@ -278,15 +270,12 @@ class AuthServices {
           'data': responseData,
         };
       } else {
-        print('Failed to retrieve profile - Status code: ${response.statusCode}');
-        print('Error message: ${responseData['message']}');
         return {
           'success': false,
           'message': responseData['message'] ?? 'Failed to retrieve profile',
         };
       }
     } catch (e) {
-      print('Exception occurred while getting profile: $e');
       return {
         'success': false,
         'message': 'Network error: $e',

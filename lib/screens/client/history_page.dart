@@ -67,9 +67,9 @@ class _HistorypageState extends State<Historypage> {
           combineAndSortHistory();
         });
       } else {
-        print('Failed to fetch history: ${result['message']}');
       }
     } catch (e) {
+      // ignore: avoid_print
       print('Error fetching history: $e');
     } finally {
       setState(() {
@@ -92,7 +92,6 @@ class _HistorypageState extends State<Historypage> {
         combineAndSortHistory();
       });
     } else {
-      print('Failed to fetch reservations: ${result['message']}');
     }
     // } catch (e) {
     //   print('Error fetching reservations: $e');

@@ -28,20 +28,6 @@ class _MyPointsPageState extends State<MyPointsPage> {
     progress = points / maxPoints;
     getReservations();
     getTrajets();
-    setState(() {
-      for (var data in combinedHistory) {
-        int points = data is TrajetModel ? 15 : 5;
-        historyData.add({
-          'desc': data is TrajetModel
-              ? "Trajet : ${data.startPoint} -- ${data.endPoint} (${data.price}DT)"
-              : data is Reservation
-                  ? "Reservation : ${data.from} -- ${data.to}"
-                  : '',
-          'pts': '+$points pts',
-        });
-      }
-      loading = false;
-    });
   }
 
   bool loading = true;
@@ -49,7 +35,7 @@ class _MyPointsPageState extends State<MyPointsPage> {
   List<Reservation> reservations = [];
   List<dynamic> combinedHistory = [];
 
-  void combineAndSortHistory() {
+  Future<void> combineAndSortHistory() async {
     combinedHistory = [...history, ...reservations];
     combinedHistory.sort((a, b) {
       DateTime dateA;
@@ -69,6 +55,21 @@ class _MyPointsPageState extends State<MyPointsPage> {
 
       return dateB.compareTo(dateA); // Sort in descending order (newest first)
     });
+
+    // Populate historyData after sorting
+    setState(() {
+      historyData = combinedHistory.map((data) {
+        int points = data is TrajetModel ? 15 : 5;
+        return {
+          'desc': data is TrajetModel
+              ? "Trajet : ${data.startPoint} -- ${data.endPoint} (${data.price}DT)"
+              : data is Reservation
+                  ? "Reservation : ${data.from} -- ${data.to}"
+                  : '',
+          'pts': '+$points pts',
+        };
+      }).toList();
+    });
   }
 
   Future<void> getTrajets() async {
@@ -80,14 +81,17 @@ class _MyPointsPageState extends State<MyPointsPage> {
           history = (result['data'] as List)
               .map((item) => TrajetModel.fromJson(item))
               .toList();
-          combineAndSortHistory();
         });
-      } else {
-        print('Failed to fetch history: ${result['message']}');
-      }
+        await combineAndSortHistory();
+      } 
     } catch (e) {
+      // ignore: avoid_print
       print('Error fetching history: $e');
-    } finally {}
+    } finally {
+      setState(() {
+        loading = false;
+      });
+    }
   }
 
   Future<void> getReservations() async {
@@ -101,9 +105,7 @@ class _MyPointsPageState extends State<MyPointsPage> {
         reservations = (result['data'] as List<Reservation>);
         combineAndSortHistory();
       });
-    } else {
-      print('Failed to fetch reservations: ${result['message']}');
-    }
+    } else {}
   }
 
   @override

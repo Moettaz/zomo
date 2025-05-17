@@ -1,4 +1,4 @@
-// ignore_for_file: use_build_context_synchronously
+// ignore_for_file: use_build_context_synchronously, deprecated_member_use
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -334,20 +334,8 @@ class _ColisState extends State<Colis> {
                                                 color: Colors.grey.shade200),
                                           ),
                                           labelText: 'De',
-                                          suffixIcon: Align(
-                                            alignment: Alignment.centerRight,
-                                            child: Container(
-                                                decoration: BoxDecoration(
-                                                  color: Colors.grey.shade200,
-                                                  shape: BoxShape.circle,
-                                                ),
-                                                child: Padding(
-                                                  padding:
-                                                      const EdgeInsets.all(8.0),
-                                                  child: Icon(Icons
-                                                      .location_on_outlined),
-                                                )),
-                                          ),
+                                          suffixIcon:
+                                              Icon(Icons.location_on_outlined),
                                         ),
                                       ),
                                     ),
@@ -390,20 +378,8 @@ class _ColisState extends State<Colis> {
                                                 color: Colors.grey.shade200),
                                           ),
                                           labelText: 'A',
-                                          suffixIcon: Align(
-                                            alignment: Alignment.centerRight,
-                                            child: Container(
-                                                decoration: BoxDecoration(
-                                                  color: Colors.grey.shade200,
-                                                  shape: BoxShape.circle,
-                                                ),
-                                                child: Padding(
-                                                  padding:
-                                                      const EdgeInsets.all(8.0),
-                                                  child: Icon(Icons
-                                                      .location_on_outlined),
-                                                )),
-                                          ),
+                                          suffixIcon:
+                                              Icon(Icons.location_on_outlined),
                                         ),
                                       ),
                                     ),
@@ -479,7 +455,13 @@ class _ColisState extends State<Colis> {
                                       });
                                     }
                                   },
+                                  style: TextStyle(
+                                      fontSize: 15.sp,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black),
                                   decoration: InputDecoration(
+                                    contentPadding: EdgeInsets.symmetric(
+                                        horizontal: 10.w, vertical: 1.h),
                                     border: OutlineInputBorder(
                                       borderRadius:
                                           BorderRadius.circular(25.sp),
@@ -502,18 +484,7 @@ class _ColisState extends State<Colis> {
                                         language == 'fr' ? 'Date' : 'Date',
                                     prefixIcon: Icon(Icons.calendar_month,
                                         color: Colors.grey.shade400),
-                                    suffixIcon: Align(
-                                      alignment: Alignment.centerRight,
-                                      child: Container(
-                                          decoration: BoxDecoration(
-                                            color: Colors.grey.shade200,
-                                            shape: BoxShape.circle,
-                                          ),
-                                          child: Padding(
-                                            padding: const EdgeInsets.all(8.0),
-                                            child: Icon(Icons.arrow_drop_down),
-                                          )),
-                                    ),
+                                    suffixIcon: Icon(Icons.arrow_drop_down),
                                   ),
                                 ),
                               ),
@@ -573,6 +544,12 @@ class _ColisState extends State<Colis> {
                                                         '${TransporteurServices.baseUrl}/storage/${transporteur.imageUrl}',
                                                         width: 30.sp,
                                                         height: 30.sp,
+                                                        errorBuilder: (context,
+                                                                error,
+                                                                stackTrace) =>
+                                                            Image.asset(
+                                                          'assets/person.png',
+                                                        ),
                                                       ),
                                                     ),
                                                     SizedBox(width: 2.w),
@@ -758,79 +735,88 @@ class _ColisState extends State<Colis> {
                                                                             selectedTransporteur =
                                                                                 transporteur;
                                                                           });
-                                                                          await storeReservation();
+                                                                          final result =
+                                                                              await storeReservation();
                                                                           Navigator.of(context)
                                                                               .pop();
-
-                                                                          await showDialog(
-                                                                            context:
-                                                                                context,
-                                                                            builder:
-                                                                                (BuildContext context) {
-                                                                              return Dialog(
-                                                                                backgroundColor: Colors.white,
-                                                                                shape: RoundedRectangleBorder(
-                                                                                  borderRadius: BorderRadius.circular(15),
-                                                                                ),
-                                                                                child: Container(
-                                                                                  padding: EdgeInsets.all(20),
-                                                                                  child: Column(
-                                                                                    mainAxisSize: MainAxisSize.min,
-                                                                                    children: [
-                                                                                      Container(
-                                                                                        decoration: BoxDecoration(
-                                                                                          color: Colors.white,
-                                                                                          shape: BoxShape.circle,
-                                                                                          border: Border.all(
-                                                                                            color: kPrimaryColor,
-                                                                                          ),
-                                                                                        ),
-                                                                                        child: Padding(
-                                                                                          padding: EdgeInsets.all(10.sp),
-                                                                                          child: Icon(
-                                                                                            Icons.attach_money_outlined,
-                                                                                            color: kPrimaryColor,
-                                                                                            size: 40.sp,
-                                                                                          ),
-                                                                                        ),
-                                                                                      ),
-                                                                                      SizedBox(height: 20),
-                                                                                      Text(
-                                                                                        language == 'fr' ? 'Vous avez gagné 5 points' : 'You have won 5 points',
-                                                                                        textAlign: TextAlign.center,
-                                                                                        style: TextStyle(fontSize: 16.sp),
-                                                                                      ),
-                                                                                      SizedBox(height: 1.h),
-                                                                                      Divider(
-                                                                                        color: kPrimaryColor,
-                                                                                      ),
-                                                                                      SizedBox(height: 1.h),
-                                                                                      Row(
-                                                                                        mainAxisAlignment: MainAxisAlignment.center,
-                                                                                        children: [
-                                                                                          TextButton(
-                                                                                            onPressed: () {
-                                                                                              Get.to(() => NavigationScreen(
-                                                                                                    showDialog: true,
-                                                                                                  ));
-                                                                                            },
-                                                                                            child: Text(
-                                                                                              language == 'fr' ? 'Génial' : 'Great',
-                                                                                              style: TextStyle(
-                                                                                                color: kPrimaryColor,
-                                                                                                fontSize: 17.sp,
-                                                                                                fontWeight: FontWeight.w600,
-                                                                                              ),
+                                                                          if (result[
+                                                                              'success']) {
+                                                                            await showDialog(
+                                                                              context: context,
+                                                                              builder: (BuildContext context) {
+                                                                                return Dialog(
+                                                                                  backgroundColor: Colors.white,
+                                                                                  shape: RoundedRectangleBorder(
+                                                                                    borderRadius: BorderRadius.circular(15),
+                                                                                  ),
+                                                                                  child: Container(
+                                                                                    padding: EdgeInsets.all(20),
+                                                                                    child: Column(
+                                                                                      mainAxisSize: MainAxisSize.min,
+                                                                                      children: [
+                                                                                        Container(
+                                                                                          decoration: BoxDecoration(
+                                                                                            color: Colors.white,
+                                                                                            shape: BoxShape.circle,
+                                                                                            border: Border.all(
+                                                                                              color: kPrimaryColor,
                                                                                             ),
                                                                                           ),
-                                                                                        ],
-                                                                                      ),
-                                                                                    ],
+                                                                                          child: Padding(
+                                                                                            padding: EdgeInsets.all(10.sp),
+                                                                                            child: Icon(
+                                                                                              Icons.attach_money_outlined,
+                                                                                              color: kPrimaryColor,
+                                                                                              size: 40.sp,
+                                                                                            ),
+                                                                                          ),
+                                                                                        ),
+                                                                                        SizedBox(height: 20),
+                                                                                        Text(
+                                                                                          language == 'fr' ? 'Vous avez gagné 5 points' : 'You have won 5 points',
+                                                                                          textAlign: TextAlign.center,
+                                                                                          style: TextStyle(fontSize: 16.sp),
+                                                                                        ),
+                                                                                        SizedBox(height: 1.h),
+                                                                                        Divider(
+                                                                                          color: kPrimaryColor,
+                                                                                        ),
+                                                                                        SizedBox(height: 1.h),
+                                                                                        Row(
+                                                                                          mainAxisAlignment: MainAxisAlignment.center,
+                                                                                          children: [
+                                                                                            TextButton(
+                                                                                              onPressed: () {
+                                                                                                setState(() {
+                                                                                                  showwDialog = true;
+                                                                                                  rateTransporteur = transporteur;
+                                                                                                });
+                                                                                                Get.to(() => NavigationScreen());
+                                                                                              },
+                                                                                              child: Text(
+                                                                                                language == 'fr' ? 'Génial' : 'Great',
+                                                                                                style: TextStyle(
+                                                                                                  color: kPrimaryColor,
+                                                                                                  fontSize: 17.sp,
+                                                                                                  fontWeight: FontWeight.w600,
+                                                                                                ),
+                                                                                              ),
+                                                                                            ),
+                                                                                          ],
+                                                                                        ),
+                                                                                      ],
+                                                                                    ),
                                                                                   ),
-                                                                                ),
-                                                                              );
-                                                                            },
-                                                                          );
+                                                                                );
+                                                                              },
+                                                                            );
+                                                                          } else {
+                                                                            ScaffoldMessenger.of(context).showSnackBar(
+                                                                              SnackBar(
+                                                                                content: Text(language == 'fr' ? 'Une erreur est survenue' : 'An error occurred'),
+                                                                              ),
+                                                                            );
+                                                                          }
                                                                         },
                                                                         child:
                                                                             Text(
