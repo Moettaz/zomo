@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:zomo/design/const.dart';
 import 'package:sizer/sizer.dart';
+import 'package:zomo/models/client.dart';
 import 'package:zomo/screens/client/navigation_screen.dart';
 import 'package:zomo/services/authserices.dart';
 import 'package:zomo/screens/auth/signin.dart';
@@ -19,6 +21,57 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfile();
+  }
+
+  Future<void> _loadProfile() async {
+    try {
+      setState(() {
+        _isLoading = true;
+      });
+      final result = await AuthServices.getProfile(clientData!.id!);
+      if (result['success']) {
+        setState(() {
+          _isLoading = false;
+        });
+        getUserData();
+      } else {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> getUserData() async {
+    try {
+      final response = await AuthServices.getCurrentUser();
+      if (response != null) {
+        setState(() {
+          if (response['specific_data'] != null) {
+            if (response['specific_data'] is Client) {
+              clientData = response['specific_data'];
+            } else {
+              clientData = Client.fromJson(response['specific_data']);
+            }
+          }
+        });
+      }
+    } catch (e) {
+      // ignore: avoid_print
+      print('Error getting user data: $e');
+    } finally {}
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -46,12 +99,27 @@ class _ProfilePageState extends State<ProfilePage> {
                   // Profile avatar
                   Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: CircleAvatar(
-                      radius: 60,
-                      backgroundImage: clientData?.imageUrl != null
-                          ? NetworkImage("${AuthServices.baseUrl}/${clientData!.imageUrl!}")
-                          : AssetImage('assets/person.png') as ImageProvider,
-                    ),
+                    child: _isLoading
+                        ? Shimmer.fromColors(
+                            baseColor: Colors.grey[300]!,
+                            highlightColor: Colors.grey[100]!,
+                            child: CircleAvatar(
+                              radius: 60,
+                              backgroundImage: clientData?.imageUrl != null
+                                  ? NetworkImage(
+                                      "${AuthServices.baseUrl}/${clientData!.imageUrl!}")
+                                  : AssetImage('assets/person.png')
+                                      as ImageProvider,
+                            ),
+                          )
+                        : CircleAvatar(
+                            radius: 60,
+                            backgroundImage: clientData?.imageUrl != null
+                                ? NetworkImage(
+                                    "${AuthServices.baseUrl}/${clientData!.imageUrl!}")
+                                : AssetImage('assets/person.png')
+                                    as ImageProvider,
+                          ),
                   ),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -59,17 +127,38 @@ class _ProfilePageState extends State<ProfilePage> {
                     children: [
                       SizedBox(height: 1.h),
                       // Name and email
-                      Text(
-                        clientData?.username ?? 'Nom Prénom',
-                        style: TextStyle(
-                            fontSize: 20.sp, fontWeight: FontWeight.bold),
-                      ),
+                      _isLoading
+                          ? Shimmer.fromColors(
+                              baseColor: Colors.grey[300]!,
+                              highlightColor: Colors.grey[100]!,
+                              child: Text(
+                                clientData?.username ?? 'Nom Prénom',
+                                style: TextStyle(
+                                    fontSize: 20.sp,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                            )
+                          : Text(
+                              clientData?.username ?? 'Nom Prénom',
+                              style: TextStyle(
+                                  fontSize: 20.sp, fontWeight: FontWeight.bold),
+                            ),
                       SizedBox(height: 1.h),
-                      Text(
-                        clientData?.email ?? 'email@example.com',
-                        style:
-                            TextStyle(fontSize: 15.sp, color: Colors.grey[600]),
-                      ),
+                      _isLoading
+                          ? Shimmer.fromColors(
+                              baseColor: Colors.grey[300]!,
+                              highlightColor: Colors.grey[100]!,
+                              child: Text(
+                                clientData?.email ?? 'email@example.com',
+                                style: TextStyle(
+                                    fontSize: 15.sp, color: Colors.grey[600]),
+                              ),
+                            )
+                          : Text(
+                              clientData?.email ?? 'email@example.com',
+                              style: TextStyle(
+                                  fontSize: 15.sp, color: Colors.grey[600]),
+                            ),
                       SizedBox(height: 1.h),
                       // Edit profile button
                       ElevatedButton(

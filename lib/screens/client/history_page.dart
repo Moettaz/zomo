@@ -4,7 +4,9 @@ import 'package:sizer/sizer.dart';
 import 'package:zomo/design/const.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:zomo/models/history_model.dart';
+import 'package:zomo/models/reservation.dart';
 import 'package:zomo/screens/client/navigation_screen.dart';
+import 'package:zomo/services/reservationservices.dart';
 import 'package:zomo/services/trajetservices.dart';
 
 class Historypage extends StatefulWidget {
@@ -16,38 +18,89 @@ class Historypage extends StatefulWidget {
 
 class _HistorypageState extends State<Historypage> {
   bool loading = false;
-  List<HistoryModel> history = [];
+  List<TrajetModel> history = [];
+  List<Reservation> reservations = [];
+  List<dynamic> combinedHistory = [];
+
   @override
   void initState() {
     super.initState();
-    getHistory();
+    getTrajets();
+    getReservations();
   }
 
-  Future<void> getHistory() async {
+  void combineAndSortHistory() {
+    combinedHistory = [...history, ...reservations];
+    combinedHistory.sort((a, b) {
+      DateTime dateA;
+      DateTime dateB;
+
+      if (a is TrajetModel) {
+        dateA = a.departureDateTime;
+      } else {
+        dateA = DateTime.parse(a.dateReservation);
+      }
+
+      if (b is TrajetModel) {
+        dateB = b.departureDateTime;
+      } else {
+        dateB = DateTime.parse(b.dateReservation);
+      }
+
+      return dateB.compareTo(dateA); // Sort in descending order (newest first)
+    });
+    setState(() {});
+  }
+
+  Future<void> getTrajets() async {
     try {
       setState(() {
         loading = true;
       });
       final result = await TrajetServices.getTrajetsByClient(clientData!.id!);
-      setState(() {
-        loading = false;
-      });
+
       if (result['success']) {
         setState(() {
           history = (result['data'] as List)
-              .map((item) => HistoryModel.fromJson(item))
+              .map((item) => TrajetModel.fromJson(item))
               .toList();
+          combineAndSortHistory();
         });
       } else {
-        setState(() {
-          loading = false;
-        });
+        print('Failed to fetch history: ${result['message']}');
       }
     } catch (e) {
+      print('Error fetching history: $e');
+    } finally {
       setState(() {
         loading = false;
       });
     }
+  }
+
+  Future<void> getReservations() async {
+    // try {
+    setState(() {
+      loading = true;
+    });
+    final result =
+        await ReservationServices.getReservationsByClient(clientData!.id!);
+
+    if (result['success']) {
+      setState(() {
+        reservations = (result['data'] as List<Reservation>);
+        combineAndSortHistory();
+      });
+    } else {
+      print('Failed to fetch reservations: ${result['message']}');
+    }
+    // } catch (e) {
+    //   print('Error fetching reservations: $e');
+    // } finally {
+    //   setState(() {
+    //     loading = false;
+    //   });
+    // }
   }
 
   @override
@@ -115,21 +168,28 @@ class _HistorypageState extends State<Historypage> {
                       ),
                     ),
                   ),
-                  SizedBox(height: history.isEmpty ? 20.h : 1.h),
+                  SizedBox(
+                      height:
+                          history.isEmpty && reservations.isEmpty ? 20.h : 1.h),
                   loading
                       ? Center(
                           child: CircularProgressIndicator(
                             color: kPrimaryColor,
                           ),
                         )
-                      : history.isEmpty
+                      : history.isEmpty && reservations.isEmpty
                           ? Center(child: _buildEmptyState())
                           : SizedBox(
                               height: 70.h,
                               child: ListView.builder(
-                                itemCount: history.length,
+                                itemCount: combinedHistory.length,
                                 itemBuilder: (context, index) {
-                                  return historyItem(history[index]);
+                                  final item = combinedHistory[index];
+                                  if (item is TrajetModel) {
+                                    return trajetItem(item);
+                                  } else {
+                                    return reservationItem(item as Reservation);
+                                  }
                                 },
                               ),
                             )
@@ -197,7 +257,7 @@ class _HistorypageState extends State<Historypage> {
     );
   }
 
-  historyItem(HistoryModel history) {
+  trajetItem(TrajetModel history) {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 1.h),
       child: Material(
@@ -285,7 +345,109 @@ class _HistorypageState extends State<Historypage> {
                         fontWeight: FontWeight.bold,
                       )),
                   SizedBox(height: 12.h),
-                  Text(language == 'fr' ? "+ 115 points" : "+ 115 points",
+                  Text(language == 'fr' ? "+ 15 points" : "+ 15 points",
+                      style: TextStyle(
+                        fontSize: 15.sp,
+                        fontWeight: FontWeight.bold,
+                      )),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  reservationItem(Reservation reservation) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 1.h),
+      child: Material(
+        elevation: 4,
+        color: Colors.white,
+        borderRadius: BorderRadius.only(
+          topRight: Radius.circular(20.sp),
+          bottomRight: Radius.circular(20.sp),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Container(
+              width: 20.w,
+              height: 20.h,
+              decoration: BoxDecoration(
+                color: kSecondaryColor,
+                shape: BoxShape.rectangle,
+                borderRadius: BorderRadius.circular(0.sp),
+              ),
+              child: Icon(
+                Icons.access_time_rounded,
+                size: 30.sp,
+                color: kPrimaryColor,
+              ),
+            ),
+            SizedBox(width: 2.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(reservation.from,
+                      style: TextStyle(
+                        fontSize: 18.sp,
+                        fontWeight: FontWeight.bold,
+                      )),
+                  SizedBox(height: 1.h),
+                  Text(reservation.to),
+                  SizedBox(height: 1.h),
+                  Text(
+                      '${reservation.dateReservation.toString().substring(0, 16)}\n${reservation.heureReservation != null ? reservation.heureReservation!.toString().length > 16 ? reservation.heureReservation!.toString().substring(0, 16) : reservation.heureReservation!.toString() : ''}'),
+                  SizedBox(height: 1.h),
+                  Row(
+                    children: [
+                      Text(
+                        language == 'fr' ? 'Chauffeur ' : 'Transporteur ',
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        reservation.transporteur!.username.capitalizeFirst!
+                            .replaceAll('_', ' '),
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 1.h),
+                  Text(
+                      language == 'fr'
+                          ? reservation.serviceId == 2 ? "Etage ${reservation.etage.toString()}" : "Taille ${reservation.colisSize}"
+                          : reservation.serviceId == 2 ? "Etage ${reservation.etage.toString()}" : "Taille ${reservation.colisSize}",
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.bold,
+                      )),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(reservation.status.capitalizeFirst!.replaceAll('_', ' '),
+                      style: TextStyle(
+                        fontSize: 17.sp,
+                        color: kPrimaryColor,
+                        fontWeight: FontWeight.bold,
+                      )),
+                  SizedBox(height: 12.h),
+                  Text(language == 'fr' ? "+ 5 points" : "+ 5 points",
                       style: TextStyle(
                         fontSize: 15.sp,
                         fontWeight: FontWeight.bold,

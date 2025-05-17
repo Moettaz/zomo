@@ -1,20 +1,45 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:sizer/sizer.dart';
 import 'package:zomo/design/const.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:zomo/models/transporteur.dart';
 import 'package:zomo/screens/client/navigation_screen.dart';
 // ignore: depend_on_referenced_packages
 import 'package:intl/intl.dart';
+import 'package:zomo/services/reservationservices.dart';
+import 'package:zomo/services/transporteurservices.dart';
 
 class Colis extends StatefulWidget {
   const Colis({super.key});
-
   @override
   State<Colis> createState() => _ColisState();
 }
 
 class _ColisState extends State<Colis> {
+  Future<Map<String, dynamic>> storeReservation() async {
+    try {
+      final reservation = await ReservationServices.storeReservation(
+        dateReservation: selectedDate.toString(),
+        status: 'en_attente',
+        clientId: clientData!.id!,
+        transporteurId: selectedTransporteur!.id!,
+        serviceId: 3,
+        colisSize: selectedItem,
+        from: fromController.text,
+        to: destinationController.text,
+      );
+      return reservation;
+    } catch (e) {
+      // ignore: avoid_print
+      print('Error storing reservation: $e');
+      return {};
+    }
+  }
+
   String selectedType = '';
   String selectedSize = '';
   String selectedDistance = '';
@@ -25,7 +50,7 @@ class _ColisState extends State<Colis> {
   String selectedPeriod = 'AM';
   DateTime selectedDate = DateTime.now();
   TextEditingController dateController = TextEditingController();
-  Map<String, dynamic>? selectedItems;
+  String? selectedItem;
   TextEditingController destinationController = TextEditingController();
   TextEditingController fromController = TextEditingController();
   final formKey = GlobalKey<FormState>();
@@ -46,37 +71,27 @@ class _ColisState extends State<Colis> {
       'image': 'assets/25kg.png',
     },
   ];
-  final chauffeurs = [
-    {
-      'id': 1,
-      'name': 'Chauffeur 1',
-      'rate': '4.5',
-      'image': 'assets/person.png',
-      'vehicle': 'Fourgonnette',
-    },
-    {
-      'id': 2,
-      'name': 'Chauffeur 2',
-      'rate': '4.2',
-      'image': 'assets/person1.png',
-      'vehicle': 'Fourgon',
-    },
-    {
-      'id': 3,
-      'name': 'Chauffeur 3',
-      'rate': '4.7',
-      'image': 'assets/person2.png',
-      'vehicle': 'Fourgonnette',
-    },
-    {
-      'id': 3,
-      'name': 'Chauffeur 4',
-      'rate': '4.7',
-      'image': 'assets/person3.png',
-      'vehicle': 'Camionnette',
-    },
-  ];
-  int selectedChauffeur = 0;
+
+  Transporteur? selectedTransporteur;
+  List<Transporteur> transporteurs = [];
+  bool gettingTransporteurs = false;
+  getTransporteurs() async {
+    setState(() {
+      gettingTransporteurs = true;
+    });
+    try {
+      transporteurs = await TransporteurServices.getAllTransporteurs();
+    } catch (e) {
+      // ignore: avoid_print
+      print('Error fetching transporteurs: $e');
+    } finally {
+      if (mounted) {
+        setState(() {
+          gettingTransporteurs = false;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -192,9 +207,11 @@ class _ColisState extends State<Colis> {
                                       InkWell(
                                         onTap: () {
                                           setState(() {
-                                            selectedItems == colis[index]
-                                                ? selectedItems = null
-                                                : selectedItems = colis[index];
+                                            selectedItem == colis[index]['name']
+                                                ? selectedItem = null
+                                                : selectedItem = colis[index]
+                                                        ['name']
+                                                    .toString();
                                           });
                                         },
                                         child: Align(
@@ -205,8 +222,8 @@ class _ColisState extends State<Colis> {
                                               height: 12.h,
                                               width: 12.h,
                                               child: Material(
-                                                color: selectedItems ==
-                                                        colis[index]
+                                                color: selectedItem ==
+                                                        colis[index]['name']
                                                     ? kPrimaryColor
                                                     : Colors.white,
                                                 borderRadius: BorderRadius.only(
@@ -239,7 +256,8 @@ class _ColisState extends State<Colis> {
                                         alignment: Alignment.topRight,
                                         child: Icon(
                                           Icons.check_circle,
-                                          color: selectedItems == colis[index]
+                                          color: selectedItem ==
+                                                  colis[index]['name']
                                               ? kPrimaryColor
                                               : Colors.white,
                                           size: 20.sp,
@@ -507,340 +525,358 @@ class _ColisState extends State<Colis> {
                           ],
                         )
                       : index == 1
-                          ? SizedBox(
-                              height: 42.h,
-                              width: 100.w,
-                              child: ListView.builder(
-                                shrinkWrap: false,
-                                physics: const NeverScrollableScrollPhysics(),
-                                itemCount: chauffeurs.length,
-                                itemBuilder: (context, index) {
-                                  final chauffeur = chauffeurs[index];
-                                  return Container(
-                                    margin: EdgeInsets.only(bottom: 1.h),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(12),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.grey
-                                              .withValues(alpha: 0.5),
-                                          spreadRadius: 1,
-                                          blurRadius: 5,
-                                          offset: const Offset(0, 2),
+                          ? gettingTransporteurs
+                              ? _buildShimmerLoading()
+                              : SizedBox(
+                                  height: 42.h,
+                                  width: 100.w,
+                                  child: ListView.builder(
+                                    shrinkWrap: false,
+                                    physics:
+                                        const NeverScrollableScrollPhysics(),
+                                    itemCount: transporteurs.length,
+                                    itemBuilder: (context, index) {
+                                      final transporteur = transporteurs[index];
+                                      return Container(
+                                        margin: EdgeInsets.only(bottom: 1.h),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.grey
+                                                  .withValues(alpha: 0.5),
+                                              spreadRadius: 1,
+                                              blurRadius: 5,
+                                              offset: const Offset(0, 2),
+                                            ),
+                                          ],
                                         ),
-                                      ],
-                                    ),
-                                    child: Material(
-                                      color: Colors.transparent,
-                                      borderRadius:
-                                          BorderRadius.circular(15.sp),
-                                      child: Padding(
-                                        padding: EdgeInsets.all(2.w),
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            SizedBox(width: 2.w),
-                                            Row(
+                                        child: Material(
+                                          color: Colors.transparent,
+                                          borderRadius:
+                                              BorderRadius.circular(15.sp),
+                                          child: Padding(
+                                            padding: EdgeInsets.all(2.w),
+                                            child: Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
                                               children: [
-                                                SizedBox(
-                                                  width: 12.w,
-                                                  child: Image.asset(
-                                                    chauffeur['image']
-                                                        .toString(),
-                                                    width: 30.sp,
-                                                    height: 30.sp,
-                                                  ),
-                                                ),
                                                 SizedBox(width: 2.w),
-                                                SizedBox(
-                                                  width: 40.w,
-                                                  child: Column(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
-                                                    children: [
-                                                      Text(
-                                                        chauffeur['name']
-                                                            as String,
-                                                        style: TextStyle(
-                                                          fontSize: 16.sp,
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                        ),
+                                                Row(
+                                                  children: [
+                                                    SizedBox(
+                                                      width: 12.w,
+                                                      child: Image.network(
+                                                        '${TransporteurServices.baseUrl}/storage/${transporteur.imageUrl}',
+                                                        width: 30.sp,
+                                                        height: 30.sp,
                                                       ),
-                                                      SizedBox(height: 0.5.h),
-                                                      Row(
+                                                    ),
+                                                    SizedBox(width: 2.w),
+                                                    SizedBox(
+                                                      width: 40.w,
+                                                      child: Column(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
                                                         children: [
                                                           Text(
-                                                            chauffeur['rate']
-                                                                as String,
+                                                            transporteur
+                                                                .username,
                                                             style: TextStyle(
-                                                              fontSize: 17.sp,
-                                                              color:
-                                                                  Colors.grey,
+                                                              fontSize: 16.sp,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
                                                             ),
-                                                          ),
-                                                          Icon(
-                                                            Icons.star_border,
-                                                            color: Colors.grey,
                                                           ),
                                                           SizedBox(
-                                                            width: 5.w,
-                                                          ),
-                                                          Text(
-                                                            chauffeur['vehicle']
-                                                                as String,
-                                                            style: TextStyle(
-                                                              fontSize: 15.sp,
-                                                              color:
-                                                                  Colors.grey,
-                                                            ),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                            ElevatedButton(
-                                                style: ElevatedButton.styleFrom(
-                                                  fixedSize: Size(30.w, 4.h),
-                                                  elevation: 0,
-                                                  backgroundColor:
-                                                      kPrimaryColor,
-                                                  shape: RoundedRectangleBorder(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            25),
-                                                  ),
-                                                ),
-                                                onPressed: () async {
-                                                  await showDialog(
-                                                    context: context,
-                                                    builder:
-                                                        (BuildContext context) {
-                                                      return Dialog(
-                                                        backgroundColor:
-                                                            Colors.white,
-                                                        shape:
-                                                            RoundedRectangleBorder(
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(15),
-                                                        ),
-                                                        child: Container(
-                                                          padding:
-                                                              EdgeInsets.all(
-                                                                  20),
-                                                          child: Column(
-                                                            mainAxisSize:
-                                                                MainAxisSize
-                                                                    .min,
+                                                              height: 0.5.h),
+                                                          Row(
                                                             children: [
-                                                              Icon(
-                                                                Icons
-                                                                    .check_circle,
-                                                                color:
-                                                                    kPrimaryColor,
-                                                                size: 50.sp,
-                                                              ),
-                                                              SizedBox(
-                                                                  height: 20),
                                                               Text(
-                                                                language == 'fr'
-                                                                    ? 'Prêt à partir'
-                                                                    : 'Ready to go',
+                                                                transporteur
+                                                                    .noteMoyenne
+                                                                    .toString(),
                                                                 style:
                                                                     TextStyle(
                                                                   fontSize:
-                                                                      20.sp,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .bold,
+                                                                      17.sp,
+                                                                  color: Colors
+                                                                      .grey,
                                                                 ),
                                                               ),
-                                                              SizedBox(
-                                                                  height: 10),
-                                                              Text(
-                                                                language == 'fr'
-                                                                    ? 'Le chauffeur est en chemin. Merci de patienter quelques instants.'
-                                                                    : 'The driver is on the way. Please wait a few moments.',
-                                                                textAlign:
-                                                                    TextAlign
-                                                                        .center,
-                                                                style: TextStyle(
-                                                                    fontSize:
-                                                                        16.sp),
+                                                              Icon(
+                                                                Icons
+                                                                    .star_border,
+                                                                color:
+                                                                    Colors.grey,
                                                               ),
                                                               SizedBox(
-                                                                  height: 20),
-                                                              Row(
-                                                                mainAxisAlignment:
-                                                                    MainAxisAlignment
-                                                                        .spaceEvenly,
-                                                                children: [
-                                                                  TextButton(
-                                                                    onPressed:
-                                                                        () {
-                                                                      Navigator.of(
-                                                                              context)
-                                                                          .pop();
-                                                                      setState(
-                                                                          () {
-                                                                        index =
-                                                                            1;
-                                                                      });
-                                                                    },
-                                                                    child: Text(
-                                                                      language ==
-                                                                              'fr'
-                                                                          ? 'Annuler'
-                                                                          : 'Cancel',
-                                                                      style:
-                                                                          TextStyle(
-                                                                        color:
-                                                                            kSecondaryColor,
-                                                                        fontSize:
-                                                                            17.sp,
-                                                                        fontWeight:
-                                                                            FontWeight.w600,
-                                                                      ),
-                                                                    ),
-                                                                  ),
-                                                                  TextButton(
-                                                                    onPressed:
-                                                                        () async {
-                                                                      Navigator.of(
-                                                                              context)
-                                                                          .pop();
-                                                                      setState(
-                                                                          () {
-                                                                        selectedChauffeur =
-                                                                            chauffeur['id']
-                                                                                as int;
-                                                                      });
-                                                                      await showDialog(
-                                                                        context:
-                                                                            context,
-                                                                        builder:
-                                                                            (BuildContext
-                                                                                context) {
-                                                                          return Dialog(
-                                                                            backgroundColor:
-                                                                                Colors.white,
-                                                                            shape:
-                                                                                RoundedRectangleBorder(
-                                                                              borderRadius: BorderRadius.circular(15),
-                                                                            ),
-                                                                            child:
-                                                                                Container(
-                                                                              padding: EdgeInsets.all(20),
-                                                                              child: Column(
-                                                                                mainAxisSize: MainAxisSize.min,
-                                                                                children: [
-                                                                                  Container(
-                                                                                    decoration: BoxDecoration(
-                                                                                      color: Colors.white,
-                                                                                      shape: BoxShape.circle,
-                                                                                      border: Border.all(
-                                                                                        color: kPrimaryColor,
-                                                                                      ),
-                                                                                    ),
-                                                                                    child: Padding(
-                                                                                      padding: EdgeInsets.all(10.sp),
-                                                                                      child: Icon(
-                                                                                        Icons.attach_money_outlined,
-                                                                                        color: kPrimaryColor,
-                                                                                        size: 40.sp,
-                                                                                      ),
-                                                                                    ),
-                                                                                  ),
-                                                                                  SizedBox(height: 20),
-                                                                                  Text(
-                                                                                    language == 'fr' ? 'Vous avez gagné x points' : 'You have won x points',
-                                                                                    textAlign: TextAlign.center,
-                                                                                    style: TextStyle(fontSize: 16.sp),
-                                                                                  ),
-                                                                                  SizedBox(height: 1.h),
-                                                                                  Divider(
-                                                                                    color: kPrimaryColor,
-                                                                                  ),
-                                                                                  SizedBox(height: 1.h),
-                                                                                  Row(
-                                                                                    mainAxisAlignment: MainAxisAlignment.center,
-                                                                                    children: [
-                                                                                      TextButton(
-                                                                                        onPressed: () {
-                                                                                          Get.to(() => NavigationScreen(
-                                                                                                showDialog: true,
-                                                                                              ));
-                                                                                        },
-                                                                                        child: Text(
-                                                                                          language == 'fr' ? 'Génial' : 'Great',
-                                                                                          style: TextStyle(
-                                                                                            color: kPrimaryColor,
-                                                                                            fontSize: 17.sp,
-                                                                                            fontWeight: FontWeight.w600,
-                                                                                          ),
-                                                                                        ),
-                                                                                      ),
-                                                                                    ],
-                                                                                  ),
-                                                                                ],
-                                                                              ),
-                                                                            ),
-                                                                          );
-                                                                        },
-                                                                      );
-                                                                    },
-                                                                    child: Text(
-                                                                      language ==
-                                                                              'fr'
-                                                                          ? 'Terminer'
-                                                                          : 'Finish',
-                                                                      style:
-                                                                          TextStyle(
-                                                                        color:
-                                                                            kPrimaryColor,
-                                                                        fontSize:
-                                                                            17.sp,
-                                                                        fontWeight:
-                                                                            FontWeight.w600,
-                                                                      ),
-                                                                    ),
-                                                                  ),
-                                                                ],
+                                                                width: 5.w,
+                                                              ),
+                                                              Text(
+                                                                transporteur
+                                                                    .vehiculeType
+                                                                    .toString(),
+                                                                style:
+                                                                    TextStyle(
+                                                                  fontSize:
+                                                                      15.sp,
+                                                                  color: Colors
+                                                                      .grey,
+                                                                ),
                                                               ),
                                                             ],
                                                           ),
-                                                        ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                                ElevatedButton(
+                                                    style: ElevatedButton
+                                                        .styleFrom(
+                                                      fixedSize:
+                                                          Size(30.w, 4.h),
+                                                      elevation: 0,
+                                                      backgroundColor:
+                                                          kPrimaryColor,
+                                                      shape:
+                                                          RoundedRectangleBorder(
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(25),
+                                                      ),
+                                                    ),
+                                                    onPressed: () async {
+                                                      await showDialog(
+                                                        context: context,
+                                                        builder: (BuildContext
+                                                            context) {
+                                                          return Dialog(
+                                                            backgroundColor:
+                                                                Colors.white,
+                                                            shape:
+                                                                RoundedRectangleBorder(
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          15),
+                                                            ),
+                                                            child: Container(
+                                                              padding:
+                                                                  EdgeInsets
+                                                                      .all(20),
+                                                              child: Column(
+                                                                mainAxisSize:
+                                                                    MainAxisSize
+                                                                        .min,
+                                                                children: [
+                                                                  Icon(
+                                                                    Icons
+                                                                        .check_circle,
+                                                                    color:
+                                                                        kPrimaryColor,
+                                                                    size: 50.sp,
+                                                                  ),
+                                                                  SizedBox(
+                                                                      height:
+                                                                          20),
+                                                                  Text(
+                                                                    language ==
+                                                                            'fr'
+                                                                        ? 'Prêt à partir'
+                                                                        : 'Ready to go',
+                                                                    style:
+                                                                        TextStyle(
+                                                                      fontSize:
+                                                                          20.sp,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .bold,
+                                                                    ),
+                                                                  ),
+                                                                  SizedBox(
+                                                                      height:
+                                                                          10),
+                                                                  Text(
+                                                                    language ==
+                                                                            'fr'
+                                                                        ? 'Le chauffeur est en chemin. Merci de patienter quelques instants.'
+                                                                        : 'The driver is on the way. Please wait a few moments.',
+                                                                    textAlign:
+                                                                        TextAlign
+                                                                            .center,
+                                                                    style: TextStyle(
+                                                                        fontSize:
+                                                                            16.sp),
+                                                                  ),
+                                                                  SizedBox(
+                                                                      height:
+                                                                          20),
+                                                                  Row(
+                                                                    mainAxisAlignment:
+                                                                        MainAxisAlignment
+                                                                            .spaceEvenly,
+                                                                    children: [
+                                                                      TextButton(
+                                                                        onPressed:
+                                                                            () {
+                                                                          Navigator.of(context)
+                                                                              .pop();
+                                                                          setState(
+                                                                              () {
+                                                                            index =
+                                                                                1;
+                                                                          });
+                                                                        },
+                                                                        child:
+                                                                            Text(
+                                                                          language == 'fr'
+                                                                              ? 'Annuler'
+                                                                              : 'Cancel',
+                                                                          style:
+                                                                              TextStyle(
+                                                                            color:
+                                                                                kSecondaryColor,
+                                                                            fontSize:
+                                                                                17.sp,
+                                                                            fontWeight:
+                                                                                FontWeight.w600,
+                                                                          ),
+                                                                        ),
+                                                                      ),
+                                                                      TextButton(
+                                                                        onPressed:
+                                                                            () async {
+                                                                          setState(
+                                                                              () {
+                                                                            selectedTransporteur =
+                                                                                transporteur;
+                                                                          });
+                                                                          await storeReservation();
+                                                                          Navigator.of(context)
+                                                                              .pop();
+
+                                                                          await showDialog(
+                                                                            context:
+                                                                                context,
+                                                                            builder:
+                                                                                (BuildContext context) {
+                                                                              return Dialog(
+                                                                                backgroundColor: Colors.white,
+                                                                                shape: RoundedRectangleBorder(
+                                                                                  borderRadius: BorderRadius.circular(15),
+                                                                                ),
+                                                                                child: Container(
+                                                                                  padding: EdgeInsets.all(20),
+                                                                                  child: Column(
+                                                                                    mainAxisSize: MainAxisSize.min,
+                                                                                    children: [
+                                                                                      Container(
+                                                                                        decoration: BoxDecoration(
+                                                                                          color: Colors.white,
+                                                                                          shape: BoxShape.circle,
+                                                                                          border: Border.all(
+                                                                                            color: kPrimaryColor,
+                                                                                          ),
+                                                                                        ),
+                                                                                        child: Padding(
+                                                                                          padding: EdgeInsets.all(10.sp),
+                                                                                          child: Icon(
+                                                                                            Icons.attach_money_outlined,
+                                                                                            color: kPrimaryColor,
+                                                                                            size: 40.sp,
+                                                                                          ),
+                                                                                        ),
+                                                                                      ),
+                                                                                      SizedBox(height: 20),
+                                                                                      Text(
+                                                                                        language == 'fr' ? 'Vous avez gagné 5 points' : 'You have won 5 points',
+                                                                                        textAlign: TextAlign.center,
+                                                                                        style: TextStyle(fontSize: 16.sp),
+                                                                                      ),
+                                                                                      SizedBox(height: 1.h),
+                                                                                      Divider(
+                                                                                        color: kPrimaryColor,
+                                                                                      ),
+                                                                                      SizedBox(height: 1.h),
+                                                                                      Row(
+                                                                                        mainAxisAlignment: MainAxisAlignment.center,
+                                                                                        children: [
+                                                                                          TextButton(
+                                                                                            onPressed: () {
+                                                                                              Get.to(() => NavigationScreen(
+                                                                                                    showDialog: true,
+                                                                                                  ));
+                                                                                            },
+                                                                                            child: Text(
+                                                                                              language == 'fr' ? 'Génial' : 'Great',
+                                                                                              style: TextStyle(
+                                                                                                color: kPrimaryColor,
+                                                                                                fontSize: 17.sp,
+                                                                                                fontWeight: FontWeight.w600,
+                                                                                              ),
+                                                                                            ),
+                                                                                          ),
+                                                                                        ],
+                                                                                      ),
+                                                                                    ],
+                                                                                  ),
+                                                                                ),
+                                                                              );
+                                                                            },
+                                                                          );
+                                                                        },
+                                                                        child:
+                                                                            Text(
+                                                                          language == 'fr'
+                                                                              ? 'Terminer'
+                                                                              : 'Finish',
+                                                                          style:
+                                                                              TextStyle(
+                                                                            color:
+                                                                                kPrimaryColor,
+                                                                            fontSize:
+                                                                                17.sp,
+                                                                            fontWeight:
+                                                                                FontWeight.w600,
+                                                                          ),
+                                                                        ),
+                                                                      ),
+                                                                    ],
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                            ),
+                                                          );
+                                                        },
                                                       );
                                                     },
-                                                  );
-                                                },
-                                                child: Text(
-                                                  language == 'fr'
-                                                      ? 'Réserver'
-                                                      : 'Book',
-                                                  style: TextStyle(
-                                                      color: Colors.white,
-                                                      fontSize: 15.sp,
-                                                      fontWeight:
-                                                          FontWeight.w600),
-                                                )),
-                                          ],
+                                                    child: Text(
+                                                      language == 'fr'
+                                                          ? 'Réserver'
+                                                          : 'Book',
+                                                      style: TextStyle(
+                                                          color: Colors.white,
+                                                          fontSize: 15.sp,
+                                                          fontWeight:
+                                                              FontWeight.w600),
+                                                    )),
+                                              ],
+                                            ),
+                                          ),
                                         ),
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
-                            )
-                              .animate()
-                              .slideX(duration: 500.ms, begin: 1, end: 0)
+                                      );
+                                    },
+                                  ),
+                                )
+                                  .animate()
+                                  .slideX(duration: 500.ms, begin: 1, end: 0)
                           : Container(),
                   SizedBox(height: 2.h),
                   index != 3
@@ -856,8 +892,8 @@ class _ColisState extends State<Colis> {
                                       borderRadius: BorderRadius.circular(25),
                                     ),
                                   ),
-                                  onPressed: () {
-                                    if (selectedItems == null) {
+                                  onPressed: () async {
+                                    if (selectedItem == null) {
                                       ScaffoldMessenger.of(context)
                                           .showSnackBar(
                                         SnackBar(
@@ -874,6 +910,7 @@ class _ColisState extends State<Colis> {
                                       setState(() {
                                         index++;
                                       });
+                                      await getTransporteurs();
                                     }
                                   },
                                   child: Text(
@@ -895,5 +932,86 @@ class _ColisState extends State<Colis> {
         )
       ],
     ));
+  }
+
+  Widget _buildShimmerLoading() {
+    return SizedBox(
+      height: 42.h,
+      width: 100.w,
+      child: ListView.builder(
+        shrinkWrap: false,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: 3, // Show 3 shimmer items
+        itemBuilder: (context, index) {
+          return Shimmer.fromColors(
+            baseColor: kPrimaryColor.withOpacity(0.2),
+            highlightColor: kPrimaryColor.withOpacity(0.4),
+            child: Container(
+              margin: EdgeInsets.only(bottom: 1.h),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Material(
+                color: Colors.transparent,
+                borderRadius: BorderRadius.circular(15.sp),
+                child: Padding(
+                  padding: EdgeInsets.all(2.w),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      SizedBox(width: 2.w),
+                      Row(
+                        children: [
+                          Container(
+                            width: 12.w,
+                            height: 12.w,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          SizedBox(width: 2.w),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                width: 40.w,
+                                height: 20,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                              ),
+                              SizedBox(height: 0.5.h),
+                              Container(
+                                width: 20.w,
+                                height: 15,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      Container(
+                        width: 30.w,
+                        height: 4.h,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(25),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    ).animate().slideX(duration: 500.ms, begin: 1, end: 0);
   }
 }

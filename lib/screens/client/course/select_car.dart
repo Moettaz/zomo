@@ -76,8 +76,10 @@ class _SelectCarState extends State<SelectCar> {
       );
 
       // Log success
+      print('Trajet stored successfully: $result');
       return result;
     } catch (e) {
+      print('Error storing trajet: $e');
       return {
         'success': false,
         'message': 'Error storing trajet: ${e.toString()}',
@@ -1474,8 +1476,8 @@ class _SelectCarState extends State<SelectCar> {
                                                                   Text(
                                                                     language ==
                                                                             'fr'
-                                                                        ? 'Vous avez gagné x points'
-                                                                        : 'You have won x points',
+                                                                        ? 'Vous avez gagné 15 points'
+                                                                        : 'You have won 15 points',
                                                                     textAlign:
                                                                         TextAlign
                                                                             .center,

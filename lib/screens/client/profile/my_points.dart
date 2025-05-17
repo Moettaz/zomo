@@ -2,24 +2,112 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:sizer/sizer.dart';
 import 'package:zomo/design/const.dart';
+import 'package:zomo/models/history_model.dart';
+import 'package:zomo/models/reservation.dart';
+import 'package:zomo/screens/client/navigation_screen.dart';
+import 'package:zomo/services/reservationservices.dart';
+import 'package:zomo/services/trajetservices.dart';
 
-class MyPointsPage extends StatelessWidget {
+class MyPointsPage extends StatefulWidget {
   const MyPointsPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    // Example data
-    int points = 25; // Replace with actual points
-    int maxPoints = 500;
-    double progress = points / maxPoints;
-    List<Map<String, dynamic>> history = [
-      {'desc': 'Trajet Manouba -- Lac 2 (15DT)', 'pts': '+15 pts'},
-      {'desc': 'Livraison colis num 14', 'pts': '+5 pts'},
-      {'desc': 'Trajet gratuit utilisé', 'pts': '-500 pts'},
-      {'desc': 'Livraison colis num 13', 'pts': '+5 pts'},
-      {'desc': 'Livraison colis num 12', 'pts': '+5 pts'},
-    ];
+  State<MyPointsPage> createState() => _MyPointsPageState();
+}
 
+class _MyPointsPageState extends State<MyPointsPage> {
+  // Example data
+  int points = 15; // Replace with actual points
+  int maxPoints = 500;
+  double progress = 0;
+  List<Map<String, dynamic>> historyData = [];
+  @override
+  void initState() {
+    super.initState();
+    points = clientData!.points!;
+    progress = points / maxPoints;
+    getReservations();
+    getTrajets();
+    setState(() {
+      for (var data in combinedHistory) {
+        int points = data is TrajetModel ? 15 : 5;
+        historyData.add({
+          'desc': data is TrajetModel
+              ? "Trajet : ${data.startPoint} -- ${data.endPoint} (${data.price}DT)"
+              : data is Reservation
+                  ? "Reservation : ${data.from} -- ${data.to}"
+                  : '',
+          'pts': '+$points pts',
+        });
+      }
+      loading = false;
+    });
+  }
+
+  bool loading = true;
+  List<TrajetModel> history = [];
+  List<Reservation> reservations = [];
+  List<dynamic> combinedHistory = [];
+
+  void combineAndSortHistory() {
+    combinedHistory = [...history, ...reservations];
+    combinedHistory.sort((a, b) {
+      DateTime dateA;
+      DateTime dateB;
+
+      if (a is TrajetModel) {
+        dateA = a.departureDateTime;
+      } else {
+        dateA = DateTime.parse(a.dateReservation);
+      }
+
+      if (b is TrajetModel) {
+        dateB = b.departureDateTime;
+      } else {
+        dateB = DateTime.parse(b.dateReservation);
+      }
+
+      return dateB.compareTo(dateA); // Sort in descending order (newest first)
+    });
+  }
+
+  Future<void> getTrajets() async {
+    try {
+      final result = await TrajetServices.getTrajetsByClient(clientData!.id!);
+
+      if (result['success']) {
+        setState(() {
+          history = (result['data'] as List)
+              .map((item) => TrajetModel.fromJson(item))
+              .toList();
+          combineAndSortHistory();
+        });
+      } else {
+        print('Failed to fetch history: ${result['message']}');
+      }
+    } catch (e) {
+      print('Error fetching history: $e');
+    } finally {}
+  }
+
+  Future<void> getReservations() async {
+    // try {
+
+    final result =
+        await ReservationServices.getReservationsByClient(clientData!.id!);
+
+    if (result['success']) {
+      setState(() {
+        reservations = (result['data'] as List<Reservation>);
+        combineAndSortHistory();
+      });
+    } else {
+      print('Failed to fetch reservations: ${result['message']}');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
         backgroundColor: Colors.white,
@@ -178,40 +266,47 @@ class MyPointsPage extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                       color: Colors.black)),
               SizedBox(height: 1.5.h),
-              Expanded(
-                child: ListView.separated(
-                  itemCount: history.length,
-                  separatorBuilder: (context, index) => Divider(height: 1.5.h),
-                  itemBuilder: (context, index) {
-                    final item = history[index];
-                    return Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: Text(
-                            item['desc'],
-                            style: TextStyle(
-                                fontSize: 15.sp,
-                                color: kSecondaryColor,
-                                fontWeight: FontWeight.bold),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        Text(
-                          item['pts'],
-                          style: TextStyle(
-                            fontSize: 15.sp,
-                            color: item['pts'].toString().startsWith('-')
-                                ? Colors.red
-                                : kPrimaryColor,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    );
-                  },
-                ),
-              ),
+              loading
+                  ? Center(
+                      child: CircularProgressIndicator(
+                        color: kPrimaryColor,
+                      ),
+                    )
+                  : Expanded(
+                      child: ListView.separated(
+                        itemCount: historyData.length,
+                        separatorBuilder: (context, index) =>
+                            Divider(height: 1.5.h),
+                        itemBuilder: (context, index) {
+                          final item = historyData[index];
+                          return Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  item['desc'],
+                                  style: TextStyle(
+                                      fontSize: 15.sp,
+                                      color: kSecondaryColor,
+                                      fontWeight: FontWeight.bold),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              Text(
+                                item['pts'],
+                                style: TextStyle(
+                                  fontSize: 15.sp,
+                                  color: item['pts'].toString().startsWith('-')
+                                      ? Colors.red
+                                      : kPrimaryColor,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+                    ),
             ],
           ),
         ),

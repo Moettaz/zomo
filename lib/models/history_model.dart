@@ -1,7 +1,7 @@
 import 'package:zomo/models/client.dart';
 import 'package:zomo/models/transporteur.dart';
 
-class HistoryModel {
+class TrajetModel {
   final int id;
   final int clientId;
   final int transporteurId;
@@ -17,7 +17,7 @@ class HistoryModel {
   final DateTime updatedAt;
   final Transporteur? transporteur;
   final Client? client;
-  HistoryModel({
+  TrajetModel({
     required this.id,
     required this.clientId,
     required this.transporteurId,
@@ -36,8 +36,8 @@ class HistoryModel {
   });
 
   // Convert Map to HistoryModel
-  factory HistoryModel.fromJson(Map<String, dynamic> json) {
-    return HistoryModel(
+  factory TrajetModel.fromJson(Map<String, dynamic> json) {
+    return TrajetModel(
       id: json['id'] as int,
       clientId: json['client_id'] as int,
       transporteurId: json['transporteur_id'] as int,
