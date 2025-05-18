@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 import 'package:zomo/design/const.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:zomo/models/reservation.dart';
 
 class HistorypageTransporteur extends StatefulWidget {
   const HistorypageTransporteur({super.key});
@@ -62,7 +61,6 @@ class _HistorypageTransporteurState extends State<HistorypageTransporteur> {
 
   @override
   Widget build(BuildContext context) {
-    Color amber = Colors.amber.shade700;
     return Scaffold(
         body: Stack(
       alignment: Alignment.topCenter,
