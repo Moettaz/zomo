@@ -3,7 +3,7 @@ class Client {
   final int userId;
   final String email;
   final String username;
-  final String password;
+  final String? password;
   final String phone;
   final int? points;
   final String? imageUrl;
@@ -13,7 +13,7 @@ class Client {
     required this.userId,
     required this.email,
     required this.username,
-    required this.password,
+     this.password,
     required this.phone,
     this.points,
     this.imageUrl,

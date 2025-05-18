@@ -6,7 +6,9 @@ import 'package:zomo/design/const.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:zomo/screens/client/navigation_screen.dart';
+import 'package:zomo/screens/transporteur/navigation_screen.dart';
 import 'package:zomo/services/authserices.dart';
+import 'package:zomo/models/user.dart';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
@@ -115,11 +117,14 @@ class _SignInScreenState extends State<SignInScreen> {
     });
 
     if (result['success']) {
-      // // Navigate based on role
-      // final userData = result['data'];
-      // final user = userData['user'];
+      final userData = result['data'];
+      final user = User.fromJson(userData['user']);
 
-      Get.off(() => const NavigationScreen(index: 0));
+      if (user.role?.slug == 'client') {
+        Get.off(() => const NavigationScreen(index: 0));
+      } else {
+        Get.off(() => const NavigationScreenTransporteur(index: 0));
+      }
     } else {
       Get.showSnackbar(kErrorSnackBar(language == 'fr'
           ? "Échec de la connexion : ${result['message']}"
@@ -1141,7 +1146,7 @@ class _SignInScreenState extends State<SignInScreen> {
                                           )),
                                     ],
                                   )),
-                              selectedIndex == 0 && clientData != null
+                              selectedIndex == 0 && transporteurData != null
                                   ? Padding(
                                       padding: EdgeInsets.only(top: 0.h),
                                       child: InkWell(

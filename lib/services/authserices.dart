@@ -142,42 +142,70 @@ class AuthServices {
 
   // Method to get the current user from SharedPreferences
   static Future<Map<String, dynamic>?> getCurrentUser() async {
-    final prefs = await SharedPreferences.getInstance();
+    try {
+      final prefs = await SharedPreferences.getInstance();
 
-    final token = prefs.getString('token');
-    final userData = prefs.getString('user');
-    final specificData = prefs.getString('specific_data');
-    final userType = prefs.getString('user_type');
+      final token = prefs.getString('token');
+      final userData = prefs.getString('user');
+      final specificData = prefs.getString('specific_data');
+      final userType = prefs.getString('user_type');
 
-    if (token == null || userData == null) {
-      return null; // Not logged in
-    }
+      print('DEBUG - Token: $token');
+      print('DEBUG - User Data: $userData');
+      print('DEBUG - Specific Data: $specificData');
+      print('DEBUG - User Type: $userType');
 
-    final user = User.fromJson(jsonDecode(userData));
-
-    dynamic typedSpecificData;
-    if (specificData != null && userType != null) {
-      final decodedData = jsonDecode(specificData);
-
-      switch (userType) {
-        case 'client':
-          typedSpecificData = Client.fromJson(decodedData);
-          break;
-        case 'transporteur':
-          typedSpecificData = Transporteur.fromJson(decodedData);
-          break;
-        case 'chauffeur':
-          typedSpecificData = Chauffeur.fromJson(decodedData);
-          break;
+      if (token == null || userData == null) {
+        print('DEBUG - Not logged in - token or userData is null');
+        return null; // Not logged in
       }
-    }
 
-    return {
-      'user': user,
-      'token': token,
-      'specific_data': typedSpecificData,
-      'user_type': userType,
-    };
+      Map<String, dynamic> decodedUserData;
+      try {
+        decodedUserData = jsonDecode(userData);
+        print('DEBUG - Decoded User Data: $decodedUserData');
+      } catch (e) {
+        print('DEBUG - Error decoding user data: $e');
+        return null;
+      }
+
+      final user = User.fromJson(decodedUserData);
+      print('DEBUG - User object created: ${user.toString()}');
+
+      dynamic typedSpecificData;
+      if (specificData != null && userType != null) {
+        try {
+          final decodedData = jsonDecode(specificData);
+          print('DEBUG - Decoded Specific Data: $decodedData');
+
+          switch (userType) {
+            case 'client':
+              typedSpecificData = Client.fromJson(decodedData);
+              break;
+            case 'transporteur':
+              typedSpecificData = Transporteur.fromJson(decodedData);
+              break;
+            case 'chauffeur':
+              typedSpecificData = Chauffeur.fromJson(decodedData);
+              break;
+          }
+          print(
+              'DEBUG - Typed Specific Data created: ${typedSpecificData.toString()}');
+        } catch (e) {
+          print('DEBUG - Error processing specific data: $e');
+        }
+      }
+
+      return {
+        'user': user,
+        'token': token,
+        'specific_data': typedSpecificData,
+        'user_type': userType,
+      };
+    } catch (e) {
+      print('DEBUG - Global error in getCurrentUser: $e');
+      return null;
+    }
   }
 
   // Logout method
@@ -211,7 +239,7 @@ class AuthServices {
       final prefs = await SharedPreferences.getInstance();
 
       // Add authorization header
-      String? token =  prefs.getString('token');
+      String? token = prefs.getString('token');
       if (token != null) {
         request.headers.addAll({
           'Authorization': 'Bearer $token',
@@ -244,7 +272,6 @@ class AuthServices {
         };
       }
 
-
       final response = await http.get(
         Uri.parse('$baseUrl/api/profile/$userId'),
         headers: <String, String>{
@@ -253,11 +280,9 @@ class AuthServices {
         },
       );
 
-
       final responseData = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
-
         // Update the local storage with new data
         await _saveUserData({
           'token': token, // Keep existing token

@@ -14,7 +14,7 @@ import 'package:zomo/screens/client/navigation_screen.dart';
 import 'package:zomo/services/trajetservices.dart';
 import 'package:zomo/services/transporteurservices.dart';
 import 'package:shimmer/shimmer.dart';
-// import 'package:geolocator/geolocator.dart';
+import 'package:location/location.dart';
 
 class SelectCar extends StatefulWidget {
   const SelectCar({super.key});
@@ -89,8 +89,12 @@ class _SelectCarState extends State<SelectCar> {
     }
   }
 
+  final Location _location = Location();
+  bool _serviceEnabled = false;
+  PermissionStatus? _permissionGranted;
+  LocationData? _locationData;
   GoogleMapController? mapController;
-  final LatLng _center = const LatLng(36.8065, 10.1815);
+  LatLng _center = const LatLng(36.8065, 10.1815);
   final Set<Marker> _markers = {};
   final Set<Polyline> _polylines = {};
   LatLng? _origin;
@@ -109,44 +113,7 @@ class _SelectCarState extends State<SelectCar> {
   }
 
   bool showingDialog = false;
-  // Future<void> _getCurrentLocation() async {
-  //   try {
-  //     LocationPermission permission = await Geolocator.checkPermission();
-  //     if (permission == LocationPermission.denied) {
-  //       permission = await Geolocator.requestPermission();
-  //       if (permission == LocationPermission.denied) {
-  //         return;
-  //       }
-  //     }
 
-  //     Position position = await Geolocator.getCurrentPosition(
-  //       desiredAccuracy: LocationAccuracy.high,
-  //     );
-
-  //     setState(() {
-  //       _center = LatLng(position.latitude, position.longitude);
-  //       _origin = _center;
-  //       _markers.add(
-  //         Marker(
-  //           markerId: const MarkerId('origin'),
-  //           position: _center,
-  //           infoWindow: const InfoWindow(title: 'Your Location'),
-  //         ),
-  //       );
-  //     });
-
-  //     mapController?.animateCamera(
-  //       CameraUpdate.newCameraPosition(
-  //         CameraPosition(
-  //           target: _center,
-  //           zoom: 15.0,
-  //         ),
-  //       ),
-  //     );
-  //   } catch (e) {
-  //     debugPrint('Error getting location: $e');
-  //   }
-  // }
   final vehicles = [
     {
       'id': 1,
@@ -192,6 +159,9 @@ class _SelectCarState extends State<SelectCar> {
 
   void _onMapCreated(GoogleMapController controller) {
     mapController = controller;
+    if (_locationData != null) {
+      _getCurrentLocation();
+    }
   }
 
   String _selectedGender = 'female';
@@ -317,6 +287,64 @@ class _SelectCarState extends State<SelectCar> {
         },
       ),
     ).animate().slideX(duration: 500.ms, begin: 1, end: 0);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _checkLocationPermission();
+  }
+
+  Future<void> _checkLocationPermission() async {
+    _serviceEnabled = await _location.serviceEnabled();
+    if (!_serviceEnabled) {
+      _serviceEnabled = await _location.requestService();
+      if (!_serviceEnabled) {
+        return;
+      }
+    }
+
+    _permissionGranted = await _location.hasPermission();
+    if (_permissionGranted == PermissionStatus.denied) {
+      _permissionGranted = await _location.requestPermission();
+      if (_permissionGranted != PermissionStatus.granted) {
+        return;
+      }
+    }
+
+    _getCurrentLocation();
+  }
+
+  Future<void> _getCurrentLocation() async {
+    try {
+      _locationData = await _location.getLocation();
+      if (_locationData != null) {
+        setState(() {
+          _center = LatLng(_locationData!.latitude!, _locationData!.longitude!);
+          _origin = _center;
+          _markers.add(
+            Marker(
+              markerId: const MarkerId('origin'),
+              position: _center,
+              infoWindow: const InfoWindow(title: 'Your Location'),
+              icon: BitmapDescriptor.defaultMarkerWithHue(
+                  BitmapDescriptor.hueYellow),
+            ),
+          );
+        });
+
+        mapController?.animateCamera(
+          CameraUpdate.newCameraPosition(
+            CameraPosition(
+              target: _center,
+              zoom: 15.0,
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      debugPrint('Error getting location: $e');
+    }
   }
 
   @override
