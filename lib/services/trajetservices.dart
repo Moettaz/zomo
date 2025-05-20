@@ -18,7 +18,6 @@ class TrajetServices {
     required String etat,
   }) async {
     try {
-    
       // Get the token from SharedPreferences
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token');
@@ -29,7 +28,6 @@ class TrajetServices {
           'message': 'Not authenticated',
         };
       }
-
 
       final response = await http.post(
         Uri.parse('$baseUrl/api/trajets'),
@@ -51,7 +49,6 @@ class TrajetServices {
         }),
       );
 
-
       final responseData = jsonDecode(response.body);
 
       if (response.statusCode == 201) {
@@ -60,7 +57,6 @@ class TrajetServices {
           'data': responseData['data'],
         };
       } else {
-
         return {
           'success': false,
           'message': responseData['message'] ?? 'Failed to create trajet',
@@ -69,7 +65,6 @@ class TrajetServices {
         };
       }
     } catch (e, stackTrace) {
-
       return {
         'success': false,
         'message': 'Network error: $e',
@@ -159,6 +154,81 @@ class TrajetServices {
       return {
         'success': false,
         'message': 'Network error: $e',
+      };
+    }
+  }
+
+  static Future<Map<String, dynamic>> updateTrajet({
+    required int id,
+    int? clientId,
+    int? transporteurId,
+    int? serviceId,
+    String? dateHeureDepart,
+    String? dateHeureArrivee,
+    String? pointDepart,
+    String? pointArrivee,
+    double? prix,
+    double? note,
+    String? etat,
+  }) async {
+    try {
+      // Get the token from SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token');
+
+      if (token == null) {
+        return {
+          'success': false,
+          'message': 'Not authenticated',
+        };
+      }
+
+      // Create a map of only the provided fields
+      final Map<String, dynamic> updateData = {};
+      if (clientId != null) updateData['client_id'] = clientId;
+      if (transporteurId != null)
+        updateData['transporteur_id'] = transporteurId;
+      if (serviceId != null) updateData['service_id'] = serviceId;
+      if (dateHeureDepart != null)
+        updateData['date_heure_depart'] = dateHeureDepart;
+      if (dateHeureArrivee != null)
+        updateData['date_heure_arrivee'] = dateHeureArrivee;
+      if (pointDepart != null) updateData['point_depart'] = pointDepart;
+      if (pointArrivee != null) updateData['point_arrivee'] = pointArrivee;
+      if (prix != null) updateData['prix'] = prix;
+      if (note != null) updateData['note'] = note;
+      if (etat != null) updateData['etat'] = etat;
+
+      final response = await http.put(
+        Uri.parse('$baseUrl/api/trajets/$id'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode(updateData),
+      );
+
+      final responseData = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        return {
+          'success': true,
+          'data': responseData['data'],
+        };
+      } else {
+        return {
+          'success': false,
+          'message': responseData['message'] ?? 'Failed to update trajet',
+          'errors': responseData['errors'],
+          'status_code': response.statusCode,
+        };
+      }
+    } catch (e, stackTrace) {
+      return {
+        'success': false,
+        'message': 'Network error: $e',
+        'stack_trace': stackTrace.toString(),
       };
     }
   }

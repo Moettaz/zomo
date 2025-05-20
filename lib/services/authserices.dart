@@ -38,7 +38,8 @@ class AuthServices {
       );
 
       final responseData = jsonDecode(response.body);
-
+      print('DEBUG - Registration response: ${response.statusCode}');
+      print('DEBUG - Registration response: $responseData');
       if (response.statusCode == 201) {
         // Registration successful
         await _saveUserData(responseData);
@@ -54,6 +55,7 @@ class AuthServices {
         };
       }
     } catch (e) {
+      print('DEBUG - Registration error: $e');
       return {
         'success': false,
         'message': 'Network error: $e',
@@ -183,7 +185,7 @@ class AuthServices {
               typedSpecificData = Client.fromJson(decodedData);
               break;
             case 'transporteur':
-              typedSpecificData = Transporteur.fromJson(decodedData);
+              typedSpecificData = decodedData;
               break;
             case 'chauffeur':
               typedSpecificData = Chauffeur.fromJson(decodedData);

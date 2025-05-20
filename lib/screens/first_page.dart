@@ -3,8 +3,10 @@ import 'package:get/get.dart';
 import 'package:sizer/sizer.dart';
 import 'package:zomo/design/const.dart';
 import 'package:zomo/models/client.dart';
+import 'package:zomo/models/transporteur.dart';
 import 'package:zomo/screens/auth/signin.dart';
 import 'package:zomo/screens/client/navigation_screen.dart';
+import 'package:zomo/screens/transporteur/navigation_screen.dart';
 import 'package:zomo/services/authserices.dart';
 
 class FirstPage extends StatefulWidget {
@@ -30,7 +32,8 @@ class _FirstPageState extends State<FirstPage> {
             if (response['specific_data'] is Client) {
               clientData = response['specific_data'];
             } else {
-              clientData = Client.fromJson(response['specific_data']);
+              transporteurData =
+                  Transporteur.fromJson(response['specific_data']);
             }
           }
         });

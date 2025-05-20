@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sizer/sizer.dart';
 import 'package:zomo/design/const.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:zomo/models/client.dart';
+import 'package:zomo/models/history_model.dart';
 import 'package:zomo/models/mission_model.dart';
 import 'package:intl/intl.dart';
+import 'package:zomo/models/reservation.dart';
+import 'package:zomo/screens/transporteur/navigation_screen.dart';
+import 'package:zomo/services/reservationservices.dart';
+import 'package:zomo/services/trajetservices.dart';
 
 class MissionScreen extends StatefulWidget {
   const MissionScreen({super.key});
@@ -14,60 +20,175 @@ class MissionScreen extends StatefulWidget {
 }
 
 class _MissionScreenState extends State<MissionScreen> {
+  bool loading = true;
+  List<TrajetModel> history = [];
+  List<Reservation> reservations = [];
+  List<dynamic> combinedHistory = [];
+
+  @override
+  void initState() {
+    super.initState();
+    getReservations();
+    getTrajets();
+  }
+
+  void combineAndSortHistory() {
+    combinedHistory = [...history, ...reservations];
+    combinedHistory.sort((a, b) {
+      DateTime dateA;
+      DateTime dateB;
+
+      if (a is TrajetModel) {
+        dateA = a.departureDateTime;
+      } else {
+        dateA = DateTime.parse(a.dateReservation);
+      }
+
+      if (b is TrajetModel) {
+        dateB = b.departureDateTime;
+      } else {
+        dateB = DateTime.parse(b.dateReservation);
+      }
+
+      return dateB.compareTo(dateA); // Sort in descending order (newest first)
+    });
+    setState(() {});
+  }
+
+  Future<void> getTrajets() async {
+    try {
+      setState(() {
+        loading = true;
+      });
+      print('Fetching trajets for transporteur: ${transporteurData!.id!}');
+      final result =
+          await TrajetServices.getTrajetsByTransporteur(transporteurData!.id!);
+
+      print('Trajet result: $result');
+
+      if (result['success']) {
+        setState(() {
+          history = (result['data'] as List)
+              .map((item) => TrajetModel.fromJson(item))
+              .toList();
+          print('Trajets fetched: ${history.length}');
+          combineAndSortHistory();
+        });
+      } else {
+        print('Failed to fetch trajets: ${result['message']}');
+      }
+    } catch (e) {
+      print('Error fetching history: $e');
+      print('Stack trace: ${StackTrace.current}');
+    } finally {
+      setState(() {
+        loading = false;
+      });
+    }
+  }
+
+  Future<void> getReservations() async {
+    try {
+      setState(() {
+        loading = true;
+      });
+      print('Fetching reservations for transporteur: ${transporteurData!.id!}');
+      final result = await ReservationServices.getReservationsByTransporteur(
+          transporteurData!.id!);
+
+      print('Reservation result: $result');
+
+      if (result['success']) {
+        setState(() {
+          reservations = result['data'] as List<Reservation>;
+          print('Reservations fetched: ${reservations.length}');
+          combineAndSortHistory();
+        });
+      } else {
+        print('Failed to fetch reservations: ${result['message']}');
+      }
+    } catch (e) {
+      print('Error fetching reservations: $e');
+      print('Stack trace: ${StackTrace.current}');
+    } finally {
+      setState(() {
+        loading = false;
+      });
+    }
+  }
+
+  Future<bool> updateReservation({
+    required int reservationId,
+    required String status,
+  }) async {
+    try {
+      setState(() {
+        uploading = true;
+      });
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token');
+
+      if (token == null) {
+        return false;
+      }
+
+      final response = await ReservationServices.updateReservation(
+        reservationId: reservationId,
+        status: status,
+      );
+
+      return response['success'];
+    } catch (e) {
+      print('Error updating reservation: $e');
+      print('Stack trace: ${StackTrace.current}');
+      return false;
+    } finally {
+      setState(() {
+        uploading = false;
+      });
+    }
+  }
+
+  Future<void> refresh() async {
+    await getReservations();
+    await getTrajets();
+  }
+
+  bool uploading = false;
+  Future<bool> updateTrajet({
+    required int trajetId,
+    required String status,
+  }) async {
+    try {
+      setState(() {
+        uploading = true;
+      });
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token');
+
+      if (token == null) {
+        return false;
+      }
+
+      final response = await TrajetServices.updateTrajet(
+        id: trajetId,
+        etat: status,
+      );
+
+      return response['success'];
+    } catch (e) {
+      print('Error updating reservation: $e');
+      print('Stack trace: ${StackTrace.current}');
+      return false;
+    } finally {
+      setState(() {
+        uploading = false;
+      });
+    }
+  }
+
   bool empty = false;
-  List<MissionModel> missions = [
-    MissionModel(
-      id: '1',
-      client: Client(
-        id: 1,
-        userId: 1,
-        username: 'John Doe',
-        email: 'john.doe@example.com',
-        phone: '1234567890',
-        imageUrl: 'assets/miniLogo.png',
-      ),
-      from: 'Sfax, Tunisia',
-      to: 'Danden, Tunisia',
-      date: DateTime.parse('2021-01-01'),
-      time: '10:00',
-      status: 'pending',
-      items: [
-        MissionItem(
-          id: '1',
-          name: 'Article 1',
-          quantity: 1,
-        ),
-        MissionItem(
-          id: '2',
-          name: 'Article 2',
-          quantity: 2,
-        ),
-      ],
-    ),
-    MissionModel(
-      id: '2',
-      client: Client(
-        id: 2,
-        userId: 2,
-        username: 'Jane Doe',
-        email: 'jane.doe@example.com',
-        phone: '1234567890',
-        imageUrl: 'assets/miniLogo.png',
-      ),
-      from: 'Danden, Tunisia',
-      to: 'Sfax, Tunisia',
-      date: DateTime.parse('2021-01-01'),
-      time: '10:00',
-      status: 'accepted',
-      items: [
-        MissionItem(
-          id: '1',
-          name: 'Article 1',
-          quantity: 1,
-        ),
-      ],
-    ),
-  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -118,40 +239,45 @@ class _MissionScreenState extends State<MissionScreen> {
               ),
             ),
             child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  SizedBox(height: 3.h),
-                  InkWell(
-                    onTap: () => setState(() {
-                      empty = !empty;
-                    }),
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 5.w),
-                      child: Text(
-                        language == 'fr' ? 'Missions' : 'Missions',
-                        style: TextStyle(
-                          fontSize: 20.sp,
-                          fontWeight: FontWeight.bold,
+              child: RefreshIndicator(
+                onRefresh: refresh,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    SizedBox(height: 3.h),
+                    InkWell(
+                      onTap: () => setState(() {
+                        empty = !empty;
+                      }),
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 5.w),
+                        child: Text(
+                          language == 'fr' ? 'Missions' : 'Missions',
+                          style: TextStyle(
+                            fontSize: 20.sp,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  SizedBox(height: empty ? 20.h : 0.h),
-                  empty
-                      ? Center(child: _buildEmptyState())
-                      : SizedBox(
-                          height: 70.h,
-                          child: ListView.builder(
-                            itemCount: missions.length,
-                            itemBuilder: (context, index) {
-                              return missionItem(missions[index]);
-                            },
-                          ),
-                        )
-                ],
-              ).animate().slideX(duration: 500.ms, begin: -1, end: 0),
+                    SizedBox(height: empty ? 20.h : 0.h),
+                    loading
+                        ? Center(child: CircularProgressIndicator())
+                        : combinedHistory.isEmpty
+                            ? Center(child: _buildEmptyState())
+                            : SizedBox(
+                                height: 70.h,
+                                child: ListView.builder(
+                                  itemCount: combinedHistory.length,
+                                  itemBuilder: (context, index) {
+                                    return missionItem(combinedHistory[index]);
+                                  },
+                                ),
+                              )
+                  ],
+                ).animate().slideX(duration: 500.ms, begin: -1, end: 0),
+              ),
             ),
           ),
         )
@@ -181,14 +307,14 @@ class _MissionScreenState extends State<MissionScreen> {
             ],
           ),
           child: Icon(
-            Icons.notifications,
+            Icons.access_time_rounded,
             size: 45.sp,
             color: kPrimaryColor,
           ),
         ),
         const SizedBox(height: 28),
         Text(
-          language == 'fr' ? "Aucune notification !" : "No notification !",
+          language == 'fr' ? "Aucune mission !" : "No mission !",
           style: TextStyle(
             fontFamily: 'Sofia Pro',
             fontSize: 20.sp,
@@ -200,8 +326,8 @@ class _MissionScreenState extends State<MissionScreen> {
         const SizedBox(height: 12),
         Text(
           language == 'fr'
-              ? "Aucune notification à vous pour le moment."
-              : "No notification for you at the moment.",
+              ? "Aucune mission à vous pour le moment."
+              : "No mission for you at the moment.",
           textAlign: TextAlign.center,
           style: TextStyle(
             fontFamily: 'Sofia Pro',
@@ -214,7 +340,20 @@ class _MissionScreenState extends State<MissionScreen> {
     );
   }
 
-  missionItem(MissionModel mission) {
+  Widget missionItem(dynamic mission) {
+    // Determine if it's a TrajetModel or Reservation
+    final bool isTrajet = mission is TrajetModel;
+    final String status = isTrajet ? mission.status : mission.status;
+    final String username = isTrajet
+        ? mission.client?.username ?? ''
+        : mission.client?.username ?? '';
+    final DateTime date = isTrajet
+        ? mission.departureDateTime
+        : DateTime.parse(mission.dateReservation);
+    final String from = isTrajet ? mission.startPoint : mission.from;
+    final String to = isTrajet ? mission.endPoint : mission.to;
+    final int itemsCount = isTrajet ? 0 : (mission.products?.length ?? 0);
+
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 0.h),
       child: Material(
@@ -228,23 +367,27 @@ class _MissionScreenState extends State<MissionScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               Text(
-                  mission.status == 'pending'
+                  status == 'en_attente'
                       ? language == 'fr'
                           ? 'En attente'
                           : 'Pending'
-                      : mission.status == 'accepted'
+                      : status == 'accepted'
                           ? language == 'fr'
-                              ? 'Courses acceptées'
+                              ? 'Acceptées'
                               : 'Accepted'
-                          : language == 'fr'
-                              ? 'Terminée'
-                              : 'Completed',
+                          : status == 'refuse'
+                              ? language == 'fr'
+                                  ? 'Refusées'
+                                  : 'Refused'
+                              : language == 'fr'
+                                  ? 'Terminée'
+                                  : 'Completed',
                   style: TextStyle(
                     fontSize: 18.sp,
                     fontWeight: FontWeight.bold,
-                    color: mission.status == 'pending'
+                    color: status == 'en_attente'
                         ? Colors.orange
-                        : mission.status == 'accepted'
+                        : status == 'accepted'
                             ? Colors.green
                             : Colors.red,
                   )),
@@ -257,22 +400,20 @@ class _MissionScreenState extends State<MissionScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(mission.client.username,
+                        Text(username,
                             style: TextStyle(
                               fontSize: 16.sp,
                               fontWeight: FontWeight.bold,
                             )),
                         SizedBox(width: 2.w),
                         Text(
-                            DateTime.now().day == mission.date.day &&
-                                    DateTime.now().month ==
-                                        mission.date.month &&
-                                    DateTime.now().year == mission.date.year
+                            DateTime.now().day == date.day &&
+                                    DateTime.now().month == date.month &&
+                                    DateTime.now().year == date.year
                                 ? language == 'fr'
                                     ? 'Aujourd\'hui'
                                     : 'Today'
-                                : DateFormat('EEEE, HH:mm')
-                                    .format(mission.date),
+                                : DateFormat('EEEE, HH:mm').format(date),
                             style: TextStyle(
                               fontSize: 16.sp,
                               fontWeight: FontWeight.w400,
@@ -286,7 +427,7 @@ class _MissionScreenState extends State<MissionScreen> {
                       children: [
                         SizedBox(
                             width: 70.w,
-                            child: Text(mission.from,
+                            child: Text(from,
                                 style: TextStyle(
                                   fontSize: 16.sp,
                                   fontWeight: FontWeight.w400,
@@ -295,124 +436,286 @@ class _MissionScreenState extends State<MissionScreen> {
                                 overflow: TextOverflow.ellipsis)),
                         SizedBox(
                             width: 70.w,
-                            child: Text(mission.to,
+                            child: Text(to,
                                 style: TextStyle(
                                   fontSize: 16.sp,
                                   fontWeight: FontWeight.w400,
                                 ),
                                 maxLines: 4,
                                 overflow: TextOverflow.ellipsis)),
-                        SizedBox(
-                            width: 70.w,
-                            child: Text(
-                                mission.items.length.toString() +
-                                            ' ' +
-                                            language ==
-                                        'fr'
-                                    ? 'articles'
-                                    : 'articles',
-                                style: TextStyle(
-                                  fontSize: 16.sp,
-                                  fontWeight: FontWeight.w400,
-                                ),
-                                maxLines: 4,
-                                overflow: TextOverflow.ellipsis)),
+                        if (!isTrajet && itemsCount > 0)
+                          SizedBox(
+                              width: 70.w,
+                              child: Text(
+                                  itemsCount.toString() +
+                                      ' ' +
+                                      (language == 'fr'
+                                          ? 'articles'
+                                          : 'articles'),
+                                  style: TextStyle(
+                                    fontSize: 16.sp,
+                                    fontWeight: FontWeight.w400,
+                                  ),
+                                  maxLines: 4,
+                                  overflow: TextOverflow.ellipsis)),
                       ],
                     ),
                   ),
                   SizedBox(height: 1.h),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            fixedSize: Size(40.w, 5.h),
-                            elevation: 0,
-                            backgroundColor: kPrimaryColor,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(25),
-                            ),
-                          ),
-                          onPressed: () async {},
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              if (mission.status == 'accepted')
-                                Icon(
-                                  Icons.phone,
-                                  color: Colors.white,
-                                  size: 20.sp,
-                                ),
-                              SizedBox(width: 1.w),
-                              Text(
-                                mission.status == 'pending'
-                                    ? language == 'fr'
-                                        ? 'Accepter'
-                                        : 'Accept'
-                                    : language == 'fr'
-                                        ? 'Appeler'
-                                        : 'Call',
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 15.sp,
-                                    fontWeight: FontWeight.w600),
+                  if (status == 'en_attente' || status == 'accepted')
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              fixedSize: Size(40.w, 5.h),
+                              elevation: 0,
+                              backgroundColor: kPrimaryColor,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(25),
                               ),
-                            ],
-                          )),
-                      ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            fixedSize: Size(40.w, 5.h),
-                            elevation: 0,
-                            backgroundColor:
-                                kSecondaryColor.withValues(alpha: 0.2),
-                            foregroundColor: kSecondaryColor,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(25),
                             ),
-                          ),
-                          onPressed: () async {},
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              if (mission.status == 'accepted')
-                                Icon(
-                                  Icons.place,
-                                  color: kSecondaryColor,
-                                  size: 20.sp,
-                                ),
-                              SizedBox(width: 1.w),
-                              Text(
-                                mission.status == 'pending'
-                                    ? language == 'fr'
-                                        ? 'Réfuser'
-                                        : 'Refuse'
-                                    : language == 'fr'
-                                        ? 'Navigation'
-                                        : 'Navigation',
-                                style: TextStyle(
-                                    fontSize: 15.sp,
-                                    fontWeight: FontWeight.w600),
+                            onPressed: () async {
+                              if (status == 'en_attente') {
+                                final result;
+                                if (isTrajet) {
+                                  result = await updateTrajet(
+                                    trajetId: mission.id,
+                                    status: 'accepted',
+                                  );
+                                } else {
+                                  result = await updateReservation(
+                                    reservationId: mission.id,
+                                    status: 'accepted',
+                                  );
+                                }
+
+                                await showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return Dialog(
+                                      backgroundColor: Colors.white,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(15),
+                                      ),
+                                      child: Container(
+                                        padding: EdgeInsets.all(20),
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Container(
+                                              decoration: BoxDecoration(
+                                                color: Colors.white,
+                                                shape: BoxShape.circle,
+                                                border: Border.all(
+                                                  color: kPrimaryColor,
+                                                ),
+                                              ),
+                                              child: Padding(
+                                                padding: EdgeInsets.all(10.sp),
+                                                child: Icon(
+                                                  result
+                                                      ? Icons
+                                                          .attach_money_outlined
+                                                      : Icons.error_outline,
+                                                  color: result
+                                                      ? kPrimaryColor
+                                                      : Colors.red,
+                                                  size: 40.sp,
+                                                ),
+                                              ),
+                                            ),
+                                            SizedBox(height: 20),
+                                            Text(
+                                              result
+                                                  ? language == 'fr'
+                                                      ? 'Vous avez gagné 15 points'
+                                                      : 'You have won 15 points'
+                                                  : language == 'fr'
+                                                      ? 'Une erreur est survenue'
+                                                      : 'An error occurred',
+                                              textAlign: TextAlign.center,
+                                              style: TextStyle(fontSize: 16.sp),
+                                            ),
+                                            SizedBox(height: 1.h),
+                                            Divider(
+                                              color: kPrimaryColor,
+                                            ),
+                                            SizedBox(height: 1.h),
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                TextButton(
+                                                  onPressed: () async {
+                                                    await refresh();
+                                                    Get.back();
+                                                  },
+                                                  child: Text(
+                                                    result
+                                                        ? language == 'fr'
+                                                            ? 'Génial'
+                                                            : 'Great'
+                                                        : language == 'fr'
+                                                            ? 'Ok'
+                                                            : 'Ok',
+                                                    style: TextStyle(
+                                                      color: kPrimaryColor,
+                                                      fontSize: 17.sp,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                );
+                              }
+                            },
+                            child: uploading
+                                ? Center(
+                                    child: CircularProgressIndicator(
+                                        color: kPrimaryColor))
+                                : Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      if (status == 'accepted')
+                                        Icon(
+                                          Icons.phone,
+                                          color: Colors.white,
+                                          size: 20.sp,
+                                        ),
+                                      SizedBox(width: 1.w),
+                                      Text(
+                                        status == 'en_attente'
+                                            ? language == 'fr'
+                                                ? 'Accepter'
+                                                : 'Accept'
+                                            : language == 'fr'
+                                                ? 'Appeler'
+                                                : 'Call',
+                                        style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 15.sp,
+                                            fontWeight: FontWeight.w600),
+                                      ),
+                                    ],
+                                  )),
+                        ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              fixedSize: Size(40.w, 5.h),
+                              elevation: 0,
+                              backgroundColor:
+                                  kSecondaryColor.withValues(alpha: 0.2),
+                              foregroundColor: kSecondaryColor,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(25),
                               ),
-                            ],
-                          )),
-                    ],
-                  ),
+                            ),
+                            onPressed: () async {
+                              if (status == 'en_attente') {
+                                final result;
+                                if (isTrajet) {
+                                  result = await updateTrajet(
+                                    trajetId: mission.id,
+                                    status: 'refuse',
+                                  );
+                                } else {
+                                  result = await updateReservation(
+                                    reservationId: mission.id,
+                                    status: 'refuse',
+                                  );
+                                }
+                                if (result) {
+                                  await refresh();
+                                  Get.showSnackbar(
+                                    GetSnackBar(
+                                      title: 'Mission refusée',
+                                      message: 'La mission a été refusée',
+                                      backgroundColor: kPrimaryColor,
+                                    ),
+                                  );
+                                }
+                              }
+                            },
+                            child: uploading
+                                ? Center(
+                                    child: CircularProgressIndicator(
+                                        color: kPrimaryColor))
+                                : Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      if (status == 'accepted')
+                                        Icon(
+                                          Icons.place,
+                                          color: kSecondaryColor,
+                                          size: 20.sp,
+                                        ),
+                                      SizedBox(width: 1.w),
+                                      Text(
+                                        status == 'en_attente'
+                                            ? language == 'fr'
+                                                ? 'Réfuser'
+                                                : 'Refuse'
+                                            : language == 'fr'
+                                                ? 'Navigation'
+                                                : 'Navigation',
+                                        style: TextStyle(
+                                            fontSize: 15.sp,
+                                            fontWeight: FontWeight.w600),
+                                      ),
+                                    ],
+                                  )),
+                      ],
+                    ),
                   SizedBox(height: 1.h),
-                  if (mission.status != 'pending')
+                  if (status == 'accepted')
                     SizedBox(
                       width: 100.w,
                       child: TextButton(
-                          onPressed: () {},
-                          child: Text(
-                            language == 'fr'
-                                ? 'MARQUER COMME LIVREE'
-                                : 'MARK AS DELIVERED',
-                            style: TextStyle(
-                              fontSize: 15.sp,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.grey,
-                            ),
-                          )),
+                          onPressed: () async {
+                            final result;
+                            if (isTrajet) {
+                              result = await updateTrajet(
+                                trajetId: mission.id,
+                                status: 'completed',
+                              );
+                            } else {
+                              result = await updateReservation(
+                                reservationId: mission.id,
+                                status: 'completed',
+                              );
+                            }
+                            if (result) {
+                              await refresh();
+                              Get.showSnackbar(
+                                GetSnackBar(
+                                  title: 'Mission terminée',
+                                  message: 'La mission a été terminée',
+                                  backgroundColor: kPrimaryColor,
+                                ),
+                              );
+                            }
+                          },
+                          child: uploading
+                              ? Center(
+                                  child: CircularProgressIndicator(
+                                      color: kPrimaryColor))
+                              : Text(
+                                  language == 'fr'
+                                      ? 'MARQUER COMME LIVREE'
+                                      : 'MARK AS DELIVERED',
+                                  style: TextStyle(
+                                    fontSize: 15.sp,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.grey,
+                                  ),
+                                )),
                     )
                 ],
               ),
