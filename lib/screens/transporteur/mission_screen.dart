@@ -674,6 +674,9 @@ class _MissionScreenState extends State<MissionScreen> {
                                     ),
                                   );
                                 }
+                              } else {
+                                //navigate to the client
+                                Get.offAll(() => NavigationScreenTransporteur());
                               }
                             },
                             child: uploading

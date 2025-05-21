@@ -5,7 +5,6 @@ import 'package:zomo/design/const.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:zomo/screens/transporteur/navigation_screen.dart';
 import 'package:zomo/services/callhistory.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
 
 class HistorypageTransporteur extends StatefulWidget {
