@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:zomo/design/const.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:zomo/screens/transporteur/navigation_screen.dart';
+import 'package:zomo/services/callhistory.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:intl/intl.dart';
 
 class HistorypageTransporteur extends StatefulWidget {
   const HistorypageTransporteur({super.key});
@@ -12,36 +17,168 @@ class HistorypageTransporteur extends StatefulWidget {
 }
 
 class _HistorypageTransporteurState extends State<HistorypageTransporteur> {
-  // Mock call history data
-  final List<Map<String, dynamic>> callHistory = [
-    {
-      'name': 'Ahmed B',
-      'type': 'received',
-      'time': 'Aujourd\'hui 10:15',
-      'duration': '1 min 42 s',
-      'missed': false,
-      'initial': 'A',
-    },
-    {
-      'name': 'Inconnu',
-      'type': 'missed',
-      'time': 'Hier 18:27',
-      'duration': '',
-      'missed': true,
-      'initial': 'I',
-    },
-    {
-      'name': 'Nadia Client',
-      'type': 'passed',
-      'time': '15 avril 14:03',
-      'duration': '3 min 10 s',
-      'missed': false,
-      'initial': 'N',
-    },
-  ];
-
+  List<Map<String, dynamic>> callHistory = [];
+  bool isLoading = true;
   String selectedFilter = 'Tous';
   String searchQuery = '';
+  final CallHistoryService _callHistoryService = CallHistoryService();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCallHistory();
+  }
+
+  Future<bool> storeCall(int senderId, int receiverId) async {
+    final callHistoryService = CallHistoryService();
+
+// Store a call history
+    try {
+      final result = await callHistoryService.storeCallHistory(
+        senderId: senderId,
+        receiverId: receiverId,
+        etat: 'received',
+        duration: 120, // optional
+      );
+      return result;
+    } catch (e) {
+      print('Error: $e');
+      return false;
+    }
+  }
+
+  Future<void> callClient(String phoneNumber, int clientId) async {
+    try {
+      await storeCall(transporteurData!.id!, clientId);
+      final Uri uri = Uri.parse('tel:$phoneNumber');
+      await launchUrl(uri);
+    } catch (e) {
+      print('Error calling client: $e');
+    }
+  }
+
+  Future<void> _loadCallHistory() async {
+    try {
+      setState(() {
+        isLoading = true;
+      });
+
+      final response =
+          await _callHistoryService.getCallHistoryById(transporteurData!.id!);
+
+      if (response['call_history'] != null) {
+        final List<dynamic> historyData = response['call_history'];
+        setState(() {
+          callHistory = historyData.map((call) {
+            // Determine if the current user is the sender or receiver
+            final isSender =
+                call['sender']['user']['id'] == transporteurData!.id;
+            final otherUser = isSender ? call['receiver'] : call['sender'];
+
+            // Get the name from specific data if available, otherwise use user data
+            String name = 'Inconnu';
+            if (otherUser['specific_data'] != null) {
+              name = otherUser['specific_data']['username'] ??
+                  otherUser['user']['name'] ??
+                  'Inconnu';
+            } else {
+              name = otherUser['user']['name'] ?? 'Inconnu';
+            }
+            String phoneNumber = '12345678';
+
+            if (otherUser['specific_data'] != null) {
+              phoneNumber = otherUser['specific_data']['phone'] ??
+                  otherUser['user']['phone'] ??
+                  '12345678';
+            } else {
+              phoneNumber = otherUser['user']['phone'] ?? '12345678';
+            }
+            int clientId = 0;
+
+            if (otherUser['specific_data'] != null) {
+              clientId = otherUser['specific_data']['id'] ??
+                  otherUser['user']['id'] ??
+                  0;
+            } else {
+              clientId = otherUser['user']['id'] ?? 0;
+            }
+            // Map backend etat to frontend type
+            String type = 'received';
+            if (call['etat'] == 'cancelled') {
+              type = 'missed';
+            } else if (isSender) {
+              type = 'passed';
+            }
+
+            // Format duration
+            String duration = '';
+            if (call['duration'] != null) {
+              final minutes = (call['duration'] / 60).floor();
+              final seconds = call['duration'] % 60;
+              duration = '$minutes min $seconds s';
+            }
+
+            // Format time
+            final DateTime callTime = DateTime.parse(call['created_at']);
+            String time;
+            if (DateTime.now().difference(callTime).inDays == 0) {
+              time = 'Aujourd\'hui ${DateFormat('HH:mm').format(callTime)}';
+            } else if (DateTime.now().difference(callTime).inDays == 1) {
+              time = 'Hier ${DateFormat('HH:mm').format(callTime)}';
+            } else {
+              time = DateFormat('d MMMM HH:mm', 'fr_FR').format(callTime);
+            }
+
+            return {
+              'name': name,
+              'type': type,
+              'time': time,
+              'duration': duration,
+              'missed': type == 'missed',
+              'initial': name.isNotEmpty ? name[0].toUpperCase() : 'I',
+              'phone': phoneNumber,
+              'client_id': clientId,
+            };
+          }).toList();  
+        });
+      }
+    } catch (e) {
+      print('Error loading call history: $e');
+      // Keep the mock data as fallback
+      setState(() {
+        callHistory = [
+          {
+            'name': 'Ahmed B',
+            'type': 'received',
+            'time': 'Aujourd\'hui 10:15',
+            'duration': '1 min 42 s',
+            'missed': false,
+            'initial': 'A',
+          },
+          {
+            'name': 'Inconnu',
+            'type': 'missed',
+            'time': 'Hier 18:27',
+            'duration': '',
+            'missed': true,
+            'initial': 'I',
+          },
+          {
+            'name': 'Nadia Client',
+            'type': 'passed',
+            'time': '15 avril 14:03',
+            'duration': '3 min 10 s',
+            'missed': false,
+            'initial': 'N',
+          },
+        ];
+      });
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
 
   List<Map<String, dynamic>> get filteredCalls {
     List<Map<String, dynamic>> filtered = callHistory;
@@ -114,14 +251,34 @@ class _HistorypageTransporteurState extends State<HistorypageTransporteur> {
                 SizedBox(height: 3.h),
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 5.w),
-                  child: Text(
-                    language == 'fr'
-                        ? 'Historique des appels'
-                        : 'History of calls',
-                    style: TextStyle(
-                      fontSize: 18.sp,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        language == 'fr'
+                            ? 'Historique des appels'
+                            : 'History of calls',
+                        style: TextStyle(
+                          fontSize: 18.sp,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      if (isLoading)
+                        SizedBox(
+                          width: 20.sp,
+                          height: 20.sp,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(kPrimaryColor),
+                          ),
+                        )
+                      else
+                        IconButton(
+                          icon: Icon(Icons.refresh, color: kPrimaryColor),
+                          onPressed: _loadCallHistory,
+                        ),
+                    ],
                   ),
                 ),
                 SizedBox(height: 2.h),
@@ -165,15 +322,25 @@ class _HistorypageTransporteurState extends State<HistorypageTransporteur> {
                 ),
                 SizedBox(height: 2.h),
                 Expanded(
-                  child: filteredCalls.isEmpty
-                      ? Center(child: _buildEmptyState())
-                      : ListView.builder(
-                          padding: EdgeInsets.symmetric(horizontal: 2.w),
-                          itemCount: filteredCalls.length,
-                          itemBuilder: (context, index) {
-                            return historyItem(filteredCalls[index]);
-                          },
-                        ),
+                  child: isLoading
+                      ? Center(
+                          child: CircularProgressIndicator(
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(kPrimaryColor),
+                          ),
+                        )
+                      : filteredCalls.isEmpty
+                          ? Center(child: _buildEmptyState())
+                          : RefreshIndicator(
+                              onRefresh: _loadCallHistory,
+                              child: ListView.builder(
+                                padding: EdgeInsets.symmetric(horizontal: 2.w),
+                                itemCount: filteredCalls.length,
+                                itemBuilder: (context, index) {
+                                  return historyItem(filteredCalls[index]);
+                                },
+                              ),
+                            ),
                 ),
               ],
             ).animate().slideX(duration: 500.ms, begin: -1, end: 0),
@@ -309,7 +476,9 @@ class _HistorypageTransporteurState extends State<HistorypageTransporteur> {
               ],
             ),
             trailing: ElevatedButton(
-              onPressed: () {},
+              onPressed: () async {
+                callClient(call['phone'], call['client_id']);
+              },
               style: ElevatedButton.styleFrom(
                 backgroundColor: amber,
                 shape: RoundedRectangleBorder(

@@ -5,12 +5,13 @@ import 'package:sizer/sizer.dart';
 import 'package:zomo/design/const.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:zomo/models/history_model.dart';
-import 'package:zomo/models/mission_model.dart';
 import 'package:intl/intl.dart';
 import 'package:zomo/models/reservation.dart';
 import 'package:zomo/screens/transporteur/navigation_screen.dart';
+import 'package:zomo/services/callhistory.dart';
 import 'package:zomo/services/reservationservices.dart';
 import 'package:zomo/services/trajetservices.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class MissionScreen extends StatefulWidget {
   const MissionScreen({super.key});
@@ -30,6 +31,24 @@ class _MissionScreenState extends State<MissionScreen> {
     super.initState();
     getReservations();
     getTrajets();
+  }
+
+  Future<bool> storeCall(int senderId, int receiverId) async {
+    final callHistoryService = CallHistoryService();
+
+// Store a call history
+    try {
+      final result = await callHistoryService.storeCallHistory(
+        senderId: senderId,
+        receiverId: receiverId,
+        etat: 'received',
+        duration: 120, // optional
+      );
+      return result;
+    } catch (e) {
+      print('Error: $e');
+      return false;
+    }
   }
 
   void combineAndSortHistory() {
@@ -184,6 +203,16 @@ class _MissionScreenState extends State<MissionScreen> {
       setState(() {
         uploading = false;
       });
+    }
+  }
+
+  Future<void> callClient(String phoneNumber, int clientId) async {
+    try {
+      await storeCall(transporteurData!.id!, clientId);
+      final Uri uri = Uri.parse('tel:$phoneNumber');
+      await launchUrl(uri);
+    } catch (e) {
+      print('Error calling client: $e');
     }
   }
 
@@ -353,7 +382,8 @@ class _MissionScreenState extends State<MissionScreen> {
     final String from = isTrajet ? mission.startPoint : mission.from;
     final String to = isTrajet ? mission.endPoint : mission.to;
     final int itemsCount = isTrajet ? 0 : (mission.products?.length ?? 0);
-
+    final String phoneNumber = "+216${mission.client?.phone}";
+    final int clientId = mission.client?.id ?? 0;
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 0.h),
       child: Material(
@@ -575,6 +605,9 @@ class _MissionScreenState extends State<MissionScreen> {
                                     );
                                   },
                                 );
+                              } else {
+                                //call the client
+                                callClient(phoneNumber, clientId);
                               }
                             },
                             child: uploading
