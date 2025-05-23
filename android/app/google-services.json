@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1061319668433",
+    "project_id": "zomo-b0465",
+    "storage_bucket": "zomo-b0465.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1061319668433:android:d448524ff4ca139d5b4bf0",
+        "android_client_info": {
+          "package_name": "com.pfe.zomo"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC6nW8FHv4vYlo4KV6FlvX2_pgQ2dUfMuA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
