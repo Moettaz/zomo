@@ -77,12 +77,12 @@ class _ReclamationFormState extends State<ReclamationForm> {
       final reclamation = Reclamation(
         clientId: clientData!.id!,
         transporteurId: _selectedTransporteur!.id!,
-        serviceId: serviceId!,
+        serviceId: serviceId,
         dateCreation: DateTime.now(),
         sujet: _sujetController.text,
         description: _descriptionController.text,
         status: 'pending',
-        priorite: "medium",
+        priorite: _selectedPriorite,
       );
 
       final createdReclamation =
