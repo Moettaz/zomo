@@ -5,6 +5,7 @@ import 'package:zomo/design/const.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:zomo/screens/transporteur/navigation_screen.dart';
 import 'package:zomo/services/callhistory.dart';
+// ignore: depend_on_referenced_packages
 import 'package:intl/intl.dart';
 
 class HistorypageTransporteur extends StatefulWidget {
@@ -41,7 +42,6 @@ class _HistorypageTransporteurState extends State<HistorypageTransporteur> {
       );
       return result;
     } catch (e) {
-      print('Error: $e');
       return false;
     }
   }
@@ -52,6 +52,7 @@ class _HistorypageTransporteurState extends State<HistorypageTransporteur> {
       final Uri uri = Uri.parse('tel:$phoneNumber');
       await launchUrl(uri);
     } catch (e) {
+      // ignore: avoid_print
       print('Error calling client: $e');
     }
   }
@@ -138,11 +139,10 @@ class _HistorypageTransporteurState extends State<HistorypageTransporteur> {
               'phone': phoneNumber,
               'client_id': clientId,
             };
-          }).toList();  
+          }).toList();
         });
       }
     } catch (e) {
-      print('Error loading call history: $e');
       // Keep the mock data as fallback
       setState(() {
         callHistory = [
@@ -213,6 +213,7 @@ class _HistorypageTransporteurState extends State<HistorypageTransporteur> {
                 width: double.infinity,
                 height: 20.h,
                 decoration: BoxDecoration(
+                  // ignore: deprecated_member_use
                   color: Colors.black.withOpacity(0.5),
                   image: DecorationImage(
                     image: AssetImage('assets/headerImage.png'),

@@ -23,13 +23,10 @@ class ReservationServices {
     required String from,
     required String to,
     String? heureReservation,
-    int? etage,   
+    int? etage,
     List<Product>? products,
   }) async {
     try {
-
-      
-
       // Get the token from SharedPreferences
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token');
@@ -40,7 +37,6 @@ class ReservationServices {
           'message': 'Not authenticated',
         };
       }
-
 
       final response = await http.post(
         Uri.parse('$baseUrl/api/reservations'),
@@ -66,9 +62,9 @@ class ReservationServices {
           if (etage != null) 'etage': etage,
           if (products != null)
             'products': products.map((product) => product.toJson()).toList(),
+          'methode_paiement': 'cash',
         }),
       );
-
 
       final responseData = jsonDecode(response.body);
 
@@ -78,7 +74,8 @@ class ReservationServices {
           'data': Reservation.fromJson(responseData['data']),
         };
       } else {
-
+        // ignore: avoid_print
+        print('Error storing reservation: ${responseData['message']}');
         return {
           'success': false,
           'message': responseData['message'] ?? 'Failed to create reservation',
@@ -87,7 +84,8 @@ class ReservationServices {
         };
       }
     } catch (e, stackTrace) {
-
+      // ignore: avoid_print
+      print('Error storing reservation: $e');
       return {
         'success': false,
         'message': 'Network error: $e',
@@ -156,7 +154,6 @@ class ReservationServices {
         };
       }
 
-
       final response = await http.get(
         Uri.parse('$baseUrl/api/reservations/client/$clientId'),
         headers: <String, String>{
@@ -165,18 +162,15 @@ class ReservationServices {
         },
       );
 
-
       final responseData = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
         final List<dynamic> data = responseData['data'] as List;
-        
-        final List<Reservation> reservations = data
-            .map((json) {
-              return Reservation.fromJson(json);
-            })
-            .toList();
-            
+
+        final List<Reservation> reservations = data.map((json) {
+          return Reservation.fromJson(json);
+        }).toList();
+
         return {
           'success': true,
           'data': reservations,

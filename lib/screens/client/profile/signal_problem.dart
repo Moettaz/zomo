@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 import 'package:sizer/sizer.dart';
 import 'package:zomo/design/const.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:zomo/models/reclamation.dart';
+import 'package:zomo/widgets/reclamation_form.dart';
 
 class SignalProblem extends StatefulWidget {
   const SignalProblem({super.key});
@@ -13,6 +15,22 @@ class SignalProblem extends StatefulWidget {
 
 class _SignalProblemState extends State<SignalProblem> {
   bool empty = false;
+  void _showReclamationForm() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true, // This allows the sheet to take full height
+      backgroundColor: Colors.transparent,
+      builder: (context) => ReclamationForm(
+        onReclamationCreated: (Reclamation reclamation) {
+          // Handle the newly created reclamation
+          // For example, refresh the reclamations list
+          setState(() {
+            // Update your UI
+          });
+        },
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -137,7 +155,9 @@ class _SignalProblemState extends State<SignalProblem> {
                                 padding: EdgeInsets.symmetric(
                                     horizontal: 15.sp, vertical: 2.h),
                                 child: ElevatedButton(
-                                  onPressed: () {},
+                                  onPressed: () {
+                                    _showReclamationForm();
+                                  },
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: kPrimaryColor,
                                     fixedSize: Size(70.w, 6.h),

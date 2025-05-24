@@ -1,3 +1,4 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -119,7 +120,7 @@ class _SignInScreenState extends State<SignInScreen> {
     if (result['success']) {
       final userData = result['data'];
       final user = User.fromJson(userData['user']);
-
+        await _updateDeviceToken(user.id!);
       if (user.role?.slug == 'client') {
         Get.off(() => const NavigationScreen(index: 0));
       } else {
@@ -179,6 +180,7 @@ class _SignInScreenState extends State<SignInScreen> {
       });
 
       if (result['success']) {
+        
         Get.showSnackbar(kSuccessSnackBar(language == 'fr'
             ? "Inscription réussie ! Vous pouvez maintenant vous connecter."
             : "Registration successful! You can now log in."));
@@ -200,6 +202,16 @@ class _SignInScreenState extends State<SignInScreen> {
       Get.showSnackbar(kErrorSnackBar(language == 'fr'
           ? "Une erreur inattendue s'est produite"
           : "An unexpected error occurred"));
+    }
+  }
+
+  Future<void> _updateDeviceToken(int userId) async {
+    final token = await FirebaseMessaging.instance.getToken();
+    if (token != null) {
+      await AuthServices.updateDeviceToken(
+        userId: userId,
+        deviceToken: token,
+      );
     }
   }
 

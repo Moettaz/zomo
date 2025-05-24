@@ -1221,12 +1221,11 @@ class _ReservationState extends State<Reservation> {
                               : gettingTransporteurs
                                   ? _buildShimmerLoading()
                                   : SizedBox(
-                                      height: 42.h,
+                                      height: 60.h,
                                       width: 100.w,
                                       child: ListView.builder(
                                         shrinkWrap: false,
-                                        physics:
-                                            const NeverScrollableScrollPhysics(),
+                                        physics: const BouncingScrollPhysics(),
                                         itemCount: transporteurs.length,
                                         itemBuilder: (context, index) {
                                           final transporteur =
@@ -1324,7 +1323,8 @@ class _ReservationState extends State<Reservation> {
                                                                   ),
                                                                   Text(
                                                                     transporteur
-                                                                        .vehiculeType!,
+                                                                            .vehiculeType ??
+                                                                        'taxi',
                                                                     style:
                                                                         TextStyle(
                                                                       fontSize:
@@ -1491,7 +1491,7 @@ class _ReservationState extends State<Reservation> {
                                                                                             ),
                                                                                             SizedBox(height: 20),
                                                                                             Text(
-                                                                                              language == 'fr' ? 'Vous avez gagné 5 points' : 'You have won 5 points',
+                                                                                              language == 'fr' ? 'Vous avez gagné 15 points' : 'You have won 5 points',
                                                                                               textAlign: TextAlign.center,
                                                                                               style: TextStyle(fontSize: 16.sp),
                                                                                             ),

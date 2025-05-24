@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -5,6 +7,8 @@ import 'package:sizer/sizer.dart';
 import 'package:zomo/design/const.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:zomo/models/history_model.dart';
+
+// ignore: depend_on_referenced_packages
 import 'package:intl/intl.dart';
 import 'package:zomo/models/reservation.dart';
 import 'package:zomo/screens/transporteur/navigation_screen.dart';
@@ -46,7 +50,6 @@ class _MissionScreenState extends State<MissionScreen> {
       );
       return result;
     } catch (e) {
-      print('Error: $e');
       return false;
     }
   }
@@ -79,26 +82,21 @@ class _MissionScreenState extends State<MissionScreen> {
       setState(() {
         loading = true;
       });
-      print('Fetching trajets for transporteur: ${transporteurData!.id!}');
       final result =
           await TrajetServices.getTrajetsByTransporteur(transporteurData!.id!);
-
-      print('Trajet result: $result');
 
       if (result['success']) {
         setState(() {
           history = (result['data'] as List)
               .map((item) => TrajetModel.fromJson(item))
               .toList();
-          print('Trajets fetched: ${history.length}');
           combineAndSortHistory();
         });
-      } else {
-        print('Failed to fetch trajets: ${result['message']}');
-      }
+      } else {}
     } catch (e) {
-      print('Error fetching history: $e');
-      print('Stack trace: ${StackTrace.current}');
+      setState(() {
+        loading = false;
+      });
     } finally {
       setState(() {
         loading = false;
@@ -111,24 +109,19 @@ class _MissionScreenState extends State<MissionScreen> {
       setState(() {
         loading = true;
       });
-      print('Fetching reservations for transporteur: ${transporteurData!.id!}');
       final result = await ReservationServices.getReservationsByTransporteur(
           transporteurData!.id!);
-
-      print('Reservation result: $result');
 
       if (result['success']) {
         setState(() {
           reservations = result['data'] as List<Reservation>;
-          print('Reservations fetched: ${reservations.length}');
           combineAndSortHistory();
         });
-      } else {
-        print('Failed to fetch reservations: ${result['message']}');
-      }
+      } else {}
     } catch (e) {
-      print('Error fetching reservations: $e');
-      print('Stack trace: ${StackTrace.current}');
+      setState(() {
+        loading = false;
+      });
     } finally {
       setState(() {
         loading = false;
@@ -158,8 +151,6 @@ class _MissionScreenState extends State<MissionScreen> {
 
       return response['success'];
     } catch (e) {
-      print('Error updating reservation: $e');
-      print('Stack trace: ${StackTrace.current}');
       return false;
     } finally {
       setState(() {
@@ -196,8 +187,6 @@ class _MissionScreenState extends State<MissionScreen> {
 
       return response['success'];
     } catch (e) {
-      print('Error updating reservation: $e');
-      print('Stack trace: ${StackTrace.current}');
       return false;
     } finally {
       setState(() {
@@ -212,6 +201,7 @@ class _MissionScreenState extends State<MissionScreen> {
       final Uri uri = Uri.parse('tel:$phoneNumber');
       await launchUrl(uri);
     } catch (e) {
+      // ignore: avoid_print
       print('Error calling client: $e');
     }
   }
@@ -477,11 +467,9 @@ class _MissionScreenState extends State<MissionScreen> {
                           SizedBox(
                               width: 70.w,
                               child: Text(
-                                  itemsCount.toString() +
-                                      ' ' +
-                                      (language == 'fr'
+                                  '$itemsCount ${language == 'fr'
                                           ? 'articles'
-                                          : 'articles'),
+                                          : 'articles'}',
                                   style: TextStyle(
                                     fontSize: 16.sp,
                                     fontWeight: FontWeight.w400,
@@ -507,7 +495,7 @@ class _MissionScreenState extends State<MissionScreen> {
                             ),
                             onPressed: () async {
                               if (status == 'en_attente') {
-                                final result;
+                                final bool result;
                                 if (isTrajet) {
                                   result = await updateTrajet(
                                     trajetId: mission.id,
@@ -652,7 +640,7 @@ class _MissionScreenState extends State<MissionScreen> {
                             ),
                             onPressed: () async {
                               if (status == 'en_attente') {
-                                final result;
+                                final bool result;
                                 if (isTrajet) {
                                   result = await updateTrajet(
                                     trajetId: mission.id,
@@ -676,7 +664,8 @@ class _MissionScreenState extends State<MissionScreen> {
                                 }
                               } else {
                                 //navigate to the client
-                                Get.offAll(() => NavigationScreenTransporteur());
+                                Get.offAll(
+                                    () => NavigationScreenTransporteur());
                               }
                             },
                             child: uploading
@@ -715,7 +704,7 @@ class _MissionScreenState extends State<MissionScreen> {
                       width: 100.w,
                       child: TextButton(
                           onPressed: () async {
-                            final result;
+                            final bool result;
                             if (isTrajet) {
                               result = await updateTrajet(
                                 trajetId: mission.id,

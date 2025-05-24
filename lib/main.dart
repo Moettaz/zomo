@@ -9,7 +9,6 @@ import 'screens/first_page.dart';
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
-  print('Handling a background message: ${message.messageId}');
 }
 
 void showInAppNotification(String title, String body) {
@@ -26,7 +25,7 @@ void showInAppNotification(String title, String body) {
     animationDuration: const Duration(milliseconds: 500),
     messageText: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [        
+      children: [
         ...body.split('\n').map((line) => Text(
               line,
               style: TextStyle(color: Colors.black, fontSize: 14.sp),
@@ -45,7 +44,6 @@ void showInAppNotification(String title, String body) {
                 fixedSize: Size(30.w, 5.h),
               ),
               onPressed: () {
-                print('Notification accepted');
                 Get.back();
               },
               child: Text(language == 'fr' ? 'Accepter' : 'Accept'),
@@ -60,7 +58,6 @@ void showInAppNotification(String title, String body) {
                 fixedSize: Size(30.w, 5.h),
               ),
               onPressed: () {
-                print('Notification refused');
                 Get.back();
               },
               child: Text(language == 'fr' ? 'Refuser' : 'Refuse'),
@@ -75,7 +72,6 @@ void showInAppNotification(String title, String body) {
                 fixedSize: Size(10.w, 5.h),
               ),
               onPressed: () {
-                print('Calling...');
                 // You can implement actual call logic here if needed
                 Get.back();
               },
@@ -99,26 +95,16 @@ void main() async {
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
   // Request notification permissions
-  NotificationSettings settings =
-      await FirebaseMessaging.instance.requestPermission(
+
+  await FirebaseMessaging.instance.requestPermission(
     alert: true,
     badge: true,
     sound: true,
   );
 
-  print('User granted permission: ${settings.authorizationStatus}');
-
-  // Get FCM token
-  String? token = await FirebaseMessaging.instance.getToken();
-  print('FCM Token: $token');
-
   // Handle foreground messages
   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-    print('Got a message whilst in the foreground!');
-    print('Message data: ${message.data}');
-
     if (message.notification != null) {
-      print('Message also contained a notification: ${message.notification}');
       // Show in-app notification
       showInAppNotification(
         message.notification?.title ?? 'New Notification',

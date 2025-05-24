@@ -71,13 +71,17 @@ class _SelectCarState extends State<SelectCar> {
         dateHeureArrivee: DateTime.now().toIso8601String(),
         pointDepart: _originController.text,
         pointArrivee: _destinationController.text,
-        prix: 10.0,
+        prix: 5.0,
         etat: 'en_attente',
+        methodePaiement: _selectedPaymentMethod,
       );
-
+      // ignore: avoid_print
+      print('Trajet stored successfully: $result');
       // Log success
       return result;
     } catch (e) {
+      // ignore: avoid_print
+      print('Error storing trajet: ${e.toString()}');
       return {
         'success': false,
         'message': 'Error storing trajet: ${e.toString()}',

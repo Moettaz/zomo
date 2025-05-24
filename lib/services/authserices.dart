@@ -37,8 +37,6 @@ class AuthServices {
       );
 
       final responseData = jsonDecode(response.body);
-      print('DEBUG - Registration response: ${response.statusCode}');
-      print('DEBUG - Registration response: $responseData');
       if (response.statusCode == 201) {
         // Registration successful
         await _saveUserData(responseData);
@@ -54,7 +52,6 @@ class AuthServices {
         };
       }
     } catch (e) {
-      print('DEBUG - Registration error: $e');
       return {
         'success': false,
         'message': 'Network error: $e',
@@ -151,33 +148,23 @@ class AuthServices {
       final specificData = prefs.getString('specific_data');
       final userType = prefs.getString('user_type');
 
-      print('DEBUG - Token: $token');
-      print('DEBUG - User Data: $userData');
-      print('DEBUG - Specific Data: $specificData');
-      print('DEBUG - User Type: $userType');
-
       if (token == null || userData == null) {
-        print('DEBUG - Not logged in - token or userData is null');
         return null; // Not logged in
       }
 
       Map<String, dynamic> decodedUserData;
       try {
         decodedUserData = jsonDecode(userData);
-        print('DEBUG - Decoded User Data: $decodedUserData');
       } catch (e) {
-        print('DEBUG - Error decoding user data: $e');
         return null;
       }
 
       final user = User.fromJson(decodedUserData);
-      print('DEBUG - User object created: ${user.toString()}');
 
       dynamic typedSpecificData;
       if (specificData != null && userType != null) {
         try {
           final decodedData = jsonDecode(specificData);
-          print('DEBUG - Decoded Specific Data: $decodedData');
 
           switch (userType) {
             case 'client':
@@ -190,10 +177,8 @@ class AuthServices {
               typedSpecificData = Chauffeur.fromJson(decodedData);
               break;
           }
-          print(
-              'DEBUG - Typed Specific Data created: ${typedSpecificData.toString()}');
         } catch (e) {
-          print('DEBUG - Error processing specific data: $e');
+          return null;
         }
       }
 
@@ -204,7 +189,6 @@ class AuthServices {
         'user_type': userType,
       };
     } catch (e) {
-      print('DEBUG - Global error in getCurrentUser: $e');
       return null;
     }
   }
@@ -299,6 +283,65 @@ class AuthServices {
         return {
           'success': false,
           'message': responseData['message'] ?? 'Failed to retrieve profile',
+        };
+      }
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Network error: $e',
+      };
+    }
+  }
+
+  // Update device token method
+  static Future<Map<String, dynamic>> updateDeviceToken({
+    required int userId,
+    required String deviceToken,
+  }) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      String? token = prefs.getString('token');
+
+      if (token == null) {
+        return {
+          'success': false,
+          'message': 'Not authenticated',
+        };
+      }
+
+      final response = await http.post(
+        Uri.parse('$baseUrl/api/update-device-token'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode(<String, dynamic>{
+          'user_id': userId,
+          'device_token': deviceToken,
+        }),
+      );
+
+      final responseData = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        // Update the local storage with new user data if provided
+        if (responseData['user'] != null) {
+          await _saveUserData({
+            'token': token, // Keep existing token
+            'user': responseData['user'],
+          });
+        }
+
+        return {
+          'success': true,
+          'message':
+              responseData['message'] ?? 'Device token updated successfully',
+        };
+      } else {
+        return {
+          'success': false,
+          'message': responseData['message'] ?? 'Failed to update device token',
         };
       }
     } catch (e) {

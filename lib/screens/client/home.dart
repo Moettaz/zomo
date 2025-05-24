@@ -106,6 +106,8 @@ class _HomePageState extends State<HomePage> {
                       await TransporteurServices.updateTransporteur(
                         rateTransporteur!.id!,
                         {
+                          'note': rating,
+                          'client_id': clientData!.id!,
                           'note_moyenne':
                               (rateTransporteur!.noteMoyenne! + rating) / 2,
                         },
@@ -227,101 +229,119 @@ class _HomePageState extends State<HomePage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  SizedBox(height: 5.h),
-                  // Top buttons
+                  SizedBox(height: 2.h),
                   Padding(
-                    padding: EdgeInsets.all(10.sp),
-                    child: Row(
+                    padding: EdgeInsets.symmetric(horizontal: 15.sp),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Expanded(
-                          child: ElevatedButton(
-                            onPressed: () {
-                              setState(() {
-                                selectedIndex = 0;
-                              });
-                            },
-                            style: ElevatedButton.styleFrom(
-                              elevation: 0,
-                              backgroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(25),
-                                side: BorderSide(
-                                    color: selectedIndex == 0
-                                        ? kPrimaryColor
-                                        : Colors.grey),
-                              ),
-                            ),
-                            child: Text(
-                              language == 'fr' ? 'Course' : 'Course',
-                              style: TextStyle(
-                                  color: selectedIndex == 0
-                                      ? kPrimaryColor
-                                      : Colors.black,
-                                  fontSize: 13.sp,
-                                  fontWeight: FontWeight.normal),
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 15.sp),
+                          child: Text(
+                            language == 'fr'
+                                ? 'Selectionner un service'
+                                : 'Select a service',
+                            style: TextStyle(
+                              fontSize: 20.sp,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),
-                        SizedBox(width: 1.w),
-                        Expanded(
-                          child: ElevatedButton(
-                            onPressed: () {
-                              setState(() {
-                                selectedIndex = 1;
-                              });
-                            },
-                            style: ElevatedButton.styleFrom(
-                              elevation: 0,
-                              backgroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(25),
-                                side: BorderSide(
-                                    color: selectedIndex == 1
-                                        ? kPrimaryColor
-                                        : Colors.grey),
+                        // Top buttons
+                        Padding(
+                          padding: EdgeInsets.all(10.sp),
+                          child: Row(
+                            children: [
+                              ElevatedButton(
+                                onPressed: () {
+                                  setState(() {
+                                    selectedIndex = 0;
+                                  });
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  elevation: 0,
+                                  backgroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(25),
+                                    side: BorderSide(
+                                        color: selectedIndex == 0
+                                            ? kPrimaryColor
+                                            : Colors.grey),
+                                  ),
+                                ),
+                                child: Text(
+                                  language == 'fr' ? 'Course' : 'Course',
+                                  style: TextStyle(
+                                      color: selectedIndex == 0
+                                          ? kPrimaryColor
+                                          : Colors.black,
+                                      fontSize: 15.sp,
+                                      fontWeight: FontWeight.normal),
+                                ),
                               ),
-                            ),
-                            child: Text(
-                              language == 'fr' ? 'Déménagement' : 'Demovation',
-                              maxLines: 1,
-                              style: TextStyle(
-                                  color: selectedIndex == 1
-                                      ? kPrimaryColor
-                                      : Colors.black,
-                                  fontSize: 13.sp,
-                                  fontWeight: FontWeight.normal),
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: 1.w),
-                        Expanded(
-                          child: ElevatedButton(
-                            onPressed: () {
-                              setState(() {
-                                selectedIndex = 2;
-                              });
-                            },
-                            style: ElevatedButton.styleFrom(
-                              elevation: 0,
-                              backgroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(25),
-                                side: BorderSide(
+                              SizedBox(width: 1.w),
+                              Expanded(
+                                child: ElevatedButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      selectedIndex = 1;
+                                    });
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    elevation: 0,
+                                    backgroundColor: Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(25),
+                                      side: BorderSide(
+                                          color: selectedIndex == 1
+                                              ? kPrimaryColor
+                                              : Colors.grey),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    language == 'fr'
+                                        ? 'Déménagement'
+                                        : 'Demovation',
+                                    maxLines: 1,
+                                    style: TextStyle(
+                                        color: selectedIndex == 1
+                                            ? kPrimaryColor
+                                            : Colors.black,
+                                        fontSize: 15.sp,
+                                        fontWeight: FontWeight.normal),
+                                  ),
+                                ),
+                              ),
+                              SizedBox(width: 1.w),
+                              ElevatedButton(
+                                onPressed: () {
+                                  setState(() {
+                                    selectedIndex = 2;
+                                  });
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  elevation: 0,
+                                  backgroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(25),
+                                    side: BorderSide(
+                                        color: selectedIndex == 2
+                                            ? kPrimaryColor
+                                            : Colors.grey),
+                                  ),
+                                ),
+                                child: Text(
+                                  language == 'fr' ? 'Colis' : 'Colis',
+                                  style: TextStyle(
                                     color: selectedIndex == 2
                                         ? kPrimaryColor
-                                        : Colors.grey),
+                                        : Colors.black,
+                                    fontSize: 15.sp,
+                                    fontWeight: FontWeight.normal,
+                                  ),
+                                ),
                               ),
-                            ),
-                            child: Text(
-                              language == 'fr' ? 'Colis' : 'Colis',
-                              style: TextStyle(
-                                color: selectedIndex == 2
-                                    ? kPrimaryColor
-                                    : Colors.black,
-                                fontSize: 13.sp,
-                                fontWeight: FontWeight.normal,
-                              ),
-                            ),
+                            ],
                           ),
                         ),
                       ],

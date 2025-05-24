@@ -1,3 +1,5 @@
+// ignore_for_file: curly_braces_in_flow_control_structures
+
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -16,6 +18,7 @@ class TrajetServices {
     required String pointArrivee,
     required double prix,
     required String etat,
+    required String methodePaiement,
   }) async {
     try {
       // Get the token from SharedPreferences
@@ -46,6 +49,7 @@ class TrajetServices {
           'point_arrivee': pointArrivee,
           'prix': prix,
           'etat': etat,
+          'methode_paiement': methodePaiement,
         }),
       );
 
