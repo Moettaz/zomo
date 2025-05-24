@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:zomo/models/client.dart';
-import 'package:zomo/models/transporteur.dart';
 import 'package:zomo/models/chauffeur.dart';
 import 'package:zomo/models/user.dart';
 
