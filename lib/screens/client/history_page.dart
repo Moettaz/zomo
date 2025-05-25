@@ -66,8 +66,7 @@ class _HistorypageState extends State<Historypage> {
               .toList();
           combineAndSortHistory();
         });
-      } else {
-      }
+      } else {}
     } catch (e) {
       // ignore: avoid_print
       print('Error fetching history: $e');
@@ -91,8 +90,7 @@ class _HistorypageState extends State<Historypage> {
         reservations = (result['data'] as List<Reservation>);
         combineAndSortHistory();
       });
-    } else {
-    }
+    } else {}
     // } catch (e) {
     //   print('Error fetching reservations: $e');
     // } finally {
@@ -340,7 +338,11 @@ class _HistorypageState extends State<Historypage> {
                   Text(history.status.capitalizeFirst!.replaceAll('_', ' '),
                       style: TextStyle(
                         fontSize: 17.sp,
-                        color: kPrimaryColor,
+                        color: history.status == 'accepted'
+                            ? Colors.green
+                            : history.status == 'rejected'
+                                ? Colors.red
+                                : kPrimaryColor,
                         fontWeight: FontWeight.bold,
                       )),
                   SizedBox(height: 12.h),
@@ -424,8 +426,12 @@ class _HistorypageState extends State<Historypage> {
                   SizedBox(height: 1.h),
                   Text(
                       language == 'fr'
-                          ? reservation.serviceId == 2 ? "Etage ${reservation.etage.toString()}" : "Taille ${reservation.colisSize}"
-                          : reservation.serviceId == 2 ? "Etage ${reservation.etage.toString()}" : "Taille ${reservation.colisSize}",
+                          ? reservation.serviceId == 2
+                              ? "Etage ${reservation.etage.toString()}"
+                              : "Taille ${reservation.colisSize}"
+                          : reservation.serviceId == 2
+                              ? "Etage ${reservation.etage.toString()}"
+                              : "Taille ${reservation.colisSize}",
                       style: TextStyle(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.bold,
@@ -442,7 +448,11 @@ class _HistorypageState extends State<Historypage> {
                   Text(reservation.status.capitalizeFirst!.replaceAll('_', ' '),
                       style: TextStyle(
                         fontSize: 17.sp,
-                        color: kPrimaryColor,
+                        color: reservation.status == 'accepted'
+                            ? Colors.green
+                            : reservation.status == 'rejected'
+                                ? Colors.red
+                                : kPrimaryColor,
                         fontWeight: FontWeight.bold,
                       )),
                   SizedBox(height: 12.h),

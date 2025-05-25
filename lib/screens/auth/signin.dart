@@ -47,6 +47,74 @@ class _SignInScreenState extends State<SignInScreen> {
   bool changePassword = false;
   final LocalAuthentication auth = LocalAuthentication();
   bool _isLoggingIn = false;
+  bool _isSendingResetCode = false;
+  bool _isVerifyingResetCode = false;
+  bool _isResettingPassword = false;
+  Future<bool> sendResetCode() async {
+    try {
+      setState(() {
+        _isSendingResetCode = true;
+      });
+      final result =
+          await AuthServices.sendResetCode(email: _emailController.text);
+      if (result['success']) {
+        return true;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      return false;
+    } finally {
+      setState(() {
+        _isSendingResetCode = false;
+      });
+    }
+  }
+
+  Future<bool> verifyResetCode() async {
+    try {
+      setState(() {
+        _isVerifyingResetCode = true;
+      });
+      final result = await AuthServices.verifyResetCode(
+          email: _emailController.text, code: _codeController.text);
+      if (result['success']) {
+        return true;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      return false;
+    } finally {
+      setState(() {
+        _isVerifyingResetCode = false;
+      });
+    }
+  }
+
+  Future<bool> resetPassword() async {
+    try {
+      setState(() {
+        _isResettingPassword = true;
+      });
+      final result = await AuthServices.resetPassword(
+          email: _emailController.text,
+          code: _codeController.text,
+          password: _newPasswordController.text,
+          passwordConfirmation: _confirmPasswordController.text);
+      if (result['success']) {
+        return true;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      return false;
+    } finally {
+      setState(() {
+        _isResettingPassword = false;
+      });
+    }
+  }
 
   Future<bool> _checkBiometric(context) async {
     setState(() {
@@ -1376,12 +1444,40 @@ class _SignInScreenState extends State<SignInScreen> {
                                 padding:
                                     EdgeInsets.symmetric(horizontal: 15.sp),
                                 child: ElevatedButton(
-                                  onPressed: () {
+                                  onPressed: () async {
                                     if (_resetPasswordEmailFormKey.currentState!
                                         .validate()) {
-                                      setState(() {
-                                        selectedIndex = 4;
-                                      });
+                                      bool result = await sendResetCode();
+                                      if (result) {
+                                        Get.showSnackbar(GetSnackBar(
+                                          title: 'Code envoyé',
+                                          message: 'Vérifiez votre email',
+                                          backgroundColor: kPrimaryColor,
+                                          duration: const Duration(seconds: 3),
+                                          margin: const EdgeInsets.all(10),
+                                          padding: const EdgeInsets.all(15),
+                                          borderRadius: 10,
+                                          snackPosition: SnackPosition.BOTTOM,
+                                          animationDuration:
+                                              const Duration(milliseconds: 500),
+                                        ));
+                                        setState(() {
+                                          selectedIndex = 4;
+                                        });
+                                      } else {
+                                        Get.showSnackbar(GetSnackBar(
+                                          title: 'Erreur',
+                                          message: 'Une erreur est survenue',
+                                          backgroundColor: Colors.red,
+                                          duration: const Duration(seconds: 3),
+                                          margin: const EdgeInsets.all(10),
+                                          padding: const EdgeInsets.all(15),
+                                          borderRadius: 10,
+                                          snackPosition: SnackPosition.BOTTOM,
+                                          animationDuration:
+                                              const Duration(milliseconds: 500),
+                                        ));
+                                      }
                                     }
                                   },
                                   style: ElevatedButton.styleFrom(
@@ -1392,13 +1488,16 @@ class _SignInScreenState extends State<SignInScreen> {
                                       borderRadius: BorderRadius.circular(25),
                                     ),
                                   ),
-                                  child: Text(
-                                    language == 'fr' ? 'Envoyer' : 'Send',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 16.sp,
-                                    ),
-                                  ),
+                                  child: _isSendingResetCode
+                                      ? const CircularProgressIndicator(
+                                          color: Colors.white)
+                                      : Text(
+                                          language == 'fr' ? 'Envoyer' : 'Send',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 16.sp,
+                                          ),
+                                        ),
                                 ),
                               ),
                               SizedBox(height: 5.h),
@@ -1554,12 +1653,45 @@ class _SignInScreenState extends State<SignInScreen> {
                                     padding:
                                         EdgeInsets.symmetric(horizontal: 15.sp),
                                     child: ElevatedButton(
-                                      onPressed: () {
+                                      onPressed: () async {
                                         if (_verifyCodeFormKey.currentState!
                                             .validate()) {
-                                          setState(() {
-                                            selectedIndex = 5;
-                                          });
+                                          bool result = await verifyResetCode();
+                                          if (result) {
+                                            Get.showSnackbar(GetSnackBar(
+                                              title: 'Code vérifié',
+                                              message: 'Le code est correct',
+                                              backgroundColor: kPrimaryColor,
+                                              duration:
+                                                  const Duration(seconds: 3),
+                                              margin: const EdgeInsets.all(10),
+                                              padding: const EdgeInsets.all(15),
+                                              borderRadius: 10,
+                                              snackPosition:
+                                                  SnackPosition.BOTTOM,
+                                              animationDuration: const Duration(
+                                                  milliseconds: 500),
+                                            ));
+                                            setState(() {
+                                              selectedIndex = 5;
+                                            });
+                                          } else {
+                                            Get.showSnackbar(GetSnackBar(
+                                              title: 'Erreur',
+                                              message:
+                                                  'Une erreur est survenue',
+                                              backgroundColor: Colors.red,
+                                              duration:
+                                                  const Duration(seconds: 3),
+                                              margin: const EdgeInsets.all(10),
+                                              padding: const EdgeInsets.all(15),
+                                              borderRadius: 10,
+                                              snackPosition:
+                                                  SnackPosition.BOTTOM,
+                                              animationDuration: const Duration(
+                                                  milliseconds: 500),
+                                            ));
+                                          }
                                         }
                                       },
                                       style: ElevatedButton.styleFrom(
@@ -1571,15 +1703,18 @@ class _SignInScreenState extends State<SignInScreen> {
                                               BorderRadius.circular(25),
                                         ),
                                       ),
-                                      child: Text(
-                                        language == 'fr'
-                                            ? 'Vérifier'
-                                            : 'Verify',
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 16.sp,
-                                        ),
-                                      ),
+                                      child: _isVerifyingResetCode
+                                          ? const CircularProgressIndicator(
+                                              color: Colors.white)
+                                          : Text(
+                                              language == 'fr'
+                                                  ? 'Vérifier'
+                                                  : 'Verify',
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 16.sp,
+                                              ),
+                                            ),
                                     ),
                                   ),
                                   SizedBox(height: 5.h),
@@ -1827,13 +1962,55 @@ class _SignInScreenState extends State<SignInScreen> {
                                           padding: EdgeInsets.symmetric(
                                               horizontal: 15.sp),
                                           child: ElevatedButton(
-                                            onPressed: () {
+                                            onPressed: () async {
                                               if (_resetPasswordFormKey
                                                   .currentState!
                                                   .validate()) {
-                                                setState(() {
-                                                  selectedIndex = 6;
-                                                });
+                                                bool result =
+                                                    await resetPassword();
+                                                if (result) {
+                                                  Get.showSnackbar(GetSnackBar(
+                                                    title:
+                                                        'Mot de passe réinitialisé',
+                                                    message:
+                                                        'Le mot de passe a été réinitialisé avec succès',
+                                                    backgroundColor:
+                                                        kPrimaryColor,
+                                                    duration: const Duration(
+                                                        seconds: 3),
+                                                    margin:
+                                                        const EdgeInsets.all(
+                                                            10),
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                            15),
+                                                    borderRadius: 10,
+                                                    snackPosition:
+                                                        SnackPosition.BOTTOM,
+                                                    animationDuration:
+                                                        const Duration(
+                                                            milliseconds: 500),
+                                                  ));
+                                                  setState(() {
+                                                    selectedIndex = 6;
+                                                  });
+                                                } else {
+                                                  Get.showSnackbar(GetSnackBar(
+                                                    title: 'Erreur',
+                                                    message:
+                                                        'Une erreur est survenue',
+                                                    backgroundColor: Colors.red,
+                                                    duration: const Duration(
+                                                        seconds: 3),
+                                                    margin:
+                                                        const EdgeInsets.all(
+                                                            10),
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                            15),
+                                                    borderRadius: 10,
+                                                  ));
+                                                }
                                               }
                                             },
                                             style: ElevatedButton.styleFrom(
@@ -1845,15 +2022,18 @@ class _SignInScreenState extends State<SignInScreen> {
                                                     BorderRadius.circular(25),
                                               ),
                                             ),
-                                            child: Text(
-                                              language == 'fr'
-                                                  ? 'Réinitialiser'
-                                                  : 'Reset',
-                                              style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 16.sp,
-                                              ),
-                                            ),
+                                            child: _isResettingPassword
+                                                ? const CircularProgressIndicator(
+                                                    color: Colors.white)
+                                                : Text(
+                                                    language == 'fr'
+                                                        ? 'Réinitialiser'
+                                                        : 'Reset',
+                                                    style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 16.sp,
+                                                    ),
+                                                  ),
                                           ),
                                         ),
                                         SizedBox(height: 10.h),

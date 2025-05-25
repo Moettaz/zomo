@@ -3,6 +3,7 @@ import 'package:sizer/sizer.dart';
 import 'package:zomo/design/const.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:zomo/models/notification_model.dart';
+import 'package:zomo/screens/client/navigation_screen.dart';
 import 'package:zomo/services/notificationserices.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -27,24 +28,25 @@ class _NotificationscreenState extends State<Notificationscreen> {
 
   Future<void> _loadNotifications() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final userId = prefs.getString('user_id');
-
-      if (userId != null) {
+      if (clientData != null) {
         final fetchedNotifications =
-            await _notificationService.getUserNotifications(userId);
+            await _notificationService.getUserNotifications(clientData!.id!);
+        print(
+            'Loaded notifications for user ${clientData!.id}: ${fetchedNotifications.length} notifications found');
         setState(() {
           notifications = fetchedNotifications;
           empty = fetchedNotifications.isEmpty;
           isLoading = false;
         });
       } else {
+        print('No user ID found in SharedPreferences');
         setState(() {
           empty = true;
           isLoading = false;
         });
       }
     } catch (e) {
+      print('Error loading notifications: $e');
       setState(() {
         empty = true;
         isLoading = false;
@@ -257,8 +259,8 @@ class _NotificationscreenState extends State<Notificationscreen> {
                   Text(
                     _formatDate(notification.dateNotification),
                     style: TextStyle(
-                      fontSize: 12.sp,
-                      color: Colors.grey,
+                      fontSize: 15.sp,
+                      color: kPrimaryColor,
                     ),
                   ),
                   SizedBox(height: 1.h),
