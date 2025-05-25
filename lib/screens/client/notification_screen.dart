@@ -5,7 +5,6 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:zomo/models/notification_model.dart';
 import 'package:zomo/screens/client/navigation_screen.dart';
 import 'package:zomo/services/notificationserices.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class Notificationscreen extends StatefulWidget {
   const Notificationscreen({super.key});
