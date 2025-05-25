@@ -57,17 +57,27 @@ class _ReclamationFormState extends State<ReclamationForm> {
         _transporteurs = transporteurs;
       });
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error loading transporteurs: $e')),
-      );
+      Get.showSnackbar(GetSnackBar(
+        message: 'Error loading transporteurs: $e',
+        duration: const Duration(seconds: 3),
+        margin: const EdgeInsets.all(10),
+        padding: const EdgeInsets.all(15),
+        borderRadius: 10,
+        snackPosition: SnackPosition.BOTTOM,
+      ));
     }
   }
 
   Future<void> _submitReclamation() async {
     if (!_formKey.currentState!.validate() || _selectedTransporteur == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill all required fields')),
-      );
+      Get.showSnackbar(GetSnackBar(
+        message: 'Please fill all required fields',
+        duration: const Duration(seconds: 3),
+        margin: const EdgeInsets.all(10),
+        padding: const EdgeInsets.all(15),
+        borderRadius: 10,
+        snackPosition: SnackPosition.BOTTOM,
+      ));
       return;
     }
 
@@ -92,11 +102,21 @@ class _ReclamationFormState extends State<ReclamationForm> {
           message: 'Reclamation created successfully',
           duration: Duration(seconds: 2),
           backgroundColor: Colors.green,
+          margin: const EdgeInsets.all(10),
+          padding: const EdgeInsets.all(15),
+          borderRadius: 10,
+          snackPosition: SnackPosition.BOTTOM,
+          animationDuration: const Duration(milliseconds: 500),
         ));
       } else {
         Get.showSnackbar(GetSnackBar(
           message: 'Error creating reclamation',
-          duration: Duration(seconds: 2),
+          duration: const Duration(seconds: 3),
+          margin: const EdgeInsets.all(10),
+          padding: const EdgeInsets.all(15),
+          borderRadius: 10,
+          snackPosition: SnackPosition.BOTTOM,
+          animationDuration: const Duration(milliseconds: 500),
           backgroundColor: Colors.red,
         ));
       }
@@ -104,7 +124,12 @@ class _ReclamationFormState extends State<ReclamationForm> {
     } catch (e) {
       Get.showSnackbar(GetSnackBar(
         message: 'Error creating reclamation: $e',
-        duration: Duration(seconds: 2),
+        duration: const Duration(seconds: 3),
+        margin: const EdgeInsets.all(10),
+        padding: const EdgeInsets.all(15),
+        borderRadius: 10,
+        snackPosition: SnackPosition.BOTTOM,
+        animationDuration: const Duration(milliseconds: 500),
         backgroundColor: Colors.red,
       ));
     } finally {

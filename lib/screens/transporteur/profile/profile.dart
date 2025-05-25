@@ -4,8 +4,11 @@ import 'package:shimmer/shimmer.dart';
 import 'package:zomo/design/const.dart';
 import 'package:sizer/sizer.dart';
 import 'package:zomo/models/transporteur.dart';
-import 'package:zomo/screens/transporteur/history_page.dart';
 import 'package:zomo/screens/transporteur/navigation_screen.dart';
+import 'package:zomo/screens/transporteur/profile/activity_history.dart';
+import 'package:zomo/screens/transporteur/profile/change_profile.dart';
+import 'package:zomo/screens/transporteur/profile/information.dart';
+import 'package:zomo/screens/transporteur/profile/solde.dart';
 import 'package:zomo/services/authserices.dart';
 import 'package:zomo/screens/auth/signin.dart';
 import 'package:zomo/screens/client/profile/change_profile.dart';
@@ -169,7 +172,7 @@ class _ProfilePageTransporteurState extends State<ProfilePageTransporteur> {
                       // Edit profile button
                       ElevatedButton(
                         onPressed: () {
-                          Get.to(() => ChangeProfile(
+                          Get.to(() => ChangeProfileTransporteur(
                                 changingProfile: true,
                               ));
                         },
@@ -198,7 +201,7 @@ class _ProfilePageTransporteurState extends State<ProfilePageTransporteur> {
                   language == 'fr'
                       ? 'Informations personnelles'
                       : 'Personal information', () {
-                Get.to(() => ChangeProfile());
+                Get.to(() => InformationPersonal());
               }),
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 5.w),
@@ -216,11 +219,11 @@ class _ProfilePageTransporteurState extends State<ProfilePageTransporteur> {
                   language == 'fr'
                       ? 'Historique et activités'
                       : 'History and activities', () {
-                Get.to(() => HistorypageTransporteur());
+                Get.to(() => ActivityHistory());
               }),
               _buildProfileOption(Icons.monetization_on_outlined,
                   language == 'fr' ? 'Paiement' : 'Payment', () {
-                // Get.to(() => PaymentPage());
+                Get.to(() => MyPointsTransporteurPage());
               }),
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 5.w),

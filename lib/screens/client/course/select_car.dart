@@ -940,18 +940,27 @@ class _SelectCarState extends State<SelectCar> {
                                             if (_formKey.currentState!
                                                 .validate()) {
                                               if (selectedVehicle == '') {
-                                                ScaffoldMessenger.of(context)
-                                                    .showSnackBar(
-                                                  SnackBar(
-                                                    content: Text(
-                                                      language == 'fr'
-                                                          ? 'Veuillez sélectionner un véhicule'
-                                                          : 'Please select a vehicle',
-                                                    ),
+                                                Get.showSnackbar(
+                                                  GetSnackBar(
+                                                    message: language == 'fr'
+                                                        ? 'Veuillez sélectionner un véhicule'
+                                                        : 'Please select a vehicle',
                                                     backgroundColor:
                                                         kPrimaryColor,
-                                                    duration:
-                                                        Duration(seconds: 2),
+                                                    duration: const Duration(
+                                                        seconds: 3),
+                                                    margin:
+                                                        const EdgeInsets.all(
+                                                            10),
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                            15),
+                                                    borderRadius: 10,
+                                                    snackPosition:
+                                                        SnackPosition.BOTTOM,
+                                                    animationDuration:
+                                                        const Duration(
+                                                            milliseconds: 500),
                                                   ),
                                                 );
                                               } else {
@@ -1232,11 +1241,16 @@ class _SelectCarState extends State<SelectCar> {
                                                                                         } else {
                                                                                           Navigator.of(context).pop();
 
-                                                                                          ScaffoldMessenger.of(context).showSnackBar(
-                                                                                            SnackBar(
-                                                                                              content: Text(language == 'fr' ? 'Une erreur est survenue' : 'An error occurred'),
-                                                                                            ),
-                                                                                          );
+                                                                                          Get.showSnackbar(GetSnackBar(
+                                                                                            message: language == 'fr' ? 'Une erreur est survenue' : 'An error occurred',
+                                                                                            backgroundColor: kPrimaryColor,
+                                                                                            duration: const Duration(seconds: 3),
+                                                                                            margin: const EdgeInsets.all(10),
+                                                                                            padding: const EdgeInsets.all(15),
+                                                                                            borderRadius: 10,
+                                                                                            snackPosition: SnackPosition.BOTTOM,
+                                                                                            animationDuration: const Duration(milliseconds: 500),
+                                                                                          ));
                                                                                         }
                                                                                       },
                                                                                       child: Text(

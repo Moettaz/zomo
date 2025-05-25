@@ -79,9 +79,18 @@ class _SignInScreenState extends State<SignInScreen> {
         setState(() {
           bioLoading = false;
         });
-        Get.showSnackbar(kErrorSnackBar(language == 'fr'
-            ? "Votre appareil ne support pas les biometriques"
-            : "Your device does not support biometrics"));
+        Get.showSnackbar(GetSnackBar(
+          message: language == 'fr'
+              ? "Votre appareil ne support pas les biometriques"
+              : "Your device does not support biometrics",
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 3),
+          margin: const EdgeInsets.all(10),
+          padding: const EdgeInsets.all(15),
+          borderRadius: 10,
+          snackPosition: SnackPosition.BOTTOM,
+          animationDuration: const Duration(milliseconds: 500),
+        ));
       }
     } on PlatformException catch (e) {
       setState(() {
@@ -89,8 +98,17 @@ class _SignInScreenState extends State<SignInScreen> {
       });
       // ignore: avoid_print
       print(e);
-      Get.showSnackbar(kErrorSnackBar(
-          language == 'fr' ? "Une erreur est survenue" : "An error occurred"));
+      Get.showSnackbar(GetSnackBar(
+        message:
+            language == 'fr' ? "Une erreur est survenue" : "An error occurred",
+        backgroundColor: Colors.red,
+        duration: const Duration(seconds: 3),
+        margin: const EdgeInsets.all(10),
+        padding: const EdgeInsets.all(15),
+        borderRadius: 10,
+        snackPosition: SnackPosition.BOTTOM,
+        animationDuration: const Duration(milliseconds: 500),
+      ));
     }
     setState(() {
       bioLoading = false;
@@ -120,16 +138,25 @@ class _SignInScreenState extends State<SignInScreen> {
     if (result['success']) {
       final userData = result['data'];
       final user = User.fromJson(userData['user']);
-        await _updateDeviceToken(user.id!);
+      await _updateDeviceToken(user.id!);
       if (user.role?.slug == 'client') {
         Get.off(() => const NavigationScreen(index: 0));
       } else {
         Get.off(() => const NavigationScreenTransporteur(index: 0));
       }
     } else {
-      Get.showSnackbar(kErrorSnackBar(language == 'fr'
-          ? "Échec de la connexion : ${result['message']}"
-          : "Login failed: ${result['message']}"));
+      Get.showSnackbar(GetSnackBar(
+        message: language == 'fr'
+            ? "Échec de la connexion : ${result['message']}"
+            : "Login failed: ${result['message']}",
+        backgroundColor: Colors.red,
+        duration: const Duration(seconds: 3),
+        margin: const EdgeInsets.all(10),
+        padding: const EdgeInsets.all(15),
+        borderRadius: 10,
+        snackPosition: SnackPosition.BOTTOM,
+        animationDuration: const Duration(milliseconds: 500),
+      ));
     }
   }
 
@@ -141,9 +168,18 @@ class _SignInScreenState extends State<SignInScreen> {
       }
 
       if (!_acceptTerms) {
-        Get.showSnackbar(kErrorSnackBar(language == 'fr'
-            ? "Veuillez accepter les termes et conditions"
-            : "Please accept the terms and conditions"));
+        Get.showSnackbar(GetSnackBar(
+          message: language == 'fr'
+              ? "Veuillez accepter les termes et conditions"
+              : "Please accept the terms and conditions",
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 3),
+          margin: const EdgeInsets.all(10),
+          padding: const EdgeInsets.all(15),
+          borderRadius: 10,
+          snackPosition: SnackPosition.BOTTOM,
+          animationDuration: const Duration(milliseconds: 500),
+        ));
         return;
       }
 
@@ -180,10 +216,18 @@ class _SignInScreenState extends State<SignInScreen> {
       });
 
       if (result['success']) {
-        
-        Get.showSnackbar(kSuccessSnackBar(language == 'fr'
-            ? "Inscription réussie ! Vous pouvez maintenant vous connecter."
-            : "Registration successful! You can now log in."));
+        Get.showSnackbar(GetSnackBar(
+          message: language == 'fr'
+              ? "Inscription réussie ! Vous pouvez maintenant vous connecter."
+              : "Registration successful! You can now log in.",
+          backgroundColor: Colors.green,
+          duration: const Duration(seconds: 3),
+          margin: const EdgeInsets.all(10),
+          padding: const EdgeInsets.all(15),
+          borderRadius: 10,
+          snackPosition: SnackPosition.BOTTOM,
+          animationDuration: const Duration(milliseconds: 500),
+        ));
 
         setState(() {
           selectedIndex = 0;
@@ -191,17 +235,35 @@ class _SignInScreenState extends State<SignInScreen> {
           _passwordController.clear();
         });
       } else {
-        Get.showSnackbar(kErrorSnackBar(language == 'fr'
-            ? "Échec de l'inscription : ${result['message']}"
-            : "Registration failed: ${result['message']}"));
+        Get.showSnackbar(GetSnackBar(
+          message: language == 'fr'
+              ? "Échec de l'inscription : ${result['message']}"
+              : "Registration failed: ${result['message']}",
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 3),
+          margin: const EdgeInsets.all(10),
+          padding: const EdgeInsets.all(15),
+          borderRadius: 10,
+          snackPosition: SnackPosition.BOTTOM,
+          animationDuration: const Duration(milliseconds: 500),
+        ));
       }
     } catch (e) {
       setState(() {
         _isLoggingIn = false;
       });
-      Get.showSnackbar(kErrorSnackBar(language == 'fr'
-          ? "Une erreur inattendue s'est produite"
-          : "An unexpected error occurred"));
+      Get.showSnackbar(GetSnackBar(
+        message: language == 'fr'
+            ? "Une erreur inattendue s'est produite"
+            : "An unexpected error occurred",
+        backgroundColor: Colors.red,
+        duration: const Duration(seconds: 3),
+        margin: const EdgeInsets.all(10),
+        padding: const EdgeInsets.all(15),
+        borderRadius: 10,
+        snackPosition: SnackPosition.BOTTOM,
+        animationDuration: const Duration(milliseconds: 500),
+      ));
     }
   }
 

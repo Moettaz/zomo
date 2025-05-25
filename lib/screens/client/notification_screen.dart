@@ -3,6 +3,8 @@ import 'package:sizer/sizer.dart';
 import 'package:zomo/design/const.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:zomo/models/notification_model.dart';
+import 'package:zomo/services/notificationserices.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Notificationscreen extends StatefulWidget {
   const Notificationscreen({super.key});
@@ -13,26 +15,44 @@ class Notificationscreen extends StatefulWidget {
 
 class _NotificationscreenState extends State<Notificationscreen> {
   bool empty = false;
-  List<NotificationModel> notifications = [
-    NotificationModel(
-      title: 'We’re blasting off 🚀',
-      description:
-          'OneSignal announces 500% growth, delivering 2 trillion messages annually & delivery rates of 1.75 million per second.',
-      image: 'assets/miniLogo.png',
-    ),
-    NotificationModel(
-      title: 'We’re blasting off 🚀',
-      description:
-          'OneSignal announces 500% growth, delivering 2 trillion messages annually & delivery rates of 1.75 million per second.',
-      image: 'assets/miniLogo.png',
-    ),
-    NotificationModel(
-      title: 'We’re blasting off 🚀',
-      description:
-          'OneSignal announces 500% growth, delivering 2 trillion messages annually & delivery rates of 1.75 million per second.',
-      image: 'assets/miniLogo.png',
-    ),
-  ];
+  bool isLoading = true;
+  List<NotificationModel> notifications = [];
+  final NotificationService _notificationService = NotificationService();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadNotifications();
+  }
+
+  Future<void> _loadNotifications() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final userId = prefs.getString('user_id');
+
+      if (userId != null) {
+        final fetchedNotifications =
+            await _notificationService.getUserNotifications(userId);
+        setState(() {
+          notifications = fetchedNotifications;
+          empty = fetchedNotifications.isEmpty;
+          isLoading = false;
+        });
+      } else {
+        setState(() {
+          empty = true;
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        empty = true;
+        isLoading = false;
+      });
+      print('Error loading notifications: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -88,33 +108,38 @@ class _NotificationscreenState extends State<Notificationscreen> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   SizedBox(height: 3.h),
-                  InkWell(
-                    onTap: () => setState(() {
-                      empty = !empty;
-                    }),
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 5.w),
-                      child: Text(
-                        language == 'fr' ? 'Notifications' : 'Notifications',
-                        style: TextStyle(
-                          fontSize: 18.sp,
-                          fontWeight: FontWeight.bold,
-                        ),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 5.w),
+                    child: Text(
+                      language == 'fr' ? 'Notifications' : 'Notifications',
+                      style: TextStyle(
+                        fontSize: 18.sp,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
-                  SizedBox(height: empty ? 20.h : 1.h),
-                  empty
-                      ? Center(child: _buildEmptyState())
-                      : SizedBox(
-                          height: 70.h,
-                          child: ListView.builder(
-                            itemCount: notifications.length,
-                            itemBuilder: (context, index) {
-                              return notificationItem(notifications[index]);
-                            },
-                          ),
-                        )
+                  SizedBox(height: 1.h),
+                  if (isLoading)
+                    Center(
+                      child: CircularProgressIndicator(
+                        color: kPrimaryColor,
+                      ),
+                    )
+                  else if (empty)
+                    Center(child: _buildEmptyState())
+                  else
+                    SizedBox(
+                      height: 70.h,
+                      child: RefreshIndicator(
+                        onRefresh: _loadNotifications,
+                        child: ListView.builder(
+                          itemCount: notifications.length,
+                          itemBuilder: (context, index) {
+                            return notificationItem(notifications[index]);
+                          },
+                        ),
+                      ),
+                    )
                 ],
               ).animate().slideX(duration: 500.ms, begin: -1, end: 0),
             ),
@@ -208,30 +233,46 @@ class _NotificationscreenState extends State<Notificationscreen> {
               ),
             ),
             SizedBox(width: 2.w),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(notification.title,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    notification.type,
                     style: TextStyle(
                       fontSize: 18.sp,
                       fontWeight: FontWeight.bold,
-                    )),
-                SizedBox(height: 1.h),
-                SizedBox(
-                    width: 70.w,
-                    child: Text(notification.description,
-                        style: TextStyle(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w400,
-                        ),
-                        maxLines: 4,
-                        overflow: TextOverflow.ellipsis)),
-                SizedBox(height: 1.h),
-              ],
+                    ),
+                  ),
+                  SizedBox(height: 1.h),
+                  Text(
+                    notification.message,
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w400,
+                    ),
+                    maxLines: 4,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  SizedBox(height: 0.5.h),
+                  Text(
+                    _formatDate(notification.dateNotification),
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      color: Colors.grey,
+                    ),
+                  ),
+                  SizedBox(height: 1.h),
+                ],
+              ),
             ),
           ],
         ),
       ),
     );
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.day}/${date.month}/${date.year} ${date.hour}:${date.minute}';
   }
 }

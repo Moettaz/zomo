@@ -811,11 +811,16 @@ class _ColisState extends State<Colis> {
                                                                               },
                                                                             );
                                                                           } else {
-                                                                            ScaffoldMessenger.of(context).showSnackBar(
-                                                                              SnackBar(
-                                                                                content: Text(language == 'fr' ? 'Une erreur est survenue' : 'An error occurred'),
-                                                                              ),
-                                                                            );
+                                                                            Get.showSnackbar(GetSnackBar(
+                                                                              message: language == 'fr' ? 'Une erreur est survenue' : 'An error occurred',
+                                                                              backgroundColor: Colors.red,
+                                                                              duration: const Duration(seconds: 3),
+                                                                              margin: const EdgeInsets.all(10),
+                                                                              padding: const EdgeInsets.all(15),
+                                                                              borderRadius: 10,
+                                                                              snackPosition: SnackPosition.BOTTOM,
+                                                                              animationDuration: const Duration(milliseconds: 500),
+                                                                            ));
                                                                           }
                                                                         },
                                                                         child:
@@ -880,16 +885,19 @@ class _ColisState extends State<Colis> {
                                   ),
                                   onPressed: () async {
                                     if (selectedItem == null) {
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
-                                        SnackBar(
-                                          content: Text(language == 'fr'
-                                              ? 'Veuillez sélectionner un colis'
-                                              : 'Please select a colis'),
-                                          backgroundColor: kPrimaryColor,
-                                          duration: Duration(seconds: 2),
-                                        ),
-                                      );
+                                      Get.showSnackbar(GetSnackBar(
+                                        message: language == 'fr'
+                                            ? 'Veuillez sélectionner un colis'
+                                            : 'Please select a colis',
+                                        backgroundColor: kPrimaryColor,
+                                        duration: const Duration(seconds: 3),
+                                        margin: const EdgeInsets.all(10),
+                                        padding: const EdgeInsets.all(15),
+                                        borderRadius: 10,
+                                        snackPosition: SnackPosition.BOTTOM,
+                                        animationDuration:
+                                            const Duration(milliseconds: 500),
+                                      ));
                                       return;
                                     }
                                     if (formKey.currentState!.validate()) {

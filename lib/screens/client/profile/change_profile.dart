@@ -47,11 +47,18 @@ class _ChangeProfileState extends State<ChangeProfile> {
         });
       }
     } catch (e) {
-      Get.showSnackbar(kErrorSnackBar(
-          language == 'fr'
-              ? 'Erreur lors de la sélection de l\'image'
-              : 'Error selecting image',
-          color: Colors.red));
+      Get.showSnackbar(GetSnackBar(
+        message: language == 'fr'
+            ? 'Erreur lors de la sélection de l\'image'
+            : 'Error selecting image',
+        backgroundColor: Colors.red,
+        duration: const Duration(seconds: 3),
+        margin: const EdgeInsets.all(10),
+        padding: const EdgeInsets.all(15),
+        borderRadius: 10,
+        snackPosition: SnackPosition.BOTTOM,
+        animationDuration: const Duration(milliseconds: 500),
+      ));
     }
   }
 
@@ -214,11 +221,17 @@ class _ChangeProfileState extends State<ChangeProfile> {
       );
 
       if (response != null && response['success'] == true) {
-        Get.showSnackbar(kErrorSnackBar(
-          language == 'fr'
+        Get.showSnackbar(GetSnackBar(
+          message: language == 'fr'
               ? 'Profil modifié avec succès !'
               : 'Profile updated successfully!',
-          color: kPrimaryColor,
+          backgroundColor: kPrimaryColor,
+          duration: const Duration(seconds: 3),
+          margin: const EdgeInsets.all(10),
+          padding: const EdgeInsets.all(15),
+          borderRadius: 10,
+          snackPosition: SnackPosition.BOTTOM,
+          animationDuration: const Duration(milliseconds: 500),
         ));
         setState(() {
           changingProfile = false;
@@ -228,19 +241,31 @@ class _ChangeProfileState extends State<ChangeProfile> {
         await getUserData();
         Get.offAll(() => NavigationScreen(index: 3));
       } else {
-        Get.showSnackbar(kErrorSnackBar(
-          language == 'fr'
+        Get.showSnackbar(GetSnackBar(
+          message: language == 'fr'
               ? 'Erreur lors de la modification du profil'
               : 'Error updating profile',
-          color: Colors.red,
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 3),
+          margin: const EdgeInsets.all(10),
+          padding: const EdgeInsets.all(15),
+          borderRadius: 10,
+          snackPosition: SnackPosition.BOTTOM,
+          animationDuration: const Duration(milliseconds: 500),
         ));
       }
     } catch (e) {
-      Get.showSnackbar(kErrorSnackBar(
-        language == 'fr'
+      Get.showSnackbar(GetSnackBar(
+        message: language == 'fr'
             ? 'Erreur lors de la modification du profil'
             : 'Error updating profile',
-        color: Colors.red,
+        backgroundColor: Colors.red,
+        duration: const Duration(seconds: 3),
+        margin: const EdgeInsets.all(10),
+        padding: const EdgeInsets.all(15),
+        borderRadius: 10,
+        snackPosition: SnackPosition.BOTTOM,
+        animationDuration: const Duration(milliseconds: 500),
       ));
     } finally {
       setState(() {

@@ -1529,13 +1529,16 @@ class _ReservationState extends State<Reservation> {
                                                                                   },
                                                                                 );
                                                                               } else {
-                                                                                ScaffoldMessenger.of(context).showSnackBar(
-                                                                                  SnackBar(
-                                                                                    content: Text(language == 'fr' ? 'Une erreur est survenue' : 'An error occurred'),
-                                                                                    backgroundColor: kPrimaryColor,
-                                                                                    duration: Duration(seconds: 2),
-                                                                                  ),
-                                                                                );
+                                                                                Get.showSnackbar(GetSnackBar(
+                                                                                  message: language == 'fr' ? 'Une erreur est survenue' : 'An error occurred',
+                                                                                  backgroundColor: kPrimaryColor,
+                                                                                  duration: const Duration(seconds: 3),
+                                                                                  margin: const EdgeInsets.all(10),
+                                                                                  padding: const EdgeInsets.all(15),
+                                                                                  borderRadius: 10,
+                                                                                  snackPosition: SnackPosition.BOTTOM,
+                                                                                  animationDuration: const Duration(milliseconds: 500),
+                                                                                ));
                                                                               }
                                                                             },
                                                                             child:
@@ -1627,40 +1630,49 @@ class _ReservationState extends State<Reservation> {
                                   onPressed: () async {
                                     if (index == 0) {
                                       if (selectedType == '') {
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(
-                                          SnackBar(
-                                            content: Text(language == 'fr'
-                                                ? 'Veuillez sélectionner un type de déménagement'
-                                                : 'Please select a type of move'),
-                                            backgroundColor: kPrimaryColor,
-                                            duration: Duration(seconds: 2),
-                                          ),
-                                        );
+                                        Get.showSnackbar(GetSnackBar(
+                                          message: language == 'fr'
+                                              ? 'Veuillez sélectionner un type de déménagement'
+                                              : 'Please select a type of move',
+                                          backgroundColor: kPrimaryColor,
+                                          duration: const Duration(seconds: 3),
+                                          margin: const EdgeInsets.all(10),
+                                          padding: const EdgeInsets.all(15),
+                                          borderRadius: 10,
+                                          snackPosition: SnackPosition.BOTTOM,
+                                          animationDuration:
+                                              const Duration(milliseconds: 500),
+                                        ));
                                         return;
                                       } else if (selectedSize == '') {
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(
-                                          SnackBar(
-                                            content: Text(language == 'fr'
-                                                ? 'Veuillez sélectionner une taille'
-                                                : 'Please select a size'),
-                                            backgroundColor: kPrimaryColor,
-                                            duration: Duration(seconds: 2),
-                                          ),
-                                        );
+                                        Get.showSnackbar(GetSnackBar(
+                                          message: language == 'fr'
+                                              ? 'Veuillez sélectionner une taille'
+                                              : 'Please select a size',
+                                          backgroundColor: kPrimaryColor,
+                                          duration: const Duration(seconds: 3),
+                                          margin: const EdgeInsets.all(10),
+                                          padding: const EdgeInsets.all(15),
+                                          borderRadius: 10,
+                                          snackPosition: SnackPosition.BOTTOM,
+                                          animationDuration:
+                                              const Duration(milliseconds: 500),
+                                        ));
                                         return;
                                       } else if (selectedDistance == '') {
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(
-                                          SnackBar(
-                                            content: Text(language == 'fr'
-                                                ? 'Veuillez sélectionner une distance'
-                                                : 'Please select a distance'),
-                                            backgroundColor: kPrimaryColor,
-                                            duration: Duration(seconds: 2),
-                                          ),
-                                        );
+                                        Get.showSnackbar(GetSnackBar(
+                                          message: language == 'fr'
+                                              ? 'Veuillez sélectionner une distance'
+                                              : 'Please select a distance',
+                                          backgroundColor: kPrimaryColor,
+                                          duration: const Duration(seconds: 3),
+                                          margin: const EdgeInsets.all(10),
+                                          padding: const EdgeInsets.all(15),
+                                          borderRadius: 10,
+                                          snackPosition: SnackPosition.BOTTOM,
+                                          animationDuration:
+                                              const Duration(milliseconds: 500),
+                                        ));
                                         return;
                                       }
                                       setState(() {
@@ -1674,16 +1686,19 @@ class _ReservationState extends State<Reservation> {
                                       }
                                     } else if (index == 2) {
                                       if (selectedItems.isEmpty) {
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(
-                                          SnackBar(
-                                            content: Text(language == 'fr'
-                                                ? 'Veuillez sélectionner des items'
-                                                : 'Please select items'),
-                                            backgroundColor: kPrimaryColor,
-                                            duration: Duration(seconds: 2),
-                                          ),
-                                        );
+                                        Get.showSnackbar(GetSnackBar(
+                                          message: language == 'fr'
+                                              ? 'Veuillez sélectionner des items'
+                                              : 'Please select items',
+                                          backgroundColor: kPrimaryColor,
+                                          duration: const Duration(seconds: 3),
+                                          margin: const EdgeInsets.all(10),
+                                          padding: const EdgeInsets.all(15),
+                                          borderRadius: 10,
+                                          snackPosition: SnackPosition.BOTTOM,
+                                          animationDuration:
+                                              const Duration(milliseconds: 500),
+                                        ));
                                         return;
                                       }
                                       await getTransporteurs();

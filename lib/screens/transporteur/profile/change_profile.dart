@@ -5,20 +5,21 @@ import 'package:sizer/sizer.dart';
 import 'package:zomo/design/const.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:zomo/models/transporteur.dart';
 import 'package:zomo/screens/client/navigation_screen.dart';
 import 'dart:io';
 import 'package:zomo/services/authserices.dart';
-import 'package:zomo/models/client.dart';
 
-class ChangeProfile extends StatefulWidget {
+class ChangeProfileTransporteur extends StatefulWidget {
   final bool changingProfile;
-  const ChangeProfile({super.key, this.changingProfile = false});
+  const ChangeProfileTransporteur({super.key, this.changingProfile = false});
 
   @override
-  State<ChangeProfile> createState() => _ChangeProfileState();
+  State<ChangeProfileTransporteur> createState() =>
+      _ChangeProfileTransporteurState();
 }
 
-class _ChangeProfileState extends State<ChangeProfile> {
+class _ChangeProfileTransporteurState extends State<ChangeProfileTransporteur > {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _nomUtilisatuerController = TextEditingController();
@@ -26,7 +27,7 @@ class _ChangeProfileState extends State<ChangeProfile> {
   final ImagePicker _picker = ImagePicker();
   File? _image;
   bool isLoading = false;
-  Client? clientData;
+  Transporteur? transporteurData;
 
   final _registerFormKey = GlobalKey<FormState>();
   bool _isRegisterPasswordVisible = false;
@@ -47,11 +48,18 @@ class _ChangeProfileState extends State<ChangeProfile> {
         });
       }
     } catch (e) {
-      Get.showSnackbar(kErrorSnackBar(
-          language == 'fr'
+      Get.showSnackbar(GetSnackBar(
+          message: language == 'fr'
               ? 'Erreur lors de la sélection de l\'image'
               : 'Error selecting image',
-          color: Colors.red));
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 3),
+          margin: const EdgeInsets.all(10),
+          padding: const EdgeInsets.all(15),
+          borderRadius: 10,
+          snackPosition: SnackPosition.BOTTOM,
+          animationDuration: const Duration(milliseconds: 500),
+      ));
     }
   }
 
@@ -164,16 +172,16 @@ class _ChangeProfileState extends State<ChangeProfile> {
       if (response != null) {
         setState(() {
           if (response['specific_data'] != null) {
-            if (response['specific_data'] is Client) {
-              clientData = response['specific_data'];
+            if (response['specific_data'] is Transporteur) {
+              transporteurData = response['specific_data'];
             } else {
-              clientData = Client.fromJson(response['specific_data']);
+              transporteurData = Transporteur.fromJson(response['specific_data']);
             }
 
             // Set initial values
-            _emailController.text = clientData?.email ?? '';
-            _nomUtilisatuerController.text = clientData?.username ?? '';
-            _phoneController.text = clientData?.phone ?? '';
+            _emailController.text = transporteurData?.email ?? '';
+            _nomUtilisatuerController.text = transporteurData?.username ?? '';
+            _phoneController.text = transporteurData?.phone ?? '';
           }
         });
       }
@@ -208,17 +216,23 @@ class _ChangeProfileState extends State<ChangeProfile> {
       }
 
       final response = await AuthServices.updateClient(
-        clientData?.id ?? 0,
+        transporteurData?.id ?? 0,
         data,
         imageFile: _image,
       );
 
       if (response != null && response['success'] == true) {
-        Get.showSnackbar(kErrorSnackBar(
-          language == 'fr'
+        Get.showSnackbar(GetSnackBar(
+          message: language == 'fr'
               ? 'Profil modifié avec succès !'
               : 'Profile updated successfully!',
-          color: kPrimaryColor,
+          backgroundColor: kPrimaryColor,
+          duration: const Duration(seconds: 3),
+          margin: const EdgeInsets.all(10),
+          padding: const EdgeInsets.all(15),
+          borderRadius: 10,
+          snackPosition: SnackPosition.BOTTOM,
+          animationDuration: const Duration(milliseconds: 500),
         ));
         setState(() {
           changingProfile = false;
@@ -228,19 +242,31 @@ class _ChangeProfileState extends State<ChangeProfile> {
         await getUserData();
         Get.offAll(() => NavigationScreen(index: 3));
       } else {
-        Get.showSnackbar(kErrorSnackBar(
-          language == 'fr'
+        Get.showSnackbar(GetSnackBar(
+          message: language == 'fr'
               ? 'Erreur lors de la modification du profil'
               : 'Error updating profile',
-          color: Colors.red,
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 3),
+          margin: const EdgeInsets.all(10),
+          padding: const EdgeInsets.all(15),
+          borderRadius: 10,
+          snackPosition: SnackPosition.BOTTOM,
+          animationDuration: const Duration(milliseconds: 500),
         ));
       }
     } catch (e) {
-      Get.showSnackbar(kErrorSnackBar(
-        language == 'fr'
+      Get.showSnackbar(GetSnackBar(
+        message: language == 'fr'
             ? 'Erreur lors de la modification du profil'
             : 'Error updating profile',
-        color: Colors.red,
+        backgroundColor: Colors.red,
+        duration: const Duration(seconds: 3),
+        margin: const EdgeInsets.all(10),
+        padding: const EdgeInsets.all(15),
+        borderRadius: 10,
+        snackPosition: SnackPosition.BOTTOM,
+        animationDuration: const Duration(milliseconds: 500),
       ));
     } finally {
       setState(() {
@@ -331,8 +357,8 @@ class _ChangeProfileState extends State<ChangeProfile> {
                     children: [
                       Text(
                         language == 'fr'
-                            ? clientData?.username ?? 'Nom Prénom'
-                            : clientData?.username ?? 'Name Surname',
+                            ? transporteurData?.username ?? 'Nom Prénom'
+                            : transporteurData?.username ?? 'Name Surname',
                         style: TextStyle(
                           fontSize: 15.sp,
                           fontWeight: FontWeight.bold,
@@ -340,8 +366,8 @@ class _ChangeProfileState extends State<ChangeProfile> {
                       ),
                       Text(
                         language == 'fr'
-                            ? clientData?.email ?? 'email@example.com'
-                            : clientData?.email ?? 'email@example.com',
+                            ? transporteurData?.email ?? 'email@example.com'
+                            : transporteurData?.email ?? 'email@example.com',
                         style: TextStyle(
                           fontSize: 15.sp,
                           fontWeight: FontWeight.normal,
@@ -691,9 +717,9 @@ class _ChangeProfileState extends State<ChangeProfile> {
                   backgroundColor: Colors.white,
                   backgroundImage: _image != null
                       ? FileImage(_image!)
-                      : clientData?.imageUrl != null
+                      : transporteurData?.imageUrl != null
                           ? NetworkImage(
-                              "${AuthServices.baseUrl}/${clientData!.imageUrl!}")
+                              "${AuthServices.baseUrl}/${transporteurData!.imageUrl!}")
                           : AssetImage('assets/person.png') as ImageProvider,
                 ),
                 Positioned(

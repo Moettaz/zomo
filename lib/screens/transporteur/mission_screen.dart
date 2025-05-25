@@ -467,9 +467,7 @@ class _MissionScreenState extends State<MissionScreen> {
                           SizedBox(
                               width: 70.w,
                               child: Text(
-                                  '$itemsCount ${language == 'fr'
-                                          ? 'articles'
-                                          : 'articles'}',
+                                  '$itemsCount ${language == 'fr' ? 'articles' : 'articles'}',
                                   style: TextStyle(
                                     fontSize: 16.sp,
                                     fontWeight: FontWeight.w400,
@@ -659,6 +657,13 @@ class _MissionScreenState extends State<MissionScreen> {
                                       title: 'Mission refusée',
                                       message: 'La mission a été refusée',
                                       backgroundColor: kPrimaryColor,
+                                      duration: const Duration(seconds: 3),
+                                      margin: const EdgeInsets.all(10),
+                                      padding: const EdgeInsets.all(15),
+                                      borderRadius: 10,
+                                      snackPosition: SnackPosition.BOTTOM,
+                                      animationDuration:
+                                          const Duration(milliseconds: 500),
                                     ),
                                   );
                                 }
@@ -723,6 +728,13 @@ class _MissionScreenState extends State<MissionScreen> {
                                   title: 'Mission terminée',
                                   message: 'La mission a été terminée',
                                   backgroundColor: kPrimaryColor,
+                                  duration: const Duration(seconds: 3),
+                                  margin: const EdgeInsets.all(10),
+                                  padding: const EdgeInsets.all(15),
+                                  borderRadius: 10,
+                                  snackPosition: SnackPosition.BOTTOM,
+                                  animationDuration:
+                                      const Duration(milliseconds: 500),
                                 ),
                               );
                             }
