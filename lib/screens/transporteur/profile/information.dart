@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:sizer/sizer.dart';
 import 'package:zomo/design/const.dart';
@@ -29,7 +28,6 @@ class _InformationPersonalState extends State<InformationPersonal> {
   Transporteur? transporteurData;
 
   final _registerFormKey = GlobalKey<FormState>();
-  bool _isRegisterPasswordVisible = false;
   String? selectedRole;
   bool changingProfile = false;
   int selectedIndex = 0;
@@ -38,7 +36,7 @@ class _InformationPersonalState extends State<InformationPersonal> {
   bool changePassword = false;
 
   // --- Add state for document files and service type selection ---
-  List<File?> _documentFiles = [null, null, null];
+  final List<File?> _documentFiles = [null, null, null];
   int _selectedServiceType = 0;
 
   Future<void> _pickImage(ImageSource source) async {
@@ -52,16 +50,16 @@ class _InformationPersonalState extends State<InformationPersonal> {
       }
     } catch (e) {
       Get.showSnackbar(GetSnackBar(
-          title: language == 'fr'
-              ? 'Erreur lors de la sélection de l\'image'
-              : 'Error selecting image',
-          backgroundColor: Colors.red,
-          duration: const Duration(seconds: 3),
-          margin: const EdgeInsets.all(10),
-          padding: const EdgeInsets.all(15),
-          borderRadius: 10,
-          snackPosition: SnackPosition.BOTTOM,
-          animationDuration: const Duration(milliseconds: 500),
+        title: language == 'fr'
+            ? 'Erreur lors de la sélection de l\'image'
+            : 'Error selecting image',
+        backgroundColor: Colors.red,
+        duration: const Duration(seconds: 3),
+        margin: const EdgeInsets.all(10),
+        padding: const EdgeInsets.all(15),
+        borderRadius: 10,
+        snackPosition: SnackPosition.BOTTOM,
+        animationDuration: const Duration(milliseconds: 500),
       ));
     }
   }
@@ -305,7 +303,6 @@ class _InformationPersonalState extends State<InformationPersonal> {
   }
 
   Widget _buildDocumentRow(String title, int index) {
-    bool isSelected = _documentFiles[index] != null;
     return ListTile(
       contentPadding: EdgeInsets.zero,
       title: Text(title, style: TextStyle(fontSize: 15.sp)),

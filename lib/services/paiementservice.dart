@@ -22,11 +22,9 @@ class PaymentService {
         final List<dynamic> paymentsJson = data['data'];
         return paymentsJson.map((json) => Payment.fromJson(json)).toList();
       } else {
-        print(response.body);
         throw Exception('Failed to load payments: ${response.statusCode}');
       }
     } catch (e) {
-      print(e);
       throw Exception('Error fetching payments: $e');
     }
   }

@@ -50,7 +50,6 @@ class ReclamationService {
         throw Exception('Not authenticated');
       }
 
-      print('Creating reclamation: ${reclamation.toJson()}');
 
       final response = await http.post(
         Uri.parse('$baseUrl/reclamations'),
@@ -61,22 +60,17 @@ class ReclamationService {
         body: json.encode(reclamation.toJson()),
       );
 
-      print('Response status code: ${response.statusCode}');
-      print('Response body: ${response.body}');
 
       if (response.statusCode == 201) {
         final Map<String, dynamic> data = json.decode(response.body);
         if (data['status'] == 'success') {
-          final createdReclamation = Reclamation.fromJson(data['data']);
-          print(
-              'Successfully created reclamation: ${createdReclamation.toJson()}');
+          Reclamation.fromJson(data['data']);
           return true;
         }
         return false;
       }
       throw Exception('Failed to create reclamation');
     } catch (e) {
-      print('Error creating reclamation: $e');
       return false;
     }
   }

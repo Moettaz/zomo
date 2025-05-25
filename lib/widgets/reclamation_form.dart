@@ -26,7 +26,7 @@ class _ReclamationFormState extends State<ReclamationForm> {
   final _sujetController = TextEditingController();
   final _descriptionController = TextEditingController();
   Transporteur? _selectedTransporteur;
-  String _selectedPriorite = 'medium';
+  final String _selectedPriorite = 'medium';
   List<Transporteur> _transporteurs = [];
   bool _isLoading = false;
   List<Map<String, dynamic>> services = [
@@ -120,7 +120,7 @@ class _ReclamationFormState extends State<ReclamationForm> {
           backgroundColor: Colors.red,
         ));
       }
-      Navigator.pop(context);
+      Get.back();
     } catch (e) {
       Get.showSnackbar(GetSnackBar(
         message: 'Error creating reclamation: $e',
@@ -164,6 +164,7 @@ class _ReclamationFormState extends State<ReclamationForm> {
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
+                    // ignore: deprecated_member_use
                     colors: [kPrimaryColor, kPrimaryColor.withOpacity(0.8)],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,

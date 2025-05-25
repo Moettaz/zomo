@@ -49,7 +49,6 @@ class _NotificationscreenState extends State<Notificationscreen> {
         empty = true;
         isLoading = false;
       });
-      print('Error loading notifications: $e');
     }
   }
 

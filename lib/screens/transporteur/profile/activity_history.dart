@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:sizer/sizer.dart';
 import 'package:zomo/design/const.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:zomo/models/history_model.dart';
 import 'package:zomo/models/reservation.dart';
 import 'package:zomo/screens/transporteur/navigation_screen.dart';
@@ -12,6 +11,7 @@ import 'package:zomo/services/reservationservices.dart';
 import 'package:zomo/services/trajetservices.dart';
 // ignore: depend_on_referenced_packages
 import 'package:intl/intl.dart';
+// ignore: depend_on_referenced_packages
 import 'package:intl/date_symbol_data_local.dart';
 
 class ActivityHistory extends StatefulWidget {

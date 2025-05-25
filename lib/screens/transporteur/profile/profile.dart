@@ -11,7 +11,6 @@ import 'package:zomo/screens/transporteur/profile/information.dart';
 import 'package:zomo/screens/transporteur/profile/solde.dart';
 import 'package:zomo/services/authserices.dart';
 import 'package:zomo/screens/auth/signin.dart';
-import 'package:zomo/screens/client/profile/change_profile.dart';
 import 'package:zomo/screens/client/profile/language_page.dart';
 import 'package:zomo/screens/client/profile/politique.dart';
 
