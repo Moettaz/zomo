@@ -30,22 +30,19 @@ class _NotificationscreenState extends State<Notificationscreen> {
       if (clientData != null) {
         final fetchedNotifications =
             await _notificationService.getUserNotifications(clientData!.id!);
-        print(
-            'Loaded notifications for user ${clientData!.id}: ${fetchedNotifications.length} notifications found');
+       
         setState(() {
           notifications = fetchedNotifications;
           empty = fetchedNotifications.isEmpty;
           isLoading = false;
         });
       } else {
-        print('No user ID found in SharedPreferences');
         setState(() {
           empty = true;
           isLoading = false;
         });
       }
     } catch (e) {
-      print('Error loading notifications: $e');
       setState(() {
         empty = true;
         isLoading = false;

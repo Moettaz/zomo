@@ -22,15 +22,12 @@ class NotificationService {
           List<NotificationModel> notifications = (data['data'] as List)
               .map((item) => NotificationModel.fromJson(item))
               .toList();
-          print(
-              'Notifications loaded successfully: ${notifications.length} notifications found');
+         
           return notifications;
         }
       }
-      print('Failed to load notifications: ${response.statusCode}');
       throw Exception('Failed to load notifications');
     } catch (e) {
-      print('Error loading notifications: $e');
       throw Exception('Error: $e');
     }
   }
